@@ -25,7 +25,7 @@ s3fs
 # Maps
 streamlit_folium
 folium
-folium.plugins
+#folium.plugins
 
 # utilities
 six>=1.14
