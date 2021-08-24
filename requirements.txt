@@ -22,8 +22,16 @@ google-cloud-storage
 mlflow
 s3fs
 
+# Maps
+streamlit_folium
+folium
+streamlit
+
 # utilities
 six>=1.14
 joblib
 memoized-property
 termcolor
+
+# Streamlit
+streamlit
