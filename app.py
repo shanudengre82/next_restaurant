@@ -1,4 +1,3 @@
-
 from streamlit_folium import folium_static
 import streamlit as st
 import folium
