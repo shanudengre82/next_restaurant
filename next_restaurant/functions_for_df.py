@@ -1,7 +1,7 @@
-
 from folium.plugins import HeatMap
 from next_restaurant.parameters import *
 
+import math
 import pandas as pd
 import ast
 import folium
@@ -29,11 +29,10 @@ def getting_lat_lng(df: pd.DataFrame):
 def popularity(pop):
     return pop
 
-
-def map_instance():
+def map_instance(zoom = zoom, initial_location=Berlin_center, width=width, height=height):
     """making a general map with different folium loayers"""
     # First map, focused on the ratings of the restaurant
-    m = folium.Map(width=width, height=height, location=Berlin_center,
+    m = folium.Map(width=width, height=height, location=initial_location,
                tiles = "Stamen Toner",
                zoom_start=zoom,
                control_scale=True,
@@ -70,18 +69,45 @@ def adding_heatmap(m, data):
     folium.LayerControl().add_to(m)
     return m
 
-
-def background():
-    # Making a background
-    CSS = """
-    h1 {
-        color: red;
-    }
-    .stApp {
-        background-image: url(https://avatars1.githubusercontent.com/u/9978111?v=4);
-        background-size: cover;
-    }
+def deg_to_rad(deg):
     """
+    Function to convert radians to degree.
+    """
+    return deg * (math.pi/180)
 
-    # if col2.checkbox('Inject CSS'):
-#     st.write(f'<style>{CSS}</style>', unsafe_allow_html=True)
+
+def distance(lat1 = 40.7128, lng1 = 35.6895,
+             lat2 = 74.0060, lng2 = 139.6917):
+    """
+    This function is based on Haversine formula to estimate distance based
+    on 2 sets of latitude and longitude
+    a = sin²(ΔlatDifference/2) + cos(lat1).cos(lat2).sin²(ΔlonDifference/2)
+    c = 2.atan2(√a, √(1−a))
+    d = R.c
+    """
+    delta_lat = deg_to_rad(lat1-lat2)
+    delta_lng = deg_to_rad(lng1-lng2)
+
+    a = ((math.sin(delta_lat/2))*(math.sin(delta_lat/2))) + (math.cos(deg_to_rad(lat1))
+                                        *math.cos(deg_to_rad(lat2))
+                                        *((math.sin(delta_lng/2))*(math.sin(delta_lng/2))))
+
+    c = 2*math.atan2(math.sqrt(a), math.sqrt(1-a))
+    R = 6371 # This is in km, and the results are also in Km
+    d = R*c
+    return d
+
+def nearby_restaurants(df, lat, lng, range_in_km = 2):
+    """
+    This function gives the restaurant near a coordinate point and withing the range in km.
+    Default range is 2 KM
+    """
+    df_copy = df.copy()
+    df_copy["distance"] = df["lng"]
+    #print(df_copy.head())
+    for i in range(len(df_copy["distance"])):
+        df_copy["distance"][i] = distance(lat1=lat, lng1=lng, lat2 = df_copy["lat"][i], lng2 = df_copy["lng"][i])
+    df_copy = df_copy[df_copy["distance"]<range_in_km]
+    return df_copy
+
+
