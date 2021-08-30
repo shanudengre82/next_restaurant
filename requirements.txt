@@ -8,6 +8,7 @@ wheel>=0.29
 numpy
 pandas
 scikit-learn
+seaborn
 
 # tests/linter
 black
@@ -21,6 +22,7 @@ gcsfs
 google-cloud-storage
 mlflow
 s3fs
+geocoder
 
 # Maps
 streamlit_folium

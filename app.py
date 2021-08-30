@@ -1,14 +1,15 @@
 from streamlit_folium import folium_static
 from next_restaurant.german_to_english import german_to_english
-from next_restaurant.cuisine_info import cuisine_num_wise
+from next_restaurant.cuisine_info import cuisine_num_wise, cuisine_most_frequent, cuisine_num_wise_clean_data_frame_capitalise
 from next_restaurant.parameters import *
 from next_restaurant.functions_for_df import *
 
 import streamlit as st
 import folium
 import pandas as pd
-import json
-import branca
+import geocoder
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # import ast
 # import time
@@ -25,13 +26,16 @@ st.set_page_config(page_title="Next Restaurant",
 # making columns
 col2, col3 = st.columns([2, 1])
 
-df = pd.read_csv("raw_data//second_merge.csv")
+df = pd.read_csv("raw_data//clean_dataframe.csv")
 
 # Determining the popularity based on number of ratings and color for a separator
 df["popularity_res"] = df["user_ratings_total"].apply(popularity)
 
 # Converting the cuisine name to english
-df["food_type_1_english"] = df["food_type"].apply(german_to_english)
+df["food_type_1_english"] = df["food_type"].str.capitalize()
+
+# df_copy is for making second plot
+df_copy = df.copy()
 
 # Printing the dataframe
 col2.dataframe(df.head())
@@ -44,13 +48,10 @@ Thank you
 st.sidebar.subheader("Frequent restaurants")
 # Selecting options
 options = st.sidebar.selectbox('Select a type of a restaurant',
-                                cuisine_num_wise)
+                                cuisine_num_wise_clean_data_frame_capitalise)
 
 if options != "All":
     df = df[df["food_type_1_english"] == options]
-
-# df_copy is for making second plot
-df_copy = df.copy()
 
 #initial_address = st.text_input("Starting point", "New York")
 # if input_type == "Italian":
@@ -78,8 +79,6 @@ rating_cutoff = st.sidebar.slider('Please select a rating cutoff',
 # Determining color for ratings cutoff
 df["ratings_color"] = df["rating"].apply(lambda x: "red" if x < rating_cutoff else "blue")
 
-# df2["ratings_color"] = df2["rating"].apply(lambda x: "red" if x < rating_cutoff else "blue")
-
 # user popularity cutoff
 popularity_cutoff = st.sidebar.slider('Please select a popularity cutoff',
                             min_value = 0,
@@ -93,16 +92,6 @@ df = df[df["user_ratings_total"]>popularity_cutoff]
 # Conditions for generating maps
 blue_ratings = st.sidebar.checkbox("High rated restaurants")
 red_ratings = st.sidebar.checkbox("Low rated restaurants")
-# heat_map_rating = col2.checkbox("Would you lie to see a heatmap")
-
-colorscale = branca.colormap.linear.PuRd_09.scale(0, 100000)
-def style_function(feature):
-    popularity_color = df["popularity_color"]
-    return {
-        "fillOpacity": 0.5,
-        "weight": 0,
-        "fillColor": "#black" if popularity_color is None else colorscale(popularity_color),
-    }
 
 if red_ratings and blue_ratings:
     m = generating_circles(m, df, "ratings_color")
@@ -124,14 +113,30 @@ with col2:
     folium.LayerControl().add_to(m)
     folium_static(m)
 
-col2.header('Distribution of restaurants in Berlin based on number of user reviews')
-
 # Conditions for generating maps
 blue_popular = st.sidebar.checkbox("High reviews restaurants")
 red_popular = st.sidebar.checkbox("Low reviews restaurants")
 
 # Determining color based on popularity cutoff
 df_copy["popularity_color"] = df_copy["user_ratings_total"].apply(lambda x: "red" if x < popularity_cutoff else "blue")
+
+df_top_cuisine = df_copy.loc[df_copy["food_type_1_english"].isin(cuisine_most_frequent)]
+
+
+# Count plot general
+sns.set_theme(style="darkgrid")
+fig, ax = plt.subplots()
+ax = sns.countplot(x = "food_type_1_english",
+                    data=df_top_cuisine,
+                    order = df_top_cuisine["food_type_1_english"].value_counts().index)
+ax.set_title("Food type")
+#ax.set_label(False)
+ax.xaxis.label.set_visible(False)
+ax.set_xticklabels(ax.get_xticklabels(), rotation = 30)
+col2.pyplot(fig)
+
+# Heading for second map plot
+col2.header('Distribution of restaurants in Berlin based on number of user reviews')
 
 # n = folium.Figure(width=100, height=100)
 n = map_instance()
@@ -156,26 +161,7 @@ with col2:
     folium.LayerControl().add_to(n)
     folium_static(n)
 
-# Making column 3
-# col3.metric(label="Active developers", value=123, delta=123, delta_color="off")
-
-# # Selecting options
-# options_2 = col3.multiselect('Select a different restaurant',
-#                             ['Italian', 'Turkish', 'French'],
-#                             ['French'])
-# # Printing out the selection
-# # st.write('You selected:', options)
-
-# # Making sure if the inputs are coordinates or proper address
-# input_type_2 = col3.radio("'Select a different restaurant'", ('Italian', 'Turkish', 'French'))
-
-# #initial_address = st.text_input("Starting point", "New York")
-# if input_type_2 == "Italian":
-#     col3.write("The intitial choice is Italian")
-
-# # Defining number of people for the ride.
-# number_of_people_2 = col3.slider('How many are you', 1, 5, 3)
-
+# Starting column 3
 col3.header("Stats based on selections")
 total_num_of_restaurants = len(df)
 col3.text(f"Total number of restaurants")
@@ -191,4 +177,30 @@ col3.write(f"{number_of_restaurant_with_low_ratings}")
 
 # col3.dataframe(df["popularity_color"].value_counts())
 # col3.dataframe(df["ratings_color"].value_counts())
-col3.dataframe(df["food_type_1_english"].value_counts())
+col3.dataframe(df["food_type"].value_counts())
+
+#Input an address
+user_input = col3.text_input("User local address input", "Koloniestrasse 36, Berlin")
+g = geocoder.osm(user_input)
+
+local_lat = g.osm["y"]
+local_lng = g.osm["x"]
+
+col3.write(f"Local lat: {local_lat}")
+col3.write(f"Local lng: {local_lng}")
+
+# n = folium.Figure(width=100, height=100)
+o = map_instance(zoom=12, initial_location=[local_lat, local_lng],
+                        width=300, height=300)
+
+df_local = nearby_restaurants(df_copy, local_lat, local_lng)
+
+# Determining color for ratings cutoff
+df_local["ratings_color"] = df_local["rating"].apply(lambda x: "red" if x < rating_cutoff else "blue")
+
+# Making circles around the popularity and color coding it.
+o = generating_circles(o, df_local, "ratings_color")
+
+with col3:
+    folium.LayerControl().add_to(o)
+    folium_static(o)
