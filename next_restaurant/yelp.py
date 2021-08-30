@@ -17,7 +17,6 @@ def generate_yelp_api_url (search_term, latitude, longitude, radius):
 def call_yelp_api(search_term, yelp_key, start_raw, end_raw):
     coordinates_list = pd.read_csv('../raw_data/Berlin_coordinates_with_distances_index.csv').sort_values(by='distance').reset_index(drop=True)
     results = []
-    results_df = pd.DataFrame
     for i in coordinates_list.index[start_raw:end_raw]: 
         yelp_url = generate_yelp_api_url(search_term,coordinates_list['lat'][i],coordinates_list['lng'][i], 80)
         headers = { 'Authorization' : f'Bearer {yelp_key}'}
