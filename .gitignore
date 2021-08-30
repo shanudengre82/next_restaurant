@@ -2,8 +2,10 @@
 .coverage
 .ipynb_checkpoints
 .DS_Store
-raw_data/
+# raw_data/
 *.csv
 **/__pycache__/
 .env
-.ipynb
+*.ipynb
+
+# adding just to make a merge request
