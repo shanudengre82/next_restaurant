@@ -1,10 +1,10 @@
-import pandas as pd 
+import pandas as pd
 import math
 import geocoder
 
 #HOW TO USE#
-""" 1. run the k_neighbours_df function with the data_df, the lat, lng of the choosen location and the number of restaurants to return 
-2. with the resulting df of the k_neighbours_df function run the calc_centers function to get the center of the bad and good centers 
+""" 1. run the k_neighbours_df function with the data_df, the lat, lng of the choosen location and the number of restaurants to return
+2. with the resulting df of the k_neighbours_df function run the calc_centers function to get the center of the bad and good centers
 """
 
 #user_input = geocoder.osm('sonnenallee30')
@@ -34,19 +34,17 @@ def distance(lat1, lng1, lat2, lng2):
     d = R*c
     return d
 
-
-# takes the df of restaurants and the lat,lng for the prefered user location and outputs a df of k nearest restaurants
-def k_neighbours_df (df, lat, lng,n_restaurants):
+def k_neighbours_df (df, lat, lng, n_restaurants=20):
+"""takes the df of restaurants and the lat,lng for the prefered user location and outputs a df of k nearest restaurants"""
     df['distance'] = ''
     for i in range(len(df)):
         df['distance'][i] = distance(lat, lng, df['lat'][i], df['lng'][i])
     return df.sort_values(by='distance')[:n_restaurants]
 
-
+def calc_centers (df,rating):
 """calculate the center of 'good' and 'bad' restaurants of the choosing location.
 Good and bad restaurants are decided based on the rating"""
 
-def calc_centers (df,rating):
     bad_rest = df[df['rating'] < rating ]
     good_rest =  df[df['rating'] >= rating]
     center_bad = ((bad_rest['rating'] * bad_rest['lat']).sum()/bad_rest['rating'].sum() ,
@@ -54,9 +52,6 @@ def calc_centers (df,rating):
     center_good = ((good_rest['rating'] * good_rest['lat']).sum()/good_rest['rating'].sum() ,
                    (good_rest['rating'] * good_rest['lng']).sum()/good_rest['rating'].sum())
     return center_bad, center_good
-
-
-
 
 def neighbours_stats (df): 
     df['rating_total'] = df['rating']*df['user_ratings_total']
@@ -67,4 +62,3 @@ def neighbours_stats (df):
     for i in df['food_type'].unique():
         cuisine_dict[i] = df[df['food_type'] == i]['food_type'].count()
     return avg_price_level, avg_rating, best_neighbour, cuisine_dict
-

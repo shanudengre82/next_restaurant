@@ -23,4 +23,27 @@ cuisine_num_wise = ("All", 'Italian', 'German', 'Asian', 'European', 'Middle eas
 'Thai', 'Mediterranean', 'Mexican', 'American', 'Korean', 'Spanish', 'Cafes', 'Balkan', 'Vegan',
 'Steak', 'Brunch', 'African')
 
+# cuisine_most_frequent = ['Italian', 'German', 'Asian', 'European', 'Middle eastern', 'Vietnamese',
+# 'International', 'Japanese', 'Pizza', 'Indian', 'Chinese']
+
+cuisine_num_wise_clean_data_frame = ["all", 'asian', 'middle eastern', 'breakfast', 'european', 'indian',
+ 'mediterranean', 'american', 'turkish', 'steak', 'balkan', 'vegetarian or vegan',
+ 'international', 'mexican', 'fastfood', 'snacks', 'african', 'south american',
+ 'fusion', 'bars', 'soup', 'russian', 'ice', 'organic', 'caucasian', 'seafood', 'hawaiian', 'caribbean',
+ 'cafes']
+
+cuisine_clean_data_frame_to_remove = ['Snacks', 'Bars', 'Ice']
+
+cuisine_num_wise_clean_data_frame_capitalise = [i.capitalize() for i in cuisine_num_wise_clean_data_frame]
+
+cuisine_most_frequent = cuisine_num_wise_clean_data_frame_capitalise[0: 10]
+
 cuisine_With_less_than15 = (i for i in tuple_ if i not in cuisine_num_wise)
+
+district_list = ["All", 'Mitte', 'Charlottenburg', 'Kreuzberg', 'Prenzlauer Berg', 'Schöneberg', 'Neukölln',
+ 'Wilmersdorf', 'Friedrichshain', 'Wedding', 'Moabit', 'Tiergarten', 'Friedenau', 'Charlottenburg-Nord', 'Steglitz', 'Britz',
+ 'Pankow', 'Lichtenberg', 'Friedrichsfelde', 'Reinickendorf', 'Französisch Buchholz', 'Tegel',
+ 'Weißensee', 'Wittenau', 'Niederschönhausen', 'Tempelhof', 'Oberschöneweide', 'Lichterfelde',
+ 'Alt-Hohenschönhausen', 'Mariendorf', 'Alt-Treptow', 'Plänterwald', 'Karlshorst', 'Grunewald',
+ 'Baumschulenweg', 'Stadtrandsiedlung Malchow', 'Niederschöneweide', 'Spandau', 'Karow', 'Gesundbrunnen', 'Marzahn', 'Buckow',
+ 'Malchow', 'Neu-Hohenschönhausen', 'Marienfelde', 'Wartenberg', 'Blankenburg', 'Heinersdorf', 'Lichtenrade', 'Westend']
