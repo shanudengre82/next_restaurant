@@ -54,3 +54,17 @@ def calc_centers (df,rating):
     center_good = ((good_rest['rating'] * good_rest['lat']).sum()/good_rest['rating'].sum() ,
                    (good_rest['rating'] * good_rest['lng']).sum()/good_rest['rating'].sum())
     return center_bad, center_good
+
+
+
+
+def neighbours_stats (df): 
+    df['rating_total'] = df['rating']*df['user_ratings_total']
+    avg_rating = df['rating'].mean()
+    avg_price_level = df['price_level'].mean()
+    best_neighbour = df[df['rating-user_ratings_total'] == df['rating-user_ratings_total'].max()]
+    cuisine_dict = {}
+    for i in df['food_type'].unique():
+        cuisine_dict[i] = df[df['food_type'] == i]['food_type'].count()
+    return avg_price_level, avg_rating, best_neighbour, cuisine_dict
+
