@@ -35,15 +35,15 @@ def distance(lat1, lng1, lat2, lng2):
     return d
 
 def k_neighbours_df (df, lat, lng, n_restaurants=20):
-"""takes the df of restaurants and the lat,lng for the prefered user location and outputs a df of k nearest restaurants"""
+    """takes the df of restaurants and the lat,lng for the prefered user location and outputs a df of k nearest restaurants"""
     df['distance'] = ''
     for i in range(len(df)):
         df['distance'][i] = distance(lat, lng, df['lat'][i], df['lng'][i])
     return df.sort_values(by='distance')[:n_restaurants]
 
 def calc_centers (df,rating):
-"""calculate the center of 'good' and 'bad' restaurants of the choosing location.
-Good and bad restaurants are decided based on the rating"""
+    """calculate the center of 'good' and 'bad' restaurants of the choosing location.
+    Good and bad restaurants are decided based on the rating"""
 
     bad_rest = df[df['rating'] < rating ]
     good_rest =  df[df['rating'] >= rating]
