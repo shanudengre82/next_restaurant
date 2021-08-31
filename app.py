@@ -67,7 +67,7 @@ m = map_instance()
 st.subheader('Distribution of restaurants in Berlin based on rating and user reviews number cutoff')
 
 # Adding a geojson layer
-folium.GeoJson('raw_data//neighbourhoods.geojson', name='Berlin neighbourhood').add_to(m)
+# folium.GeoJson('raw_data//neighbourhoods.geojson', name='Berlin neighbourhood').add_to(m)
 
 # Selecting district options
 st.sidebar.subheader("Would you like to just explore?")
