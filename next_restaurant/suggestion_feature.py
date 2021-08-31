@@ -59,12 +59,14 @@ def calc_centers (df,rating):
 
 
 def neighbours_stats (df): 
-    df['rating_total'] = df['rating']*df['user_ratings_total']
+    """returns the avg_rating, avg_rating , best_competitor(= rating * total No. of ratings) and the counts of each cuisine """
+    price_dict = {'€': 1.0, "€€": 2.0, "€€€": 3.0, "€€€€": 4.0, "1.0": 1.0, "2.0": 2.0, "3.0": 3.0, "4.0": 4.0}
+    df.replace({'price_level': price_dict}, inplace=True)
     avg_rating = df['rating'].mean()
-    avg_price_level = df['price_level'].mean()
-    best_neighbour = df[df['rating-user_ratings_total'] == df['rating-user_ratings_total'].max()]
-    cuisine_dict = {}
+    df['rating_total'] = df['rating']*df['user_ratings_total']
+    most_frq_price_level = df['price_level'].mode()
+    best_competitor = df[df['rating_total'] == df['rating_total'].max()]['names_clean']
+    cuisine_distribution = {}
     for i in df['food_type'].unique():
-        cuisine_dict[i] = df[df['food_type'] == i]['food_type'].count()
-    return avg_price_level, avg_rating, best_neighbour, cuisine_dict
-
+        cuisine_distribution[i] = df[df['food_type'] == i]['food_type'].count()
+    return most_frq_price_level, avg_rating, best_competitor, cuisine_distribution
