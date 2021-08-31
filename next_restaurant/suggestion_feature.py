@@ -35,18 +35,18 @@ def distance(lat1, lng1, lat2, lng2):
     return d
 
 
-# takes the df of restaurants and the lat,lng for the prefered user location and outputs a df of k nearest restaurants
 def k_neighbours_df (df, lat, lng,n_restaurants):
+    """takes the df of restaurants and the lat,lng for the prefered user location and outputs a df of k nearest restaurants"""
     df['distance'] = ''
     for i in range(len(df)):
         df['distance'][i] = distance(lat, lng, df['lat'][i], df['lng'][i])
     return df.sort_values(by='distance')[:n_restaurants]
 
 
-"""calculate the center of 'good' and 'bad' restaurants of the choosing location.
-Good and bad restaurants are decided based on the rating"""
+
 
 def calc_centers (df,rating):
+    """calculate the center of 'good' and 'bad' restaurants of the choosing location. Good and bad restaurants are decided based on the rating"""
     bad_rest = df[df['rating'] < rating ]
     good_rest =  df[df['rating'] >= rating]
     center_bad = ((bad_rest['rating'] * bad_rest['lat']).sum()/bad_rest['rating'].sum() ,
@@ -59,14 +59,18 @@ def calc_centers (df,rating):
 
 
 def neighbours_stats (df): 
-    """returns the avg_rating, avg_rating , best_competitor(= rating * total No. of ratings) and the counts of each cuisine """
+    """takes the k_neighbours_df and returns the most_frequent_price_leve, avg_rating , best_competitor(= rating * total No. of ratings) and the count of each cuisine in a dict"""
     price_dict = {'€': 1.0, "€€": 2.0, "€€€": 3.0, "€€€€": 4.0, "1.0": 1.0, "2.0": 2.0, "3.0": 3.0, "4.0": 4.0}
     df.replace({'price_level': price_dict}, inplace=True)
-    avg_rating = df['rating'].mean()
-    df['rating_total'] = df['rating']*df['user_ratings_total']
     most_frq_price_level = df['price_level'].mode()
+    
+    avg_rating = df['rating'].mean()
+    
+    df['rating_total'] = df['rating']*df['user_ratings_total']
     best_competitor = df[df['rating_total'] == df['rating_total'].max()]['names_clean']
+    
     cuisine_distribution = {}
     for i in df['food_type'].unique():
         cuisine_distribution[i] = df[df['food_type'] == i]['food_type'].count()
+        
     return most_frq_price_level, avg_rating, best_competitor, cuisine_distribution
