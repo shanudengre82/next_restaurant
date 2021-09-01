@@ -28,13 +28,19 @@ cuisine_num_wise = ("All", 'Italian', 'German', 'Asian', 'European', 'Middle eas
 # cuisine_most_frequent = ['Italian', 'German', 'Asian', 'European', 'Middle eastern', 'Vietnamese',
 # 'International', 'Japanese', 'Pizza', 'Indian', 'Chinese']
 
-cuisine_num_wise_clean_data_frame = ["all", 'asian', 'middle eastern', 'breakfast', 'european', 'indian',
- 'mediterranean', 'american', 'turkish', 'steak', 'balkan', 'vegetarian or vegan',
- 'international', 'mexican', 'fastfood', 'snacks', 'african', 'south american',
- 'fusion', 'bars', 'soup', 'russian', 'ice', 'organic', 'caucasian', 'seafood', 'hawaiian', 'caribbean',
- 'cafes']
+cuisine_num_wise_clean_data_frame = [
+    "all", 'european', 'asian', 'italian', 'german',
+    'vietnamese', 'pizza', 'middle eastern', 'mediterranean', 'indian',
+    'international', 'chinese', 'turkish', 'fastfood', 'snacks', 'american',
+    'mexican', 'cafes', 'steak', 'vegetarian or vegan', 'breakfast', 'bars',
+    'balkan', 'south american', 'african', 'fusion', 'russian', 'organic',
+    'seafood', 'soup', 'ice', 'hawaiian', 'caucasian', 'caribbean'
+]
 
-cuisine_clean_data_frame_to_remove = ['Snacks', 'Bars', 'Ice']
+cuisine_clean_data_frame_to_remove = [
+    'Snacks', 'Bars', 'Ice', 'Bars', 'Balkan', 'South american', 'African',
+    'Fusion', 'Russian', 'Organic', 'Seafood', 'Soup', 'Hawaiian',
+    'Caucasian', 'Caribbean']
 
 cuisine_num_wise_clean_data_frame_capitalise = [i.capitalize() for i in cuisine_num_wise_clean_data_frame]
 
@@ -167,3 +173,42 @@ district_list = ["All", 'Mitte', 'Charlottenburg', 'Kreuzberg', 'Prenzlauer Berg
  'Alt-Hohenschönhausen', 'Mariendorf', 'Alt-Treptow', 'Plänterwald', 'Karlshorst', 'Grunewald',
  'Baumschulenweg', 'Stadtrandsiedlung Malchow', 'Niederschöneweide', 'Spandau', 'Karow', 'Gesundbrunnen', 'Marzahn', 'Buckow',
  'Malchow', 'Neu-Hohenschönhausen', 'Marienfelde', 'Wartenberg', 'Blankenburg', 'Heinersdorf', 'Lichtenrade', 'Westend']
+
+
+# change main food_types_2 to food_type (german, pizza, italian, vietnamese, japaneses, chinese, turkish, indian)
+
+
+def change_main_food_types(df):
+
+    df['food_type'] = np.where(
+        (df['food_type_2'] == 'german') & (df['food_type'] == 'european'),
+        df['food_type_2'], df['food_type'])
+
+    df['food_type'] = np.where(
+        (df['food_type_2'] == 'italian') & (df['food_type'] == 'european'),
+        df['food_type_2'], df['food_type'])
+
+    df['food_type'] = np.where(df['food_type_2'] == 'pizza', df['food_type_2'],
+                               df['food_type'])
+
+    df['food_type'] = np.where(
+        (df['food_type_2'] == 'vietnamese') & (df['food_type'] == 'asian'),
+        df['food_type_2'], df['food_type'])
+
+    df['food_type'] = np.where(
+        (df['food_type_2'] == 'japanese') & (df['food_type'] == 'asian'),
+        df['food_type_2'], df['food_type'])
+
+    df['food_type'] = np.where(
+        (df['food_type_2'] == 'chinese') & (df['food_type'] == 'asian'),
+        df['food_type_2'], df['food_type'])
+
+    df['food_type'] = np.where(
+        (df['food_type_2'] == 'indian') & (df['food_type'] == 'asian'),
+        df['food_type_2'], df['food_type'])
+
+    df['food_type'] = np.where((df['food_type_2'] == 'turkish') &
+                               (df['food_type'] == 'middle eastern'),
+                               df['food_type_2'], df['food_type'])
+
+    return df
