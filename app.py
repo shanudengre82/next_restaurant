@@ -287,7 +287,7 @@ center_bad, center_good = calc_centers(df_local, rating_cutoff)
 # n = folium.Figure(width=100, height=100)
 o = map_instance(zoom=12, initial_location=[local_lat, local_lng],
                         width=500, height=300)
-=======
+
 # Making a suggestion based on good center and bad center
 suggested_lat = (0.9)*center_bad[0] + (0.1)*center_good[0]
 suggested_lng = (0.9)*center_bad[1] + (0.1)*center_good[1]
