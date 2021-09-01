@@ -53,12 +53,15 @@ def calc_centers (df,rating):
                    (good_rest['rating'] * good_rest['lng']).sum()/good_rest['rating'].sum())
     return center_bad, center_good
 
-def neighbours_stats (df): 
-    df['rating_total'] = df['rating']*df['user_ratings_total']
+def neighbours_stats (df):
+    """takes the k_neighbours_df and returns the most_frequent_price_leve, avg_rating , best_competitor(= rating * total No. of ratings) and the count of each cuisine in a dict"""
+    price_dict = {'€': 1.0, "€€": 2.0, "€€€": 3.0, "€€€€": 4.0, "1.0": 1.0, "2.0": 2.0, "3.0": 3.0, "4.0": 4.0}
+    df.replace({'price_level': price_dict}, inplace=True)
+    most_frq_price_level = df['price_level'].mode()
     avg_rating = df['rating'].mean()
-    avg_price_level = df['price_level'].mean()
-    best_neighbour = df[df['rating-user_ratings_total'] == df['rating-user_ratings_total'].max()]
-    cuisine_dict = {}
+    df['rating_total'] = df['rating']*df['user_ratings_total']
+    best_competitor = df[df['rating_total'] == df['rating_total'].max()]['names_clean']
+    cuisine_distribution = {}
     for i in df['food_type'].unique():
-        cuisine_dict[i] = df[df['food_type'] == i]['food_type'].count()
-    return avg_price_level, avg_rating, best_neighbour, cuisine_dict
+        cuisine_distribution[i] = df[df['food_type'] == i]['food_type'].count()
+    return most_frq_price_level, avg_rating, best_competitor, cuisine_distribution

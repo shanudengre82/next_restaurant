@@ -27,9 +27,8 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="NEXT RESTAURANT",
                    initial_sidebar_state='expanded')
 
-
 ## LOAD THE DATAFRAME
-df = pd.read_csv("raw_data//clean_dataframe.csv")
+df = pd.read_csv("raw_data//clean_dataframe_1.csv")
 
 # Determining the popularity based on number of ratings and color for a separator
 df["popularity_res"] = df["user_ratings_total"].apply(popularity)
@@ -42,7 +41,6 @@ df_copy = df.copy()
 df_copy_for_stats = df.copy()
 
 ## MAIN PAGE
-
 # Title and subheader
 st.title("Next Restaurant")
 st.header('Browse through the restaurants in Berlin')
@@ -60,8 +58,10 @@ st.sidebar.markdown('''# Find the best place to open your restaurant''')
 
 st.sidebar.subheader("Do you already have a type of cuisine in mind?")
 
+
 options_cuisine = st.sidebar.selectbox('Select a type of cuisine',
                                 cuisine_num_wise_clean_data_frame_capitalise)
+options_cuisine = [i for i in options_cuisine if i not in cuisine_clean_data_frame_to_remove]
 
 if options_cuisine != "All":
     df = df[df["food_type_1_english"] == options_cuisine]
@@ -274,8 +274,6 @@ df_local["ratings_color"] = df_local["rating"].apply(lambda x: "red" if x < rati
 
 # Chopping data frame with respect to popularity cutoff
 df_local = df_local[df_local["user_ratings_total"]>popularity_cutoff]
-
-
 
 # Estimating centroid bad and centroid good
 center_bad, center_good = calc_centers(df_local, rating_cutoff)
