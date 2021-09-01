@@ -95,3 +95,10 @@ def german_to_english(x):
         return here_to_eng[x].capitalize()
     else:
         return x.capitalize()
+
+def food_type_conversion(df_name):
+    df_name.replace({"food_type_2": food_type_conversion}, inplace=True)
+    df_name.replace({"food_type": food_type_conversion}, inplace=True)
+    df_name["food_type"] = df_name['food_type'].str.lower()
+    df_name["food_type_2"] = df_name['food_type_2'].str.lower()
+    return df_name
