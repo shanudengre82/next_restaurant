@@ -6,6 +6,7 @@ Berlin_center = [52.5, 13.404954]
 
 # Making a map, setting few parameters
 # f = folium.Figure(width=500, height=500)
+
 width = 1000
 height = 600
 zoom = 11

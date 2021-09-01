@@ -34,11 +34,14 @@ cuisine_num_wise_clean_data_frame = ["all", 'asian', 'middle eastern', 'breakfas
  'fusion', 'bars', 'soup', 'russian', 'ice', 'organic', 'caucasian', 'seafood', 'hawaiian', 'caribbean',
  'cafes']
 
+cuisine_clean_data_frame_to_remove = ['Snacks', 'Bars', 'Ice']
+
 cuisine_num_wise_clean_data_frame_capitalise = [i.capitalize() for i in cuisine_num_wise_clean_data_frame]
 
 cuisine_most_frequent = cuisine_num_wise_clean_data_frame_capitalise[0: 10]
 
 cuisine_With_less_than15 = (i for i in tuple_ if i not in cuisine_num_wise)
+
 
 # use this dict to convert food_type_2 into broader food_type categories
 food_types_categories = {
@@ -156,3 +159,11 @@ def categorize_food_types(df_name):
     df_name.drop(columns='Unnamed: 0', inplace=True)
 
     return df_name
+
+district_list = ["All", 'Mitte', 'Charlottenburg', 'Kreuzberg', 'Prenzlauer Berg', 'Schöneberg', 'Neukölln',
+ 'Wilmersdorf', 'Friedrichshain', 'Wedding', 'Moabit', 'Tiergarten', 'Friedenau', 'Charlottenburg-Nord', 'Steglitz', 'Britz',
+ 'Pankow', 'Lichtenberg', 'Friedrichsfelde', 'Reinickendorf', 'Französisch Buchholz', 'Tegel',
+ 'Weißensee', 'Wittenau', 'Niederschönhausen', 'Tempelhof', 'Oberschöneweide', 'Lichterfelde',
+ 'Alt-Hohenschönhausen', 'Mariendorf', 'Alt-Treptow', 'Plänterwald', 'Karlshorst', 'Grunewald',
+ 'Baumschulenweg', 'Stadtrandsiedlung Malchow', 'Niederschöneweide', 'Spandau', 'Karow', 'Gesundbrunnen', 'Marzahn', 'Buckow',
+ 'Malchow', 'Neu-Hohenschönhausen', 'Marienfelde', 'Wartenberg', 'Blankenburg', 'Heinersdorf', 'Lichtenrade', 'Westend']
