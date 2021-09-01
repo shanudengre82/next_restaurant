@@ -60,19 +60,12 @@ st.sidebar.markdown('''# Find the best place to open your restaurant''')
 
 st.sidebar.subheader("Do you already have a type of cuisine in mind?")
 
-<<<<<<< HEAD
-
-options_cuisine = st.sidebar.selectbox('Select a type of cuisine',
-                                cuisine_num_wise_clean_data_frame_capitalise)
-# options_cuisine = [i for i in options_cuisine if i not in cuisine_clean_data_frame_to_remove]
-=======
 selected_cuisine = [i for i in cuisine_num_wise_clean_data_frame_capitalise
  if i not in cuisine_clean_data_frame_to_remove]
 
 options_cuisine = st.sidebar.selectbox('Select a type of cuisine',
                                        selected_cuisine)
 
->>>>>>> 5ecebaf9298b4cfd37a1b2f60e86e56ec194d527
 
 if options_cuisine != "All":
     df = df[df["food_type_1_english"] == options_cuisine]
