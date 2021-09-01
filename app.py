@@ -61,7 +61,7 @@ st.sidebar.subheader("Do you already have a type of cuisine in mind?")
 
 options_cuisine = st.sidebar.selectbox('Select a type of cuisine',
                                 cuisine_num_wise_clean_data_frame_capitalise)
-options_cuisine = [i for i in options_cuisine if i not in cuisine_clean_data_frame_to_remove]
+# options_cuisine = [i for i in options_cuisine if i not in cuisine_clean_data_frame_to_remove]
 
 if options_cuisine != "All":
     df = df[df["food_type_1_english"] == options_cuisine]
