@@ -406,6 +406,6 @@ folium_static(o)
 #with st:
 #folium.LayerControl().add_to(n)
 #folium_static(n)
-=======
+
 st.header("Global and local area comparision")
 
