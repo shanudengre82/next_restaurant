@@ -184,3 +184,4 @@ def stats_per_cuisine_and_hood(df, rating, popularity):
     cuisine_hoods = cuisine_hoods.sort_values(by=['count'],
                                                       ascending=False)
     return cuisine_hoods
+
