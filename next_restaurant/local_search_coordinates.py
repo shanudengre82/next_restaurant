@@ -2,7 +2,9 @@
 from next_restaurant.functions_for_df import distance
 
 import numpy as np
+import streamlit as st
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def generating_circular_coordinates(df, lat=52.5607405, lng=13.3808273, radius=100):
     """
     This function generates coordinates to search for best location
@@ -53,9 +55,9 @@ def generating_circular_coordinates(df, lat=52.5607405, lng=13.3808273, radius=1
         distance_ = distance(lat1=lat, lat2=i[0], lng1=lng, lng2=i[1])
         if distance_ < 2*distance_max/3:
             box_sorted.append(i)
-
     return box_sorted
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=False)
 def locating_best_place_based_on_distance(df, box: list):
     """
     This function looks for the farthest possible place with respect to
