@@ -1,3 +1,6 @@
+
+import streamlit as st
+
 """
 In this module we make a function all the functions
 needed to convert German names from here to English
@@ -90,12 +93,14 @@ here_to_eng = {'Pizza': 'Pizza',
  'Niederländisch': 'Dutch',
  'Amerikanisch - Cajun': 'American'}
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def german_to_english(x):
     if x in here_to_eng:
         return here_to_eng[x].capitalize()
     else:
         return x.capitalize()
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def food_type_conversion(df_name):
     df_name.replace({"food_type_2": food_type_conversion}, inplace=True)
     df_name.replace({"food_type": food_type_conversion}, inplace=True)

@@ -27,6 +27,14 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="NEXT RESTAURANT",
                    initial_sidebar_state='expanded')
 
+# Trying to make it colorfull
+# st.markdown(f'<p style="background-color:#0066cc;color:#33ff33;font-size:24px;border-radius:2%;">Hello My name is Shanu Dengre</p>', unsafe_allow_html=True)
+
+# colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
+
+# for color in colors:
+#     st.write(f"<{color}>{color}</{color}>", unsafe_allow_html=True)
+
 ## LOAD THE DATAFRAME
 df = pd.read_csv("raw_data//clean_dataframe_1.csv")
 
@@ -47,10 +55,9 @@ df_copy_for_stats = df.copy()
 st.title("Next Restaurant")
 st.header('Browse through the restaurants in Berlin')
 
-# Display the map
-m = map_instance()
-
-
+st.markdown('#### <span style="color:blue">**Blue circles**</span>: High rated restaurants', unsafe_allow_html=True)
+st.markdown('#### <span style="color:red">**Red circles**</span>: Low rated restaurants', unsafe_allow_html=True)
+st.markdown('###### ')
 ## SIDEBAR
 
 # Title
@@ -66,32 +73,58 @@ selected_cuisine = [i for i in cuisine_num_wise_clean_data_frame_capitalise
 options_cuisine = st.sidebar.selectbox('Select a type of cuisine',
                                        selected_cuisine)
 
-
 if options_cuisine != "All":
     df = df[df["food_type_1_english"] == options_cuisine]
 
 # District selection
 st.sidebar.subheader("Do you already have a district in mind?")
 
-
 options_district = st.sidebar.selectbox(
     'Select a district', list_districts)
-
 
 if options_district != "All":
     df = df[df["district"] == options_district]
 
-# Input an address
+# input popularity and ratings
+st.sidebar.subheader("What would you consider a \"good\" restaurant\
+                     based on customers ratings?"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     )
 
+rating_cutoff = st.sidebar.slider('Please select a rating',
+                                  min_value=2.,
+                                  max_value=5.,
+                                  step=0.1,
+                                  value=4.5)
+
+# user popularity cutoff
+
+popularity_cutoff = st.sidebar.slider('Please select a number of rating',
+                                      min_value=0,
+                                      max_value=2000,
+                                      step=1,
+                                      value=40)
+
+# Conditions for generating maps
+blue_ratings = st.sidebar.checkbox("Only show me good restaurants")
+red_ratings = st.sidebar.checkbox("Only show me bad restaurants")
+
+## POPULARITY AND RATINGS CUTOFFS
+# Conditions for generating maps
+blue_popular = st.sidebar.checkbox("Only show me popular restaurants")
+red_popular = st.sidebar.checkbox("Only show me unpopular restaurants")
+
+# Input an address
 st.sidebar.subheader("Do you already have an address in mind?")
 
-user_input = st.sidebar.text_input("Enter an address", "Thomasiusstrasse 11, Berlin")
+user_input = st.sidebar.text_input("Enter an address", "Mitte, Berlin")
 
 g = geocoder.osm(user_input)
 
 local_lat = g.osm["y"]
 local_lng = g.osm["x"]
 
+district = geocoder.osm(f"{options_district}, Berlin")
+local_lat_district = district.osm["y"]
+local_lng_district = district.osm["x"]
 #st.sidebar.markdown("Coordinates corresponding to the address")
 #st.sidebar.write(f"Local lat: {local_lat}")
 #st.sidebar.write(f"Local lng: {local_lng}")
@@ -103,42 +136,19 @@ number_of_nearby_restaurant_to_be_considered = st.sidebar.slider('How many neare
                             step=5,
                             value = 20)
 
-# input popularity and ratings
-st.sidebar.subheader("What would you consider a \"good\" restaurant\
-                     based on customers ratings?"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     )
-
-rating_cutoff = st.sidebar.slider('Please select a rating',
-                                  min_value=2.,
-                                  max_value=5.,
-                                  step=0.1,
-                                  value=4.6)
-
-# user popularity cutoff
-
-popularity_cutoff = st.sidebar.slider('Please select a number of rating',
-                                      min_value=0,
-                                      max_value=2000,
-                                      step=1,
-                                      value=50)
-
-# Conditions for generating maps
-blue_ratings = st.sidebar.checkbox("Only show me good restaurants")
-red_ratings = st.sidebar.checkbox("Only show me bad restaurants")
-# Conditions for generating maps
-blue_popular = st.sidebar.checkbox("Only show me popular restaurants")
-red_popular = st.sidebar.checkbox("Only show me unpopular restaurants")
-
-
-## POPULARITY AND RATINGS CUTOFFS
-
 # Determining color for ratings cutoff
 df["ratings_color"] = df["rating"].apply(lambda x: "red" if x < rating_cutoff else "blue")
-
 
 # Chopping data frame with respect to popularity cutoff
 df = df[df["user_ratings_total"]>popularity_cutoff]
 
-# First map
+## FIRST MAP
+# Display the map
+if options_district == "All":
+    m = map_instance(zoom = zoom, initial_location=Berlin_center, width=width, height=height)
+else:
+    m = map_instance(zoom = 14, initial_location=[local_lat_district, local_lng_district], width=width, height=height)
+
 if red_ratings and blue_ratings:
     m = generating_circles(m, df, "ratings_color")
 
@@ -264,20 +274,7 @@ else:
 
 
 ## MAP ZOOMED IN
-# In case of address input
-
-st.header("Your closest competitors")
-
-st.write('Based on this address, your potential closest competitors would be:\
-X restaurants, mostly X type of food.\
-Their average rating is X, and X are good restaurants.'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               )
-
-st.subheader('Our suggestions in the area')
-
-st.write('*Red marker*: center of worse resaturants of the area')
-st.write('*Blue marker*: center of worse resaturants of the area')
-st.write('*Green markers*: furthest locations from all restaurants in the area')
-
+# Making df_local
 df_local = k_neighbours_df(df_copy, local_lat, local_lng, n_restaurants=number_of_nearby_restaurant_to_be_considered)
 
 # Determining color for ratings cutoff
@@ -286,12 +283,29 @@ df_local["ratings_color"] = df_local["rating"].apply(lambda x: "red" if x < rati
 # Chopping data frame with respect to popularity cutoff
 df_local = df_local[df_local["user_ratings_total"]>popularity_cutoff]
 
+# In case of address input
+st.header("Your closest competitors")
+
+most_frq_price_level, avg_rating, best_competitor, cuisine_distribution, good_restaurants_per, bad_restaurants_per = neighbours_stats(df)
+
+# st.write(stats)
+st.write(f'Based on this address, your top potential competitor would be: \
+{best_competitor} restaurants. Most of them have price level {most_frq_price_level} type of food. \
+Their average rating is {round(avg_rating)}, and {good_restaurants_per}% of restaurants are good.'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               )
+
+st.subheader('Our suggestions in the area')
+
+st.markdown('#### <span style="color:red">*Red marker*</span>: <strong>center of worse resaturants of the area</strong>', unsafe_allow_html=True)
+st.markdown('#### <span style="color:blue">*Blue marker*</span>: center of worse resaturants of the area', unsafe_allow_html=True)
+st.markdown('#### <span style="color:green">*Green marker*</span>: furthest locations from all restaurants in the area', unsafe_allow_html=True)
+
+st.markdown("###### ")
 # Estimating centroid bad and centroid good
 center_bad, center_good = calc_centers(df_local, rating_cutoff)
 
 # n = folium.Figure(width=100, height=100)
-o = map_instance(zoom=14, initial_location=[local_lat, local_lng],
-                        width=500, height=300)
+o = map_instance(zoom=15, initial_location=[center_good[0], center_good[1]],
+                        width=width, height=height)
 
 # Making circles around the popularity and color coding it.
 o = generating_circles(o, df_local, "ratings_color")
@@ -326,15 +340,9 @@ for i in range(suggestion_number_distance):
     to_append = [best_location_based_on_distance[0], best_location_based_on_distance[1], 0]
     df_local_lat_lng.loc[len(df_local_lat_lng.index)] = to_append
 
-# st.write(f"{suggested_lat}, {suggested_lng}")
-# st.write(f"{best_location_based_on_distance}")
-# with col3:
-# folium.Marker([suggested_lat, suggested_lng]).add_to(o)
-
 folium.Marker(location=[center_bad[0], center_bad[1]],
               popup="Center of bad restarants",
               icon=folium.Icon(color="red")).add_to(o)
-
 
 folium.Marker([center_good[0], center_good[1]],
               popup="Center of good restarants",
@@ -347,7 +355,6 @@ for i in best_location_based_on_distance_list:
                 icon=folium.Icon(color="darkgreen")).add_to(o)
     number+=1
 
-folium.LayerControl().add_to(o)
 folium_static(o)
 
 # Making list of clean cuisine for local choices
@@ -413,4 +420,10 @@ else:
 #folium.LayerControl().add_to(n)
 #folium_static(n)
 
-st.header("Global and local area comparision")
+# st.header("Global and local area comparision")
+
+# st.write(f"{most_frq_price_level}, {avg_rating}, {cuisine_distribution}")
+
+# st.write(f"{best_competitor}")
+
+
