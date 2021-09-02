@@ -2,7 +2,10 @@
 # Berlin_center = [52.5200066, 13.404954]
 
 # Changed center to make it symmeteric
-Berlin_center = [52.5, 13.404954]
+# Berlin_center = [52.5, 13.404954]
+
+# Changed center to make it symmeteric
+Berlin_center = [52.5, 13.49]
 
 # Making a map, setting few parameters
 # f = folium.Figure(width=500, height=500)

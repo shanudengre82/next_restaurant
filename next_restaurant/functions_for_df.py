@@ -1,6 +1,7 @@
 from folium.plugins import HeatMap
 from next_restaurant.parameters import *
 
+import streamlit as st
 import math
 import pandas as pd
 import ast
@@ -9,7 +10,7 @@ import folium
 """
 In this module we make functions which can be used to transform data frames
 """
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def getting_lat_lng(df: pd.DataFrame):
     """
     This function let us to add a log and lng columns un a DataFrame bease on it's geometry column.
@@ -26,9 +27,11 @@ def getting_lat_lng(df: pd.DataFrame):
     df['lat'] = lat
     return df
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def popularity(pop):
     return pop
 
+# @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def map_instance(zoom = zoom, initial_location=Berlin_center, width=width, height=height):
     """making a general map with different folium loayers"""
     # First map, focused on the ratings of the restaurant
@@ -42,9 +45,10 @@ def map_instance(zoom = zoom, initial_location=Berlin_center, width=width, heigh
     folium.TileLayer('stamenwatercolor').add_to(m)
     folium.TileLayer('cartodbpositron').add_to(m)
     folium.TileLayer('openstreetmap').add_to(m)
-
+    folium.LayerControl().add_to(m)
     return m
 
+# @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def generating_circles(m, df, color: str):
     for i in range(len(df)):
             # address = df.iloc[i]["full_address"]
@@ -60,6 +64,7 @@ def generating_circles(m, df, color: str):
                 ).add_to(m)
     return m
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def adding_heatmap(m, data):
     """making a heatmap of data with lng, lat and data"""
     HeatMap(data=data, radius=10, blur = 0,
@@ -69,13 +74,14 @@ def adding_heatmap(m, data):
     folium.LayerControl().add_to(m)
     return m
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def deg_to_rad(deg):
     """
     Function to convert radians to degree.
     """
     return deg * (math.pi/180)
 
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def distance(lat1 = 40.7128, lng1 = 35.6895,
              lat2 = 74.0060, lng2 = 139.6917):
     """
@@ -97,6 +103,7 @@ def distance(lat1 = 40.7128, lng1 = 35.6895,
     d = R*c
     return d
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def nearby_restaurants(df, lat, lng, range_in_km = 2):
     """
     This function gives the restaurant near a coordinate point and withing the range in km.

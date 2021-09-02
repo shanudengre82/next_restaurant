@@ -1,11 +1,14 @@
 import pandas as pd
 import numpy as np
+import streamlit as st
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def number_of_good_restaurants(df, rating, popularity):
     good_restaurants = df[df['rating'] >= rating]
     number_of_good_restaurants = len(good_restaurants[ good_restaurants['user_ratings_total'] >= popularity])
     return number_of_good_restaurants
 
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def percent_of_good_restaurants(df, rating, popularity):
     total_num_of_restaurants = len(df)
     good_restaurants = df[df['rating'] >= rating]
@@ -15,23 +18,23 @@ def percent_of_good_restaurants(df, rating, popularity):
 
 
 # get a list of all districts in the df
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def get_hood(df_name):
     hoods = list(df_name.district.unique())
     return hoods
 
 # get a list of all cuisines in the df
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def get_cuisines(df):
     cuisines = list(df.food_type.unique())
     return cuisines
 
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def get_detail_cuisines(df):
     cuisines_2 = list(df.food_type_2.unique())
     return cuisines_2
 
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def stats_per_cuisine(df, cuisine, rating, popularity):
     lst_ = []
     if cuisine == 'All':
@@ -83,7 +86,7 @@ def stats_per_cuisine(df, cuisine, rating, popularity):
 
         return cuisines_df
 
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def stats_per_hood(df, rating, popularity):
     lst_2 = []
     hoods = get_hood(df)
@@ -109,7 +112,7 @@ def stats_per_hood(df, rating, popularity):
 
     return hoods_df_
 
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def stats_per_hood_and_cuisine(df, rating, popularity):
     lst_3 = []
     cuisines= get_cuisines(df)
@@ -143,7 +146,7 @@ def stats_per_hood_and_cuisine(df, rating, popularity):
 
     return hoods_cuisine
 
-
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def stats_per_cuisine_and_hood(df, rating, popularity):
     lst_4 = []
     cuisines = get_cuisines(df)
@@ -165,12 +168,9 @@ def stats_per_cuisine_and_hood(df, rating, popularity):
             lst_4.append(hood)
             lst_4.append(hood_df['names_clean'].count())
             lst_4.append(round(
-                    hood_df['names_clean'].count() /
-                    all_cuisines['names_clean'].count(), 2))
+                    hood_df['names_clean'].count() / all_cuisines['names_clean'].count(), 2))
             lst_4.append(
-                round(
-                    good_df['names_clean'].count() /
-                    hood_df['names_clean'].count(), 2))
+                round(good_df['names_clean'].count() / hood_df['names_clean'].count(), 2))
             lst_4.append(
                 round(
                     good_df['names_clean'].count() /
@@ -184,3 +184,4 @@ def stats_per_cuisine_and_hood(df, rating, popularity):
     cuisine_hoods = cuisine_hoods.sort_values(by=['count'],
                                                       ascending=False)
     return cuisine_hoods
+
