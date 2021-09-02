@@ -134,7 +134,7 @@ number_of_nearby_restaurant_to_be_considered = st.sidebar.slider('How many neare
                             min_value = 5,
                             max_value = 100,
                             step=5,
-                            value = 20)
+                            value = 40)
 
 # Determining color for ratings cutoff
 df["ratings_color"] = df["rating"].apply(lambda x: "red" if x < rating_cutoff else "blue")
@@ -211,7 +211,7 @@ main_cuisine_per_hood = list(stats_hoods_cuisine[stats_hoods_cuisine['district']
 percent_main_cuisine = list(
 stats_hoods_cuisine[stats_hoods_cuisine['district'] == options_district]['%_restaurants_in_district'][0:5]*100)
 num_cuisine_per_hood = stats_hoods_cuisine
-stats_hoods_cuisine =stats_per_cuisine_and_hood(df_copy_for_stats, rating_cutoff,
+stats_hoods_cuisine = stats_per_cuisine_and_hood(df_copy_for_stats, rating_cutoff,
                                              popularity_cutoff)
 
 # text to be displayed:
@@ -320,7 +320,7 @@ suggestion_number_distance = st.slider('Number of green markers',
                             min_value = 1,
                             max_value = 10,
                             step=1,
-                            value = 1)
+                            value = 3)
 
 # Dataframe with just latitudes and longitutes. They are to generate suggestions.
 df_local_lat_lng = df_local[["lat", "lng", "distance"]]
@@ -348,8 +348,8 @@ folium.Marker([center_good[0], center_good[1]],
               popup="Center of good restarants",
               icon=folium.Icon(color="darkblue")).add_to(o)
 
+number = 1
 for i in best_location_based_on_distance_list:
-    number = 1
     folium.Marker(i,
                 popup=f"Optimum location number {number} based on distance from nearest neighbour restaurant",
                 icon=folium.Icon(color="darkgreen")).add_to(o)
