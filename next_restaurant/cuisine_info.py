@@ -42,6 +42,8 @@ cuisine_clean_data_frame_to_remove = [
     'Fusion', 'Russian', 'Organic', 'Seafood', 'Soup', 'Hawaiian',
     'Caucasian', 'Caribbean']
 
+cuisine_to_remove = [item.lower() for item in cuisine_clean_data_frame_to_remove]
+
 cuisine_num_wise_clean_data_frame_capitalise = [i.capitalize() for i in cuisine_num_wise_clean_data_frame]
 
 cuisine_most_frequent = cuisine_num_wise_clean_data_frame_capitalise[0: 10]
