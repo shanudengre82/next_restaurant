@@ -33,7 +33,7 @@ st.set_page_config(page_title="NEXT RESTAURANT",
 # colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
 
 # for color in colors:
-#     st.write(f"<{color}>{color}</{color}>", unsafe_allow_html=True)
+#     st.markdown(f"<{color}>{color}</{color}>", unsafe_allow_html=True)
 
 ## LOAD THE DATAFRAME
 df = pd.read_csv("raw_data//clean_dataframe_1.csv")
@@ -126,8 +126,8 @@ district = geocoder.osm(f"{options_district}, Berlin")
 local_lat_district = district.osm["y"]
 local_lng_district = district.osm["x"]
 #st.sidebar.markdown("Coordinates corresponding to the address")
-#st.sidebar.write(f"Local lat: {local_lat}")
-#st.sidebar.write(f"Local lng: {local_lng}")
+#st.sidebar.markdown(f"Local lat: {local_lat}")
+#st.sidebar.markdown(f"Local lng: {local_lng}")
 
 # Number of restaurants to be considered locally
 number_of_nearby_restaurant_to_be_considered = st.sidebar.slider('How many nearest restaurants would you like to see?',
@@ -218,29 +218,29 @@ stats_hoods_cuisine = stats_per_cuisine_and_hood(df_copy_for_stats, rating_cutof
 
 if options_district == 'All' and options_cuisine == 'All':
 
-    st.write(f"There are {total_num_of_restaurants} restaurants\
-    in Berlin,among which {number_of_good_restaurants} \
+    st.markdown(f"There are {total_num_of_restaurants} restaurants \
+    in Berlin, among which {number_of_good_restaurants} \
     good restaurants. \
-    The three most common type of cuisines are \
+    The three most common types of cuisines are \
     {five_most_common_cuisines[0].capitalize()} ({round(five_most_common_percent[0])}% of all restaurants),\
     {five_most_common_cuisines[1].capitalize()} ({round(five_most_common_percent[1])}% of all restaurants),\
     {five_most_common_cuisines[2].capitalize()} ({round(five_most_common_percent[2])}% of all restaurants)."
     )
-    st.write("See more stats [here]")
+    st.markdown("See more stats [here]")
 elif options_district == 'All' and options_cuisine != 'All':
     main_hood_per_cuisine = list(stats_hoods_cuisine[stats_hoods_cuisine['cuisine']
                                                      == options_cuisine.lower()]['district'][0:5])
     p = list(stats_hoods_cuisine[stats_hoods_cuisine['cuisine']
                                                      == options_cuisine.lower()]['percent_all_restaurants_of_berlin'][0:5]*100)
 
-    st.write(f"There are {number_cuisine} {options_cuisine} restaurants\
+    st.markdown(f"There are {number_cuisine} **{options_cuisine}** restaurants\
     in Berlin, among which {percent_good_cuisine}% \
-    good restaurants. {options_cuisine} restaurants represents {percent_of_all}%\
-    of all restaurants in Berlin. {options_cuisine} restaurants are mostly located in\
+    good restaurants. **{options_cuisine}** restaurants represents {percent_of_all}%\
+    of all restaurants in Berlin. **{options_cuisine}** restaurants are mostly located in\
     {main_hood_per_cuisine[0]} ({round(p[0])}%), {main_hood_per_cuisine[1]} ({round(p[1])}%) and \
     {main_hood_per_cuisine[2]} ({round(p[2])}%)"                                                                                                                                                )
 
-    st.write("See more stats [here]")
+    st.markdown("See more stats [here]")
 elif options_district != 'All' and options_cuisine == 'All':
     stats_hoods_hood = stats_hoods[stats_hoods['district']== options_district]
 
@@ -248,7 +248,7 @@ elif options_district != 'All' and options_cuisine == 'All':
     num_good_restaurants = stats_hoods_hood.iloc[0]['number_good_restaurants']
     percentage_good_restaurants_hood = round(stats_hoods_hood.iloc[0]['%_all_good_restaurants']*100)
 
-    st.write(f"There are {num_restaurants} restaurants \
+    st.markdown(f"There are {num_restaurants} restaurants \
     in {options_district}, among which {num_good_restaurants} \
     good restaurants. \
     {percentage_good_restaurants_hood} % of the best restaurants in Berlin are located in this district.\
@@ -257,7 +257,7 @@ elif options_district != 'All' and options_cuisine == 'All':
     {main_cuisine_per_hood[1].capitalize()} ({round(percent_main_cuisine[1])}%) \
     and {main_cuisine_per_hood[2].capitalize()} ({round(percent_main_cuisine[2])}%)."
              )
-    st.write("See more stats [here]")
+    st.markdown("See more stats [here]")
 else:
     stats_hoods_cuisine_hood = stats_hoods_cuisine[stats_hoods_cuisine['district'] == options_district]
     stats_hoods_cuisine_cuisine = stats_hoods_cuisine_hood[stats_hoods_cuisine_hood['cuisine'] == options_cuisine.lower()]
@@ -265,13 +265,11 @@ else:
     good = round(stats_hoods_cuisine_cuisine.iloc[0]['%_considered_good']*100)
     percent_of_all = round(stats_hoods_cuisine_cuisine.iloc[0]['percent_all_restaurants_of_berlin']*100)
 
-    st.write(f"There are {num} {options_cuisine} restaurants \
-    in {options_district}, among which {good}% are good restaurants. \
-    {percent_of_all}% of the all the {options_cuisine} restaurants of Berlin \
-    are located in {options_district}."                                       )
+    st.markdown(f"There are {num} **{options_cuisine}** restaurants in {options_district} based on your selected criterias.")
+    st.markdown(f"**{good}**% are good restaurants.")
+    st.markdown(f"**{percent_of_all}**% of the all the **{options_cuisine}** restaurants of Berlin are located in {options_district}.")
 
-    st.write("See more stats [here]")
-
+    st.markdown("See more stats [here]")
 
 ## MAP ZOOMED IN
 # Making df_local
@@ -288,31 +286,51 @@ st.header("Your closest competitors")
 
 most_frq_price_level, avg_rating, best_competitor, cuisine_distribution, good_restaurants_per, bad_restaurants_per = neighbours_stats(df)
 
-# st.write(stats)
-st.write(f'Based on this address, your top potential competitor would be: \
-{best_competitor} restaurants. Most of them have price level {most_frq_price_level} type of food. \
-Their average rating is {round(avg_rating)}, and {good_restaurants_per}% of restaurants are good.'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               )
+# Capitalising names
+best_competitor_capitalise = []
+for i in best_competitor.split():
+    # i = str(i)
+    # st.markdown(i)
+    try:
+        best_competitor_capitalise.append(i.capitalize())
+        # st.markdown("true")
+    except:
+        best_competitor_capitalise.append(i)
+best_competitor =  " ".join(best_competitor_capitalise)
 
-st.subheader('Our suggestions in the area')
+# Printing local stats
+st.markdown(f'Based on the address you provided, your top potential competitor would be: **{best_competitor}**.')
+st.markdown(f'Most of them have price level **{most_frq_price_level}**.')
+st.markdown(f'Their average rating is **{round(avg_rating, 2)}**, and **{good_restaurants_per}%** of restaurants are considered as good.')
 
-st.markdown('#### <span style="color:red">*Red marker*</span>: <strong>center of worse resaturants of the area</strong>', unsafe_allow_html=True)
-st.markdown('#### <span style="color:blue">*Blue marker*</span>: center of worse resaturants of the area', unsafe_allow_html=True)
+
+# Making heading for the suggestion part
+st.header('Our suggestions in the area')
+
+# Adding description for the marker.
+st.markdown('#### <span style="color:red">*Red marker*</span>: center of low rated resaturants of the area', unsafe_allow_html=True)
+st.markdown('#### <span style="color:blue">*Blue marker*</span>: center of high rated resaturants of the area', unsafe_allow_html=True)
 st.markdown('#### <span style="color:green">*Green marker*</span>: furthest locations from all restaurants in the area', unsafe_allow_html=True)
-
 st.markdown("###### ")
-# Estimating centroid bad and centroid good
-center_bad, center_good = calc_centers(df_local, rating_cutoff)
 
+# Estimating centroid bad and centroid good
+center_bad_center_good = calc_centers(df_local, rating_cutoff)
+
+if type(center_bad_center_good) == dict:
 # n = folium.Figure(width=100, height=100)
-o = map_instance(zoom=15, initial_location=[center_good[0], center_good[1]],
+    first_key = next(iter(center_bad_center_good))
+    o = map_instance(zoom=15, initial_location=[center_bad_center_good[first_key][0], center_bad_center_good[first_key][1]],
                         width=width, height=height)
+else:
+    o = map_instance(zoom=15, initial_location=[center_bad_center_good[1][0], center_bad_center_good[1][1]],
+                            width=width, height=height)
 
 # Making circles around the popularity and color coding it.
 o = generating_circles(o, df_local, "ratings_color")
 
 # Making a suggestion based on good center and bad center
-suggested_lat = (0.9)*center_bad[0] + (0.1)*center_good[0]
-suggested_lng = (0.9)*center_bad[1] + (0.1)*center_good[1]
+# suggested_lat = (0.9)*center_bad[0] + (0.1)*center_good[0]
+# suggested_lng = (0.9)*center_bad[1] + (0.1)*center_good[1]
 
 # number of suggestions based on distance
 # st.sidebar.markdown("Rating cutoff")
@@ -330,23 +348,33 @@ df_local_lat_lng = df_local[["lat", "lng", "distance"]]
 local_box = generating_circular_coordinates(df = df_local_lat_lng,
                                             lat = local_lat,
                                             lng = local_lng)
-# st.write(len(local_box))
+# st.markdown(len(local_box))
 
+# Creating best location lists
 best_location_based_on_distance_list = []
 for i in range(suggestion_number_distance):
-    # st.write(i)
+    # st.markdown(i)
     best_location_based_on_distance = locating_best_place_based_on_distance(box = local_box, df = df_local_lat_lng)
     best_location_based_on_distance_list.append(best_location_based_on_distance)
     to_append = [best_location_based_on_distance[0], best_location_based_on_distance[1], 0]
     df_local_lat_lng.loc[len(df_local_lat_lng.index)] = to_append
 
-folium.Marker(location=[center_bad[0], center_bad[1]],
-              popup="Center of bad restarants",
-              icon=folium.Icon(color="red")).add_to(o)
 
-folium.Marker([center_good[0], center_good[1]],
-              popup="Center of good restarants",
-              icon=folium.Icon(color="darkblue")).add_to(o)
+if type(center_bad_center_good) == dict:
+    if first_key == "center_bad":
+        color = "red"
+    else:
+        color = "darkblue"
+    folium.Marker(location=[center_bad_center_good[first_key][0], center_bad_center_good[first_key][1]],
+                popup="Center of low rated restarants",
+                icon=folium.Icon(color=color)).add_to(o)
+else:
+    folium.Marker([center_bad_center_good[1][0], center_bad_center_good[1][1]],
+                popup="Center of high rated restarants",
+                icon=folium.Icon(color="darkblue")).add_to(o)
+    folium.Marker([center_bad_center_good[0][0], center_bad_center_good[0][1]],
+            popup="Center of low rated restarants",
+            icon=folium.Icon(color="red")).add_to(o)
 
 number = 1
 for i in best_location_based_on_distance_list:
@@ -422,8 +450,8 @@ else:
 
 # st.header("Global and local area comparision")
 
-# st.write(f"{most_frq_price_level}, {avg_rating}, {cuisine_distribution}")
+# st.markdown(f"{most_frq_price_level}, {avg_rating}, {cuisine_distribution}")
 
-# st.write(f"{best_competitor}")
+# st.markdown(f"{best_competitor}")
 
 

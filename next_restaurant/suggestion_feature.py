@@ -53,10 +53,23 @@ def calc_centers (df,rating):
     Good and bad restaurants are decided based on the rating"""
 
     bad_rest = df[df['rating'] < rating ]
+
     good_rest =  df[df['rating'] >= rating]
-    center_bad = ((bad_rest['rating'] * bad_rest['lat']).sum()/bad_rest['rating'].sum() ,
-                  (bad_rest['rating'] * bad_rest['lng']).sum()/bad_rest['rating'].sum())
-    center_good = ((good_rest['rating'] * good_rest['lat']).sum()/good_rest['rating'].sum() ,
+
+    if len(bad_rest) == 0 and len(good_rest) == 0:
+        return None
+    elif len(bad_rest) == 0 and len(good_rest) != 0:
+        center_good = ((good_rest['rating'] * good_rest['lat']).sum()/good_rest['rating'].sum() ,
+                   (good_rest['rating'] * good_rest['lng']).sum()/good_rest['rating'].sum())
+        return {"center_good": center_good}
+    elif len(bad_rest) != 0 and len(good_rest) == 0:
+        center_bad = ((bad_rest['rating'] * bad_rest['lat']).sum()/bad_rest['rating'].sum() ,
+                    (bad_rest['rating'] * bad_rest['lng']).sum()/bad_rest['rating'].sum())
+        return {"center_bad": center_bad}
+    else:
+        center_bad = ((bad_rest['rating'] * bad_rest['lat']).sum()/bad_rest['rating'].sum() ,
+                    (bad_rest['rating'] * bad_rest['lng']).sum()/bad_rest['rating'].sum())
+        center_good = ((good_rest['rating'] * good_rest['lat']).sum()/good_rest['rating'].sum() ,
                    (good_rest['rating'] * good_rest['lng']).sum()/good_rest['rating'].sum())
     return center_bad, center_good
 
@@ -69,8 +82,10 @@ def neighbours_stats(df):
     most_frq_price_level = int(most_frq_price_level)*"€"
     avg_rating = df['rating'].mean()
     df['rating_total'] = df['rating']*df['user_ratings_total']
-    best_competitor = df[df['rating_total'] == df['rating_total'].max()]
-    df_1 = pd.DataFrame.from_dict(best_competitor)
+
+    # Making best competitor
+    best_competitor_df = df[df['rating_total'] == df['rating_total'].max()]
+    df_1 = pd.DataFrame.from_dict(best_competitor_df)
     df_1 = df_1.reset_index()
     best_competitor = df_1["names_clean"][0]
     # best_competitor = best_competitor.capitalise()
