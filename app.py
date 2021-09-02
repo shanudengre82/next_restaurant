@@ -56,8 +56,8 @@ df_copy_for_stats = df.copy()
 st.title("Next Restaurant")
 st.header('Browse through the restaurants in Berlin')
 
-st.markdown('#### <span style="color:blue">**Blue circles**</span>: High rated restaurants', unsafe_allow_html=True)
-st.markdown('#### <span style="color:red">**Red circles**</span>: Low rated restaurants', unsafe_allow_html=True)
+st.markdown('#### <span style="color:cadetblue">**Cadetblue circles**</span>: High rated restaurants', unsafe_allow_html=True)
+st.markdown('#### <span style="color:orange">**Orange circles**</span>: Low rated restaurants', unsafe_allow_html=True)
 st.markdown('###### ')
 ## SIDEBAR
 
@@ -138,7 +138,7 @@ number_of_nearby_restaurant_to_be_considered = st.sidebar.slider('How many neare
                             value = 40)
 
 # Determining color for ratings cutoff
-df["ratings_color"] = df["rating"].apply(lambda x: "red" if x < rating_cutoff else "blue")
+df["ratings_color"] = df["rating"].apply(lambda x: "orange" if x < rating_cutoff else "cadetblue")
 
 # Chopping data frame with respect to popularity cutoff
 df = df[df["user_ratings_total"]>popularity_cutoff]
@@ -154,12 +154,12 @@ if red_ratings and blue_ratings:
     m = generating_circles(m, df, "ratings_color")
 
 elif red_ratings and not blue_ratings:
-    df_red = df[df["ratings_color"] == "red"]
+    df_red = df[df["ratings_color"] == "orange"]
     heatmap_red_ratings = df_red[["lat", "lng", "rating"]]
     m = generating_circles(m, df_red, "ratings_color")
 
 elif blue_ratings and not red_ratings:
-    df_blue = df[df["ratings_color"] == "blue"]
+    df_blue = df[df["ratings_color"] == "cadetblue"]
     heatmap_blue_ratings = df_blue[["lat", "lng", "rating"]]
     m = generating_circles(m, df_blue, "ratings_color")
 else:
@@ -236,17 +236,6 @@ stats_cuisine_hoods =stats_per_cuisine_and_hood(df_copy_for_stats, rating_cutoff
 
 if options_district == 'All' and options_cuisine == 'All':
 
-<<<<<<< HEAD
-    st.markdown(f"There are {total_num_of_restaurants} restaurants \
-    in Berlin, among which {number_of_good_restaurants} \
-    good restaurants. \
-    The three most common types of cuisines are \
-    {five_most_common_cuisines[0].capitalize()} ({round(five_most_common_percent[0])}% of all restaurants),\
-    {five_most_common_cuisines[1].capitalize()} ({round(five_most_common_percent[1])}% of all restaurants),\
-    {five_most_common_cuisines[2].capitalize()} ({round(five_most_common_percent[2])}% of all restaurants)."
-    )
-    st.markdown("See more stats [here]")
-=======
     st.write(f"\
     - There are {total_num_of_restaurants} restaurants in Berlin, \
     {number_of_good_restaurants} of them are good restaurants "                                                                                                                                                                                             )
@@ -259,19 +248,12 @@ if options_district == 'All' and options_cuisine == 'All':
 
     st.write('For more information, select a district and a cuisine type.')
 
->>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
 elif options_district == 'All' and options_cuisine != 'All':
     main_hood_per_cuisine = list(stats_cuisine_hoods[stats_hoods_cuisine['cuisine']
                                                      == options_cuisine.lower()]['district'][0:5])
     p = list(stats_cuisine_hoods[stats_cuisine_hoods['cuisine']
                                                      == options_cuisine.lower()]['percent_all_restaurants_of_berlin'][0:5]*100)
 
-<<<<<<< HEAD
-    st.markdown(f"There are {number_cuisine} **{options_cuisine}** restaurants\
-    in Berlin, among which {percent_good_cuisine}% \
-    good restaurants. **{options_cuisine}** restaurants represents {percent_of_all}%\
-    of all restaurants in Berlin. **{options_cuisine}** restaurants are mostly located in\
-=======
     st.write(f"\
         - There are {number_cuisine} {options_cuisine} restaurants in Berlin,\
         {percent_good_cuisine}% are good restaurants"                                                                                                                                                               )
@@ -280,7 +262,6 @@ elif options_district == 'All' and options_cuisine != 'All':
             of all Berlin restaurants"                                                                                                                                                        )
     st.write(f"\
         - {options_cuisine} restaurants are mostly located in \
->>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
     {main_hood_per_cuisine[0]} ({round(p[0])}%), {main_hood_per_cuisine[1]} ({round(p[1])}%) and \
     {main_hood_per_cuisine[2]} ({round(p[2])}%)"                                                                                                                                                                                                )
 
@@ -289,10 +270,6 @@ elif options_district == 'All' and options_cuisine != 'All':
     {best_rated_3_cuisines[1]} ({round(best_rated_3_perc[1])}%) and \
     {best_rated_3_cuisines[2]} ({round(best_rated_3_perc[1])}%)"                                                                                                                                                                                                )
 
-<<<<<<< HEAD
-    st.markdown("See more stats [here]")
-=======
->>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
 elif options_district != 'All' and options_cuisine == 'All':
     stats_hoods_hood = stats_hoods[stats_hoods['district']== options_district]
 
@@ -300,13 +277,6 @@ elif options_district != 'All' and options_cuisine == 'All':
     num_good_restaurants = stats_hoods_hood.iloc[0]['number_good_restaurants']
     percentage_good_restaurants_hood = round(stats_hoods_hood.iloc[0]['%_all_good_restaurants']*100)
 
-<<<<<<< HEAD
-    st.markdown(f"There are {num_restaurants} restaurants \
-    in {options_district}, among which {num_good_restaurants} \
-    good restaurants. \
-    {percentage_good_restaurants_hood} % of the best restaurants in Berlin are located in this district.\
-    The most common type of cuisine in this neighbordhood are: \
-=======
     st.write(f"\
     - There are {num_restaurants} restaurants in {options_district}, \
     {round((num_good_restaurants/num_restaurants)*100)}% of them are good "                                                                                                                                                                                                                                 )
@@ -314,14 +284,10 @@ elif options_district != 'All' and options_cuisine == 'All':
         - {options_district} has {percentage_good_restaurants_hood} % of the best restaurants in Berlin"                                                                                                                                                                                                                                                                                                                        )
     st.write(f"\
     - Most common type of cuisine in {options_district}:\
->>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
     {main_cuisine_per_hood[0].capitalize()}, ({round(percent_main_cuisine[0])}%) \
     {main_cuisine_per_hood[1].capitalize()} ({round(percent_main_cuisine[1])}%) \
     and {main_cuisine_per_hood[2].capitalize()} ({round(percent_main_cuisine[2])}%)."
              )
-<<<<<<< HEAD
-    st.markdown("See more stats [here]")
-=======
 
     st.write(f"In Berlin overall, there are: {total_num_of_restaurants} restaurants \
     {number_of_good_restaurants} of them are good"                                                                                                                                                      )
@@ -332,19 +298,11 @@ elif options_district != 'All' and options_cuisine == 'All':
      {five_most_common_cuisines[1].capitalize()} ({round(five_most_common_percent[1])}%) and \
      {five_most_common_cuisines[2].capitalize()} ({round(five_most_common_percent[2])}%)"                                                                                                                                                                                                                                                                           )
 
->>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
 else:
     stats_hoods_cuisine_hood = stats_hoods_cuisine[stats_hoods_cuisine['district'] == options_district]
     stats_hoods_cuisine_cuisine = stats_hoods_cuisine_hood[stats_hoods_cuisine_hood['cuisine'] == options_cuisine.lower()]
     num = stats_hoods_cuisine_cuisine.iloc[0]['count']
     good = round(stats_hoods_cuisine_cuisine.iloc[0]['%_considered_good']*100)
-<<<<<<< HEAD
-    percent_of_all = round(stats_hoods_cuisine_cuisine.iloc[0]['percent_all_restaurants_of_berlin']*100)
-
-    st.markdown(f"There are {num} **{options_cuisine}** restaurants in {options_district} based on your selected criterias.")
-    st.markdown(f"**{good}**% are good restaurants.")
-    st.markdown(f"**{percent_of_all}**% of the all the **{options_cuisine}** restaurants of Berlin are located in {options_district}.")
-=======
     percent_of_all = round(stats_hoods_cuisine_cuisine.iloc[0]['%_all_good_restaurants_for_this_cuisine_in_berlin']*100)
 
     stats_hoods_good = stats_cuisine_hoods[
@@ -367,7 +325,6 @@ else:
  {round(berlin_good_cuisine*100)}% of them are good "                                                                                                                                                                    )
     st.write(f" - {name} has most {options_cuisine.capitalize()} restaurants in Berlin ({perce}%)")
     st.write(f" - {name_2}  has most of the good {options_cuisine.capitalize()} restaurants ({perce_2}%)")
->>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
 
     st.markdown("See more stats [here]")
 
@@ -376,7 +333,7 @@ else:
 df_local = k_neighbours_df(df_copy, local_lat, local_lng, n_restaurants=number_of_nearby_restaurant_to_be_considered)
 
 # Determining color for ratings cutoff
-df_local["ratings_color"] = df_local["rating"].apply(lambda x: "red" if x < rating_cutoff else "blue")
+df_local["ratings_color"] = df_local["rating"].apply(lambda x: "orange" if x < rating_cutoff else "cadetblue")
 
 # Chopping data frame with respect to popularity cutoff
 df_local = df_local[df_local["user_ratings_total"]>popularity_cutoff]
@@ -408,9 +365,9 @@ st.markdown(f'Their average rating is **{round(avg_rating, 2)}**, and **{good_re
 st.header('Our suggestions in the area')
 
 # Adding description for the marker.
-st.markdown('#### <span style="color:red">*Red marker*</span>: center of low rated resaturants of the area', unsafe_allow_html=True)
-st.markdown('#### <span style="color:blue">*Blue marker*</span>: center of high rated resaturants of the area', unsafe_allow_html=True)
-st.markdown('#### <span style="color:green">*Green marker*</span>: furthest locations from all restaurants in the area', unsafe_allow_html=True)
+st.markdown('#### <span style="color:orange">*Orange marker*</span>: center of low rated resaturants of the area', unsafe_allow_html=True)
+st.markdown('#### <span style="color:cadetblue">*Cadetblue marker*</span>: center of high rated resaturants of the area', unsafe_allow_html=True)
+st.markdown('#### <span style="color:lightgreen">*Lightreen marker*</span>: furthest locations from all restaurants in the area', unsafe_allow_html=True)
 st.markdown("###### ")
 
 # Estimating centroid bad and centroid good
@@ -434,7 +391,7 @@ o = generating_circles(o, df_local, "ratings_color")
 
 # number of suggestions based on distance
 # st.sidebar.markdown("Rating cutoff")
-suggestion_number_distance = st.slider('Number of green markers',
+suggestion_number_distance = st.slider('Number of lightgreen markers',
                             min_value = 1,
                             max_value = 10,
                             step=1,
@@ -462,25 +419,25 @@ for i in range(suggestion_number_distance):
 
 if type(center_bad_center_good) == dict:
     if first_key == "center_bad":
-        color = "red"
+        color = "orange"
     else:
-        color = "darkblue"
+        color = "lightgreen"
     folium.Marker(location=[center_bad_center_good[first_key][0], center_bad_center_good[first_key][1]],
                 popup="Center of low rated restarants",
                 icon=folium.Icon(color=color)).add_to(o)
 else:
     folium.Marker([center_bad_center_good[1][0], center_bad_center_good[1][1]],
                 popup="Center of high rated restarants",
-                icon=folium.Icon(color="darkblue")).add_to(o)
+                icon=folium.Icon(color="lightgreen")).add_to(o)
     folium.Marker([center_bad_center_good[0][0], center_bad_center_good[0][1]],
             popup="Center of low rated restarants",
-            icon=folium.Icon(color="red")).add_to(o)
+            icon=folium.Icon(color="orange")).add_to(o)
 
 number = 1
 for i in best_location_based_on_distance_list:
     folium.Marker(i,
                 popup=f"Optimum location number {number} based on distance from nearest neighbour restaurant",
-                icon=folium.Icon(color="darkgreen")).add_to(o)
+                icon=folium.Icon(color="lightgreen")).add_to(o)
     number+=1
 
 folium_static(o)
@@ -533,11 +490,11 @@ else:
 #n = generating_circles(n, df_copy, "popularity_color")
 
 #elif blue_popular and not red_popular:
-#df_blue_2 = df_copy[df_copy["popularity_color"] == "blue"]
+#df_blue_2 = df_copy[df_copy["popularity_color"] == "cadetblue"]
 #n = generating_circles(n, df_blue_2, "popularity_color")
 
 #elif red_popular and not blue_popular:
-#df_red_2 = df_copy[df_copy["popularity_color"] == "red"]
+#df_red_2 = df_copy[df_copy["popularity_color"] == "orange"]
 # heatmap_blue_ratings = df_blue[["lat", "lng", "rating"]]
 #n = generating_circles(n, df_red_2, "popularity_color")
 

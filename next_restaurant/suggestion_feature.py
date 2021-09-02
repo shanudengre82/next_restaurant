@@ -93,7 +93,7 @@ def neighbours_stats(df):
     for i in df['food_type'].unique():
         cuisine_distribution[i] = df[df['food_type'] == i]['food_type'].count()
 
-    percent_of_good_restaurants = round(len(df[df["ratings_color"]=="blue"])*100/len(df))
-    percent_of_bad_restaurants = round(len(df[df["ratings_color"]=="red"])*100/len(df))
+    percent_of_good_restaurants = round(len(df[df["ratings_color"]=="cadetblue"])*100/len(df))
+    percent_of_bad_restaurants = round(len(df[df["ratings_color"]=="orange"])*100/len(df))
 
     return most_frq_price_level, avg_rating, best_competitor, cuisine_distribution, percent_of_good_restaurants, percent_of_bad_restaurants
