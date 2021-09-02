@@ -56,7 +56,8 @@ df_copy_for_stats = df.copy()
 st.title("Next Restaurant")
 st.header('Browse through the restaurants in Berlin')
 
-st.markdown('#### <span style="color:cadetblue">**Cadetblue circles**</span>: High rated restaurants', unsafe_allow_html=True)
+st.markdown('###### ')
+st.markdown('#### <span style="color:blue">**Blue circles**</span>: High rated restaurants', unsafe_allow_html=True)
 st.markdown('#### <span style="color:orange">**Orange circles**</span>: Low rated restaurants', unsafe_allow_html=True)
 st.markdown('###### ')
 ## SIDEBAR
@@ -138,7 +139,7 @@ number_of_nearby_restaurant_to_be_considered = st.sidebar.slider('How many neare
                             value = 40)
 
 # Determining color for ratings cutoff
-df["ratings_color"] = df["rating"].apply(lambda x: "orange" if x < rating_cutoff else "cadetblue")
+df["ratings_color"] = df["rating"].apply(lambda x: "orange" if x < rating_cutoff else "blue")
 
 # Chopping data frame with respect to popularity cutoff
 df = df[df["user_ratings_total"]>popularity_cutoff]
@@ -159,7 +160,7 @@ elif red_ratings and not blue_ratings:
     m = generating_circles(m, df_red, "ratings_color")
 
 elif blue_ratings and not red_ratings:
-    df_blue = df[df["ratings_color"] == "cadetblue"]
+    df_blue = df[df["ratings_color"] == "blue"]
     heatmap_blue_ratings = df_blue[["lat", "lng", "rating"]]
     m = generating_circles(m, df_blue, "ratings_color")
 else:
@@ -326,14 +327,14 @@ else:
     st.write(f" - {name} has most {options_cuisine.capitalize()} restaurants in Berlin ({perce}%)")
     st.write(f" - {name_2}  has most of the good {options_cuisine.capitalize()} restaurants ({perce_2}%)")
 
-    st.markdown("See more stats [here]")
+    # st.markdown("See more stats [here]")
 
 ## MAP ZOOMED IN
 
 df_local = k_neighbours_df(df_copy, local_lat, local_lng, n_restaurants=number_of_nearby_restaurant_to_be_considered)
 
 # Determining color for ratings cutoff
-df_local["ratings_color"] = df_local["rating"].apply(lambda x: "orange" if x < rating_cutoff else "cadetblue")
+df_local["ratings_color"] = df_local["rating"].apply(lambda x: "orange" if x < rating_cutoff else "blue")
 
 # Chopping data frame with respect to popularity cutoff
 df_local = df_local[df_local["user_ratings_total"]>popularity_cutoff]
@@ -356,17 +357,16 @@ for i in best_competitor.split():
 best_competitor =  " ".join(best_competitor_capitalise)
 
 # Printing local stats
-st.markdown(f'Based on the address you provided, your top potential competitor would be: **{best_competitor}**.')
 st.markdown(f'Most of them have price level **{most_frq_price_level}**.')
 st.markdown(f'Their average rating is **{round(avg_rating, 2)}**, and **{good_restaurants_per}%** of restaurants are considered as good.')
-
+st.markdown(f'Based on the address you provided, your top potential competitor would be: **{best_competitor}**.')
 
 # Making heading for the suggestion part
 st.header('Our suggestions in the area')
 
 # Adding description for the marker.
 st.markdown('#### <span style="color:orange">*Orange marker*</span>: center of low rated resaturants of the area', unsafe_allow_html=True)
-st.markdown('#### <span style="color:cadetblue">*Cadetblue marker*</span>: center of high rated resaturants of the area', unsafe_allow_html=True)
+st.markdown('#### <span style="color:blue">*Blue marker*</span>: center of high rated resaturants of the area', unsafe_allow_html=True)
 st.markdown('#### <span style="color:lightgreen">*Lightreen marker*</span>: furthest locations from all restaurants in the area', unsafe_allow_html=True)
 st.markdown("###### ")
 
@@ -421,14 +421,14 @@ if type(center_bad_center_good) == dict:
     if first_key == "center_bad":
         color = "orange"
     else:
-        color = "lightgreen"
+        color = "darkblue"
     folium.Marker(location=[center_bad_center_good[first_key][0], center_bad_center_good[first_key][1]],
                 popup="Center of low rated restarants",
                 icon=folium.Icon(color=color)).add_to(o)
 else:
     folium.Marker([center_bad_center_good[1][0], center_bad_center_good[1][1]],
                 popup="Center of high rated restarants",
-                icon=folium.Icon(color="lightgreen")).add_to(o)
+                icon=folium.Icon(color="darkblue")).add_to(o)
     folium.Marker([center_bad_center_good[0][0], center_bad_center_good[0][1]],
             popup="Center of low rated restarants",
             icon=folium.Icon(color="orange")).add_to(o)
@@ -490,7 +490,7 @@ else:
 #n = generating_circles(n, df_copy, "popularity_color")
 
 #elif blue_popular and not red_popular:
-#df_blue_2 = df_copy[df_copy["popularity_color"] == "cadetblue"]
+#df_blue_2 = df_copy[df_copy["popularity_color"] == "blue"]
 #n = generating_circles(n, df_blue_2, "popularity_color")
 
 #elif red_popular and not blue_popular:
