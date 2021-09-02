@@ -15,6 +15,7 @@ import geocoder
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 # import ast
 # import time
 # import openrouteservice
@@ -87,7 +88,7 @@ if options_district != "All":
 
 # input popularity and ratings
 st.sidebar.subheader("What would you consider a \"good\" restaurant\
-                     based on customers ratings?"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     )
+                     based on customers ratings?"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     )
 
 rating_cutoff = st.sidebar.slider('Please select a rating',
                                   min_value=2.,
@@ -189,7 +190,7 @@ percent_of_good_restaurants = percent_of_good_restaurants(
     df_copy_for_stats, rating_cutoff, popularity_cutoff)
 total_num_of_restaurants = len(df_copy_for_stats)
 number_of_good_restaurants = number_of_good_restaurants(
-    df, rating_cutoff, popularity_cutoff)
+    df_copy_for_stats, rating_cutoff, popularity_cutoff)
 
 # cuisine stats
 stats_cuisine = stats_per_cuisine(df_copy_for_stats, options_cuisine,
@@ -200,8 +201,24 @@ number_cuisine = round(list(stats_cuisine['number_restaurants_in_Berlin'])[0])
 percent_good_cuisine = list(stats_cuisine['%_considered_good']*100)[0]
 percent_of_all = list(stats_cuisine['%_all_restaurants_in_Berlin']*100)[0]
 
+best_rated_cuisines = stats_per_cuisine(df_copy_for_stats, 'All',
+                                        rating_cutoff, popularity_cutoff)
+
+best_rated_cuisines_df = best_rated_cuisines.sort_values(by=['%_considered_good'], ascending=False)
+best_rated = best_rated_cuisines_df[~best_rated_cuisines_df['cuisine'].isin(cuisine_to_remove)]
+best_rated_3_cuisines = list(best_rated['cuisine'])[0:3]
+best_rated_3_perc = list(best_rated['%_considered_good'] * 100)[0:3]
+
+berlin_cuisine = stats_cuisine.iloc[0]['number_restaurants_in_Berlin']
+berlin_good_cuisine = stats_cuisine.iloc[0]['%_considered_good']
+
 # hoods stats
 stats_hoods = stats_per_hood(df_copy_for_stats, rating_cutoff, popularity_cutoff)
+most_restaurants = stats_hoods.iloc[0]['district']
+most_restaurants_perc = round(stats_hoods.iloc[0]['%_all_berlin_restaurants']*100)
+best_hood = stats_hoods.sort_values(by=['%_all_good_restaurants'],ascending=False)
+best_district = best_hood.iloc[0]['district']
+best_district_per = round(best_hood.iloc[0]['%_all_good_restaurants']*100)
 
 # hoods and cuisine stats
 stats_hoods_cuisine = stats_per_hood_and_cuisine(df_copy_for_stats,
@@ -211,13 +228,15 @@ main_cuisine_per_hood = list(stats_hoods_cuisine[stats_hoods_cuisine['district']
 percent_main_cuisine = list(
 stats_hoods_cuisine[stats_hoods_cuisine['district'] == options_district]['%_restaurants_in_district'][0:5]*100)
 num_cuisine_per_hood = stats_hoods_cuisine
-stats_hoods_cuisine = stats_per_cuisine_and_hood(df_copy_for_stats, rating_cutoff,
-                                             popularity_cutoff)
+
+
+stats_cuisine_hoods =stats_per_cuisine_and_hood(df_copy_for_stats, rating_cutoff, popularity_cutoff)
 
 # text to be displayed:
 
 if options_district == 'All' and options_cuisine == 'All':
 
+<<<<<<< HEAD
     st.markdown(f"There are {total_num_of_restaurants} restaurants \
     in Berlin, among which {number_of_good_restaurants} \
     good restaurants. \
@@ -227,20 +246,53 @@ if options_district == 'All' and options_cuisine == 'All':
     {five_most_common_cuisines[2].capitalize()} ({round(five_most_common_percent[2])}% of all restaurants)."
     )
     st.markdown("See more stats [here]")
+=======
+    st.write(f"\
+    - There are {total_num_of_restaurants} restaurants in Berlin, \
+    {number_of_good_restaurants} of them are good restaurants "                                                                                                                                                                                             )
+    st.write(f"\
+    - The three most common type of cuisines are\
+    {five_most_common_cuisines[0].capitalize()} ({round(five_most_common_percent[0])}% of all restaurants),\
+    {five_most_common_cuisines[1].capitalize()} ({round(five_most_common_percent[1])}% of all restaurants),\
+    {five_most_common_cuisines[2].capitalize()} ({round(five_most_common_percent[2])}% of all restaurants)."
+             )
+
+    st.write('For more information, select a district and a cuisine type.')
+
+>>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
 elif options_district == 'All' and options_cuisine != 'All':
-    main_hood_per_cuisine = list(stats_hoods_cuisine[stats_hoods_cuisine['cuisine']
+    main_hood_per_cuisine = list(stats_cuisine_hoods[stats_hoods_cuisine['cuisine']
                                                      == options_cuisine.lower()]['district'][0:5])
-    p = list(stats_hoods_cuisine[stats_hoods_cuisine['cuisine']
+    p = list(stats_cuisine_hoods[stats_cuisine_hoods['cuisine']
                                                      == options_cuisine.lower()]['percent_all_restaurants_of_berlin'][0:5]*100)
 
+<<<<<<< HEAD
     st.markdown(f"There are {number_cuisine} **{options_cuisine}** restaurants\
     in Berlin, among which {percent_good_cuisine}% \
     good restaurants. **{options_cuisine}** restaurants represents {percent_of_all}%\
     of all restaurants in Berlin. **{options_cuisine}** restaurants are mostly located in\
+=======
+    st.write(f"\
+        - There are {number_cuisine} {options_cuisine} restaurants in Berlin,\
+        {percent_good_cuisine}% are good restaurants"                                                                                                                                                               )
+    st.write(f"\
+        - {options_cuisine} restaurants represents {round(percent_of_all)}% \
+            of all Berlin restaurants"                                                                                                                                                        )
+    st.write(f"\
+        - {options_cuisine} restaurants are mostly located in \
+>>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
     {main_hood_per_cuisine[0]} ({round(p[0])}%), {main_hood_per_cuisine[1]} ({round(p[1])}%) and \
-    {main_hood_per_cuisine[2]} ({round(p[2])}%)"                                                                                                                                                )
+    {main_hood_per_cuisine[2]} ({round(p[2])}%)"                                                                                                                                                                                                )
 
+    st.write(f"In Berlin, the type of restaurants which have the best ratings are:\
+    {best_rated_3_cuisines[0]} ({round(best_rated_3_perc[0])}%),\
+    {best_rated_3_cuisines[1]} ({round(best_rated_3_perc[1])}%) and \
+    {best_rated_3_cuisines[2]} ({round(best_rated_3_perc[1])}%)"                                                                                                                                                                                                )
+
+<<<<<<< HEAD
     st.markdown("See more stats [here]")
+=======
+>>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
 elif options_district != 'All' and options_cuisine == 'All':
     stats_hoods_hood = stats_hoods[stats_hoods['district']== options_district]
 
@@ -248,31 +300,79 @@ elif options_district != 'All' and options_cuisine == 'All':
     num_good_restaurants = stats_hoods_hood.iloc[0]['number_good_restaurants']
     percentage_good_restaurants_hood = round(stats_hoods_hood.iloc[0]['%_all_good_restaurants']*100)
 
+<<<<<<< HEAD
     st.markdown(f"There are {num_restaurants} restaurants \
     in {options_district}, among which {num_good_restaurants} \
     good restaurants. \
     {percentage_good_restaurants_hood} % of the best restaurants in Berlin are located in this district.\
     The most common type of cuisine in this neighbordhood are: \
+=======
+    st.write(f"\
+    - There are {num_restaurants} restaurants in {options_district}, \
+    {round((num_good_restaurants/num_restaurants)*100)}% of them are good "                                                                                                                                                                                                                                 )
+    st.write(f"\
+        - {options_district} has {percentage_good_restaurants_hood} % of the best restaurants in Berlin"                                                                                                                                                                                                                                                                                                                        )
+    st.write(f"\
+    - Most common type of cuisine in {options_district}:\
+>>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
     {main_cuisine_per_hood[0].capitalize()}, ({round(percent_main_cuisine[0])}%) \
     {main_cuisine_per_hood[1].capitalize()} ({round(percent_main_cuisine[1])}%) \
     and {main_cuisine_per_hood[2].capitalize()} ({round(percent_main_cuisine[2])}%)."
              )
+<<<<<<< HEAD
     st.markdown("See more stats [here]")
+=======
+
+    st.write(f"In Berlin overall, there are: {total_num_of_restaurants} restaurants \
+    {number_of_good_restaurants} of them are good"                                                                                                                                                      )
+    st.write(f"- {most_restaurants} has most restaurants in Berlin ({most_restaurants_perc}%) \
+    and {best_district} has most of the good restaurants ({best_district_per}%)"                                                                                                                                                                                                                                                )
+    st.write(f"The most common types of cuisines in Berlin are:\
+     {five_most_common_cuisines[0].capitalize()} ({round(five_most_common_percent[0])}%), \
+     {five_most_common_cuisines[1].capitalize()} ({round(five_most_common_percent[1])}%) and \
+     {five_most_common_cuisines[2].capitalize()} ({round(five_most_common_percent[2])}%)"                                                                                                                                                                                                                                                                           )
+
+>>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
 else:
     stats_hoods_cuisine_hood = stats_hoods_cuisine[stats_hoods_cuisine['district'] == options_district]
     stats_hoods_cuisine_cuisine = stats_hoods_cuisine_hood[stats_hoods_cuisine_hood['cuisine'] == options_cuisine.lower()]
     num = stats_hoods_cuisine_cuisine.iloc[0]['count']
     good = round(stats_hoods_cuisine_cuisine.iloc[0]['%_considered_good']*100)
+<<<<<<< HEAD
     percent_of_all = round(stats_hoods_cuisine_cuisine.iloc[0]['percent_all_restaurants_of_berlin']*100)
 
     st.markdown(f"There are {num} **{options_cuisine}** restaurants in {options_district} based on your selected criterias.")
     st.markdown(f"**{good}**% are good restaurants.")
     st.markdown(f"**{percent_of_all}**% of the all the **{options_cuisine}** restaurants of Berlin are located in {options_district}.")
+=======
+    percent_of_all = round(stats_hoods_cuisine_cuisine.iloc[0]['%_all_good_restaurants_for_this_cuisine_in_berlin']*100)
+
+    stats_hoods_good = stats_cuisine_hoods[
+        stats_cuisine_hoods['cuisine'] == options_cuisine.lower()].sort_values(
+            by=['percent_all_restaurants_of_berlin'], ascending=False)
+    name = stats_hoods_good.iloc[0]['district']
+    perce = round(stats_hoods_good.iloc[0]['percent_all_restaurants_of_berlin']*100)
+    stats_hoods_2 = stats_cuisine_hoods[
+        stats_cuisine_hoods['cuisine'] ==
+        options_cuisine.lower()].sort_values(by=['%_all_good_restaurants_for_this_cuisine_in_berlin'],ascending=False)
+    name_2 = stats_hoods_2.iloc[0]['district']
+    perce_2 = round(stats_hoods_2.iloc[0]['%_all_good_restaurants_for_this_cuisine_in_berlin']*100)
+
+    st.write(f" - There are {num} {options_cuisine.capitalize()} restaurants in {options_district}, \
+        {good}% of them are good restaurants"                                                                                                                                                                                    )
+    st.write(f" - {percent_of_all}% of the all the {options_cuisine.capitalize()} restaurants of Berlin \
+    are located in {options_district} "                                                                                                                                                            )
+
+    st.write(f" - In Berlin overall, there are {berlin_cuisine} {options_cuisine.capitalize()} restaurants,\
+ {round(berlin_good_cuisine*100)}% of them are good "                                                                                                                                                                    )
+    st.write(f" - {name} has most {options_cuisine.capitalize()} restaurants in Berlin ({perce}%)")
+    st.write(f" - {name_2}  has most of the good {options_cuisine.capitalize()} restaurants ({perce_2}%)")
+>>>>>>> d03285fa0cae65ef6673bd8915939ddf9c5794cb
 
     st.markdown("See more stats [here]")
 
 ## MAP ZOOMED IN
-# Making df_local
+
 df_local = k_neighbours_df(df_copy, local_lat, local_lng, n_restaurants=number_of_nearby_restaurant_to_be_considered)
 
 # Determining color for ratings cutoff
