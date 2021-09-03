@@ -136,7 +136,7 @@ number_of_nearby_restaurant_to_be_considered = st.sidebar.slider('How many neare
                             min_value = 5,
                             max_value = 100,
                             step=5,
-                            value = 40)
+                            value = 20)
 
 # Determining color for ratings cutoff
 df["ratings_color"] = df["rating"].apply(lambda x: "orange" if x < rating_cutoff else "blue")
@@ -395,7 +395,7 @@ suggestion_number_distance = st.slider('Number of lightgreen markers',
                             min_value = 1,
                             max_value = 10,
                             step=1,
-                            value = 3)
+                            value = 2)
 
 # Dataframe with just latitudes and longitutes. They are to generate suggestions.
 df_local_lat_lng = df_local[["lat", "lng", "distance"]]
