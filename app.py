@@ -1,40 +1,21 @@
 from streamlit_folium import folium_static
-from next_restaurant.german_to_english import *
-from next_restaurant.cuisine_info import *
-from next_restaurant.parameters import *
-from next_restaurant.functions_for_df import *
-from next_restaurant.district import *
-from next_restaurant.stats import *
-from next_restaurant.suggestion_feature import *
-from next_restaurant.local_search_coordinates import *
+from next_restaurant.german_to_english import cuisine_to_remove
+from next_restaurant.cuisine_info import change_main_food_types
+from next_restaurant.parameters import cuisine_num_wise_clean_data_frame_capitalise, cuisine_clean_data_frame_to_remove
+from next_restaurant.functions_for_df import popularity, percent_of_good_restaurants, number_of_good_restaurants
+from next_restaurant.district import list_districts, Berlin_center, zoom, width, height
+from next_restaurant.stats import stats_per_cuisine, stats_per_hood, stats_per_hood_and_cuisine, stats_per_cuisine_and_hood
+from next_restaurant.suggestion_feature import calc_centers, k_neighbours_df, neighbours_stats, locating_best_place_based_on_distance, generating_circular_coordinates
+from next_restaurant.local_search_coordinates import map_instance, generating_circles
 
 import streamlit as st
 import folium
 import pandas as pd
 import geocoder
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-
-# import ast
-# import time
-# import openrouteservice
-# import json
-# import datetime
-# import geocoder
-# import requests
 
 ## SET LAYOUT
 st.set_page_config(page_title="NEXT RESTAURANT",
                    initial_sidebar_state='expanded')
-
-# Trying to make it colorfull
-# st.markdown(f'<p style="background-color:#0066cc;color:#33ff33;font-size:24px;border-radius:2%;">Hello My name is Shanu Dengre</p>', unsafe_allow_html=True)
-
-# colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
-
-# for color in colors:
-#     st.markdown(f"<{color}>{color}</{color}>", unsafe_allow_html=True)
 
 ## LOAD THE DATAFRAME
 df = pd.read_csv("raw_data//clean_dataframe_1.csv")
@@ -127,9 +108,6 @@ local_lng = g.osm["x"]
 district = geocoder.osm(f"{options_district}, Berlin")
 local_lat_district = district.osm["y"]
 local_lng_district = district.osm["x"]
-#st.sidebar.markdown("Coordinates corresponding to the address")
-#st.sidebar.markdown(f"Local lat: {local_lat}")
-#st.sidebar.markdown(f"Local lng: {local_lng}")
 
 # Number of restaurants to be considered locally
 number_of_nearby_restaurant_to_be_considered = st.sidebar.slider('How many nearest restaurants would you like to see?',
@@ -330,7 +308,6 @@ else:
     # st.markdown("See more stats [here]")
 
 ## MAP ZOOMED IN
-
 df_local = k_neighbours_df(df_copy, local_lat, local_lng, n_restaurants=number_of_nearby_restaurant_to_be_considered)
 
 # Determining color for ratings cutoff
@@ -346,14 +323,11 @@ most_frq_price_level, avg_rating, best_competitor, cuisine_distribution, good_re
 
 # Capitalising names
 best_competitor_capitalise = []
-for i in best_competitor.split():
-    # i = str(i)
-    # st.markdown(i)
+for competitor in best_competitor.split():
     try:
-        best_competitor_capitalise.append(i.capitalize())
-        # st.markdown("true")
-    except:
-        best_competitor_capitalise.append(i)
+        best_competitor_capitalise.append(competitor.capitalize())
+    except Exception :
+        best_competitor_capitalise.append(competitor)
 best_competitor =  " ".join(best_competitor_capitalise)
 
 # Printing local stats
@@ -373,8 +347,7 @@ st.markdown("###### ")
 # Estimating centroid bad and centroid good
 center_bad_center_good = calc_centers(df_local, rating_cutoff)
 
-if type(center_bad_center_good) == dict:
-# n = folium.Figure(width=100, height=100)
+if isinstance(center_bad_center_good, dict):
     first_key = next(iter(center_bad_center_good))
     o = map_instance(zoom=15, initial_location=[center_bad_center_good[first_key][0], center_bad_center_good[first_key][1]],
                         width=width, height=height)
@@ -385,12 +358,6 @@ else:
 # Making circles around the popularity and color coding it.
 o = generating_circles(o, df_local, "ratings_color")
 
-# Making a suggestion based on good center and bad center
-# suggested_lat = (0.9)*center_bad[0] + (0.1)*center_good[0]
-# suggested_lng = (0.9)*center_bad[1] + (0.1)*center_good[1]
-
-# number of suggestions based on distance
-# st.sidebar.markdown("Rating cutoff")
 suggestion_number_distance = st.slider('Number of lightgreen markers',
                             min_value = 1,
                             max_value = 10,
@@ -399,25 +366,21 @@ suggestion_number_distance = st.slider('Number of lightgreen markers',
 
 # Dataframe with just latitudes and longitutes. They are to generate suggestions.
 df_local_lat_lng = df_local[["lat", "lng", "distance"]]
-# st.dataframe(df_local_lat_lng.head())
 
 # Coordinates inside a local box
 local_box = generating_circular_coordinates(df = df_local_lat_lng,
                                             lat = local_lat,
                                             lng = local_lng)
-# st.markdown(len(local_box))
-
 # Creating best location lists
 best_location_based_on_distance_list = []
-for i in range(suggestion_number_distance):
-    # st.markdown(i)
+for _ in range(suggestion_number_distance):
     best_location_based_on_distance = locating_best_place_based_on_distance(box = local_box, df = df_local_lat_lng)
     best_location_based_on_distance_list.append(best_location_based_on_distance)
     to_append = [best_location_based_on_distance[0], best_location_based_on_distance[1], 0]
     df_local_lat_lng.loc[len(df_local_lat_lng.index)] = to_append
 
 
-if type(center_bad_center_good) == dict:
+if isinstance(center_bad_center_good, dict):
     if first_key == "center_bad":
         color = "orange"
     else:
@@ -450,65 +413,3 @@ if len(cuisine_list_local) < 10:
     df_top_cuisine_local = df_local.loc[df_local["food_type_1_english"].isin(cuisine_list_local)]
 else:
     df_top_cuisine_local = df_local.loc[df_local["food_type_1_english"].isin(cuisine_list_local[0:10])]
-
-
-# fig, ax1 = plt.subplots()
-# ax1 = sns.countplot(x = "food_type_1_english",
-#                     data=df_top_cuisine_local,
-#                     order = df_top_cuisine_local["food_type_1_english"].value_counts().index)
-
-# # for p in ax1.patches:
-# #     ax1.annotate('%{:.1f}'.format(p.get_height()), (p.get_x()+0.1, p.get_height()+50))
-
-# st.subheader(f'Popular cusines locally')
-# # ax.set_title("Food type")
-# # ax.set_label(False)
-# ax1.xaxis.label.set_visible(False)
-# ax1.set_xticklabels(ax1.get_xticklabels(), rotation = 30)
-# st.pyplot(fig)
-
-# Count plot general
-#sns.set_theme(style="darkgrid")
-#fig, ax = plt.subplots()
-#ax = sns.countplot(x = "food_type_1_english",
-#data=df_top_cuisine,
-#order = df_top_cuisine["food_type_1_english"].value_counts().index)
-#ax.set_title("Food type")
-#ax.set_label(False)
-#ax.xaxis.label.set_visible(False)
-#ax.set_xticklabels(ax.get_xticklabels(), rotation = 30)
-#st.pyplot(fig)
-
-# Heading for second map plot
-#st.header('Distribution of restaurants in Berlin based on number of user reviews')
-
-# n = folium.Figure(width=100, height=100)
-#n = map_instance()
-
-#if red_popular and blue_popular:
-# Making circles around the popularity and color coding it.
-#n = generating_circles(n, df_copy, "popularity_color")
-
-#elif blue_popular and not red_popular:
-#df_blue_2 = df_copy[df_copy["popularity_color"] == "blue"]
-#n = generating_circles(n, df_blue_2, "popularity_color")
-
-#elif red_popular and not blue_popular:
-#df_red_2 = df_copy[df_copy["popularity_color"] == "orange"]
-# heatmap_blue_ratings = df_blue[["lat", "lng", "rating"]]
-#n = generating_circles(n, df_red_2, "popularity_color")
-
-#else:
-#n = generating_circles(n, df_copy, "popularity_color")
-
-#with st:
-#folium.LayerControl().add_to(n)
-#folium_static(n)
-
-# st.header("Global and local area comparision")
-
-# st.markdown(f"{most_frq_price_level}, {avg_rating}, {cuisine_distribution}")
-
-# st.markdown(f"{best_competitor}")
-
-
