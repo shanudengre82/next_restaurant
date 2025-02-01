@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import streamlit as st
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
@@ -41,12 +40,9 @@ def stats_per_cuisine(df, cuisine, rating, popularity):
         cuisines = get_cuisines(df)
         for cuisine in cuisines:
             cuisine_type = df[df.food_type == cuisine]
-            good_restaurants = df[df.rating >= rating]
-            good_restaurants_df = good_restaurants[good_restaurants.user_ratings_total >= popularity]
             good_cuisine_type = cuisine_type[cuisine_type.rating >= rating]
             good_cuisine_type_df = good_cuisine_type[
             good_cuisine_type.user_ratings_total >= popularity]
-            good_hood = good_cuisine_type_df
 
             lst_.append(cuisine)
             lst_.append(cuisine_type['names_clean'].count())
@@ -65,12 +61,9 @@ def stats_per_cuisine(df, cuisine, rating, popularity):
 
     else:
         cuisine_type = df[df.food_type == cuisine.lower()]
-        good_restaurants = df[df.rating >= rating]
-        good_restaurants_df = good_restaurants[good_restaurants.user_ratings_total >= popularity]
         good_cuisine_type = cuisine_type[cuisine_type.rating >= rating]
         good_cuisine_type_df = good_cuisine_type[
         good_cuisine_type.user_ratings_total >= popularity]
-        good_hood = good_cuisine_type_df
 
         lst_.append(cuisine)
         lst_.append(cuisine_type['names_clean'].count())
