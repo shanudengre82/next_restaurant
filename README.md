@@ -1,47 +1,9 @@
-# Data analysis
-- Description: Project Description
-- Data Source:
-- Type of analysis:
-  
-# Startup the project
+# next_restaurant
 
-The initial setup.
+## Introduction
+This project is focused upon the location Berlin. We have huge numbers of restaurant in Berlin and with this app, we try to use data of existing restaurants to predict best locations to open next restaurant.
 
-Create virtualenv and install the project:
-```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv ~/venv ; source ~/venv/bin/activate ;\
-    pip install pip -U; pip install -r requirements.txt
-```
-
-Unittest test:
-```bash
-make clean install test
-```
-
-Check for next_restaurant in gitlab.com/{group}.
-If your project is not set please add it:
-
-- Create a new project on `gitlab.com/{group}/next_restaurant`
-- Then populate it:
-
-```bash
-##   e.g. if group is "{group}" and project_name is "next_restaurant"
-git remote add origin git@github.com:{group}/next_restaurant.git
-git push -u origin master
-git push -u origin --tags
-```
-
-Functional test with a script:
-
-```bash
-cd
-mkdir tmp
-cd tmp
-next_restaurant-run
-```
-
-# Install
+## Install
 
 Go to `https://github.com/{group}/next_restaurant` to see the project, manage issues,
 setup you ssh public key, ...
