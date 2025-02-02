@@ -2,13 +2,13 @@ import pandas as pd
 import streamlit as st
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def number_of_good_restaurants(df, rating, popularity):
+def get_number_of_good_restaurants(df, rating, popularity):
     good_restaurants = df[df['rating'] >= rating]
     number_of_good_restaurants = len(good_restaurants[ good_restaurants['user_ratings_total'] >= popularity])
     return number_of_good_restaurants
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def percent_of_good_restaurants(df, rating, popularity):
+def get_percent_of_good_restaurants(df, rating, popularity):
     total_num_of_restaurants = len(df)
     good_restaurants = df[df['rating'] >= rating]
     number_of_good_restaurants = len(good_restaurants[ good_restaurants['user_ratings_total'] >= popularity])
@@ -34,7 +34,7 @@ def get_detail_cuisines(df):
     return cuisines_2
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def stats_per_cuisine(df, cuisine, rating, popularity):
+def get_stats_per_cuisine(df, cuisine, rating, popularity):
     lst_ = []
     if cuisine == 'All':
         cuisines = get_cuisines(df)
@@ -80,7 +80,7 @@ def stats_per_cuisine(df, cuisine, rating, popularity):
         return cuisines_df
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def stats_per_hood(df, rating, popularity):
+def get_stats_per_hood(df, rating, popularity):
     lst_2 = []
     hoods = get_hood(df)
     for hood in hoods:
@@ -106,7 +106,7 @@ def stats_per_hood(df, rating, popularity):
     return hoods_df_
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def stats_per_hood_and_cuisine(df, rating, popularity):
+def get_stats_per_hood_and_cuisine(df, rating, popularity):
     lst_3 = []
     cuisines= get_cuisines(df)
     hoods = get_hood(df)
@@ -140,7 +140,7 @@ def stats_per_hood_and_cuisine(df, rating, popularity):
     return hoods_cuisine
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def stats_per_cuisine_and_hood(df, rating, popularity):
+def get_stats_per_cuisine_and_hood(df, rating, popularity):
     lst_4 = []
     cuisines = get_cuisines(df)
     hoods = get_hood(df)

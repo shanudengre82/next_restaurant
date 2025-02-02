@@ -7,6 +7,8 @@ raw_data/
 **/__pycache__/
 .env
 *.ipynb
+.github
+.trunk
 
 # adding just to make a merge request
 # adding just to make a merge request

@@ -5,7 +5,7 @@ import pandas as pd
 """ runs on a certain radius and for n runs starting form the city center lat, lng. returns a df and saves a df for each call in the function folder"""
 categoryId ='4d4b7105d754a06374d81259' # category Food
 
-def four_sqr_api(client_id,client_secret, categoryId, runs, radius):
+def get_four_sqr_api(client_id,client_secret, categoryId, runs, radius):
     url = 'https://api.foursquare.com/v2/venues/explore'
     coordinates_list = pd.read_csv('../raw_data/Berlin_coordinates_with_distances_index.csv').sort_values(by='distance').reset_index(drop=True)
     df = pd.DataFrame(columns=['id', 'name', 'address', 'lat', 'lng', 'category'])
@@ -18,7 +18,7 @@ def four_sqr_api(client_id,client_secret, categoryId, runs, radius):
         categoryId=categoryId,
         limit=50,
         radius = radius)
-        response = requests.get(url=url, params=params).json()
+        response = requests.get(url=url, params=params, timeout=300).json()
         index = int(coordinates_list.iloc[i]["index"])
         pd.DataFrame(response).to_csv(f"./data/foursquare_berlin_coordinates_{index}.csv")
         df_temp = pd.DataFrame(columns=['id', 'name', 'address', 'lat', 'lng', 'category'])
@@ -41,5 +41,5 @@ def four_sqr_api_details(client_id,client_secret, venue_id):
     client_id=client_id,
     client_secret=client_secret,
     v='20200826')
-    response = requests.get(url=url, params=params).json()
+    response = requests.get(url=url, params=params, timeout=300).json()
     return response

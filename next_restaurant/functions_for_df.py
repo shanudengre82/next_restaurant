@@ -1,5 +1,5 @@
 from folium.plugins import HeatMap
-from next_restaurant.parameters import *
+from next_restaurant.parameters import zoom, Berlin_center, width, height, radius
 
 import streamlit as st
 import math
@@ -11,7 +11,7 @@ import folium
 In this module we make functions which can be used to transform data frames
 """
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def getting_lat_lng(df: pd.DataFrame):
+def get_lat_lng(df: pd.DataFrame):
     """
     This function let us to add a log and lng columns un a DataFrame bease on it's geometry column.
     """
@@ -21,18 +21,18 @@ def getting_lat_lng(df: pd.DataFrame):
         try:
             lat.append(ast.literal_eval(df.geometry.iloc[i])['location']['lat'])
             lng.append(ast.literal_eval(df.geometry.iloc[i])['location']['lng'])
-        except:
+        except Exception:
             pass
     df['lng'] = lng
     df['lat'] = lat
     return df
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def popularity(pop):
+def get_popularity(pop):
     return pop
 
 # @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def map_instance(zoom = zoom, initial_location=Berlin_center, width=width, height=height):
+def get_map_instance(zoom = zoom, initial_location=Berlin_center, width=width, height=height):
     """making a general map with different folium loayers"""
     # First map, focused on the ratings of the restaurant
     m = folium.Map(width=width, height=height, location=initial_location,
@@ -75,14 +75,14 @@ def adding_heatmap(m, data):
     return m
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def deg_to_rad(deg):
+def get_deg_to_rad(deg):
     """
     Function to convert radians to degree.
     """
     return deg * (math.pi/180)
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
-def distance(lat1 = 40.7128, lng1 = 35.6895,
+def get_distance(lat1 = 40.7128, lng1 = 35.6895,
              lat2 = 74.0060, lng2 = 139.6917):
     """
     This function is based on Haversine formula to estimate distance based

@@ -21,9 +21,8 @@ Clone the project and install it:
 git clone git@github.com:{group}/next_restaurant.git
 cd next_restaurant
 pip install -r requirements.txt
-make clean install test                # install and test
 ```
-Functionnal test with a script:
+Functional test with a script:
 
 ```bash
 cd

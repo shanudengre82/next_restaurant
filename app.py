@@ -1,27 +1,26 @@
-from streamlit_folium import folium_static
-from next_restaurant.german_to_english import cuisine_to_remove
-from next_restaurant.cuisine_info import change_main_food_types
-from next_restaurant.parameters import cuisine_num_wise_clean_data_frame_capitalise, cuisine_clean_data_frame_to_remove
-from next_restaurant.functions_for_df import popularity, percent_of_good_restaurants, number_of_good_restaurants
-from next_restaurant.district import list_districts, Berlin_center, zoom, width, height
-from next_restaurant.stats import stats_per_cuisine, stats_per_hood, stats_per_hood_and_cuisine, stats_per_cuisine_and_hood
-from next_restaurant.suggestion_feature import calc_centers, k_neighbours_df, neighbours_stats, locating_best_place_based_on_distance, generating_circular_coordinates
-from next_restaurant.local_search_coordinates import map_instance, generating_circles
-
 import streamlit as st
 import folium
 import pandas as pd
 import geocoder
 
+from streamlit_folium import folium_static
+from next_restaurant.cuisine_info import change_main_food_types
+from next_restaurant.functions_for_df import get_map_instance, generating_circles, get_popularity
+from next_restaurant.stats import get_stats_per_cuisine, get_stats_per_hood, get_stats_per_hood_and_cuisine, get_stats_per_cuisine_and_hood, get_percent_of_good_restaurants, get_number_of_good_restaurants
+from next_restaurant.suggestion_feature import calc_centers, k_neighbours_df, neighbours_stats
+from next_restaurant.cuisine_info import cuisine_num_wise_clean_data_frame_capitalise, cuisine_clean_data_frame_to_remove, cuisine_to_remove
+from next_restaurant.district import list_districts
+from next_restaurant.local_search_coordinates import generating_circular_coordinates
+from next_restaurant.parameters import Berlin_center, width, height, zoom
+
 ## SET LAYOUT
-st.set_page_config(page_title="NEXT RESTAURANT",
-                   initial_sidebar_state='expanded')
+st.set_page_config(page_title="NEXT RESTAURANT", initial_sidebar_state='expanded', layout="wide")
 
 ## LOAD THE DATAFRAME
 df = pd.read_csv("raw_data//clean_dataframe_1.csv")
 
 # Determining the popularity based on number of ratings and color for a separator
-df["popularity_res"] = df["user_ratings_total"].apply(popularity)
+df["popularity_res"] = df["user_ratings_total"].apply(get_popularity)
 
 # Capitalize food_types for the selection dropdown
 df = change_main_food_types(df)
@@ -50,11 +49,9 @@ st.sidebar.markdown('''# Find the best place to open your restaurant''')
 
 st.sidebar.subheader("Do you already have a type of cuisine in mind?")
 
-selected_cuisine = [i for i in cuisine_num_wise_clean_data_frame_capitalise
- if i not in cuisine_clean_data_frame_to_remove]
+selected_cuisine = [cuisine for cuisine in cuisine_num_wise_clean_data_frame_capitalise if cuisine not in cuisine_clean_data_frame_to_remove]
 
-options_cuisine = st.sidebar.selectbox('Select a type of cuisine',
-                                       selected_cuisine)
+options_cuisine = st.sidebar.selectbox('Select a type of cuisine', selected_cuisine)
 
 if options_cuisine != "All":
     df = df[df["food_type_1_english"] == options_cuisine]
@@ -62,8 +59,7 @@ if options_cuisine != "All":
 # District selection
 st.sidebar.subheader("Do you already have a district in mind?")
 
-options_district = st.sidebar.selectbox(
-    'Select a district', list_districts)
+options_district = st.sidebar.selectbox('Select a district', list_districts)
 
 if options_district != "All":
     df = df[df["district"] == options_district]
@@ -79,7 +75,6 @@ rating_cutoff = st.sidebar.slider('Please select a rating',
                                   value=4.5)
 
 # user popularity cutoff
-
 popularity_cutoff = st.sidebar.slider('Please select a number of rating',
                                       min_value=0,
                                       max_value=2000,
@@ -125,9 +120,9 @@ df = df[df["user_ratings_total"]>popularity_cutoff]
 ## FIRST MAP
 # Display the map
 if options_district == "All":
-    m = map_instance(zoom = zoom, initial_location=Berlin_center, width=width, height=height)
+    m = get_map_instance(zoom = zoom, initial_location=Berlin_center, width=width, height=height)
 else:
-    m = map_instance(zoom = 14, initial_location=[local_lat_district, local_lng_district], width=width, height=height)
+    m = get_map_instance(zoom = 14, initial_location=[local_lat_district, local_lng_district], width=width, height=height)
 
 if red_ratings and blue_ratings:
     m = generating_circles(m, df, "ratings_color")
@@ -157,22 +152,16 @@ if len(cuisine_list) < 10:
 else:
     df_top_cuisine = df_top_cuisine.loc[df_top_cuisine["food_type_1_english"].isin(cuisine_list[0:10])]
 
-
-## INFO BOX BELOW THE MAP
-
 st.header("Key points")
 st.subheader("Consider this information when chosing a location for your restaurant:")
 
 # general stats about Berlin
-
-percent_of_good_restaurants = percent_of_good_restaurants(
-    df_copy_for_stats, rating_cutoff, popularity_cutoff)
+percent_good_restaurants = get_percent_of_good_restaurants(df_copy_for_stats, rating_cutoff, popularity_cutoff)
 total_num_of_restaurants = len(df_copy_for_stats)
-number_of_good_restaurants = number_of_good_restaurants(
-    df_copy_for_stats, rating_cutoff, popularity_cutoff)
+number_of_good_restaurants = get_number_of_good_restaurants(df_copy_for_stats, rating_cutoff, popularity_cutoff)
 
 # cuisine stats
-stats_cuisine = stats_per_cuisine(df_copy_for_stats, options_cuisine,
+stats_cuisine = get_stats_per_cuisine(df_copy_for_stats, options_cuisine,
                                   rating_cutoff, popularity_cutoff)
 five_most_common_cuisines = list(stats_cuisine['cuisine'][0:5])
 five_most_common_percent = list(stats_cuisine['%_all_restaurants_in_Berlin']*100)[0:5]
@@ -180,7 +169,7 @@ number_cuisine = round(list(stats_cuisine['number_restaurants_in_Berlin'])[0])
 percent_good_cuisine = list(stats_cuisine['%_considered_good']*100)[0]
 percent_of_all = list(stats_cuisine['%_all_restaurants_in_Berlin']*100)[0]
 
-best_rated_cuisines = stats_per_cuisine(df_copy_for_stats, 'All',
+best_rated_cuisines = get_stats_per_cuisine(df_copy_for_stats, 'All',
                                         rating_cutoff, popularity_cutoff)
 
 best_rated_cuisines_df = best_rated_cuisines.sort_values(by=['%_considered_good'], ascending=False)
@@ -192,7 +181,7 @@ berlin_cuisine = stats_cuisine.iloc[0]['number_restaurants_in_Berlin']
 berlin_good_cuisine = stats_cuisine.iloc[0]['%_considered_good']
 
 # hoods stats
-stats_hoods = stats_per_hood(df_copy_for_stats, rating_cutoff, popularity_cutoff)
+stats_hoods = get_stats_per_hood(df_copy_for_stats, rating_cutoff, popularity_cutoff)
 most_restaurants = stats_hoods.iloc[0]['district']
 most_restaurants_perc = round(stats_hoods.iloc[0]['%_all_berlin_restaurants']*100)
 best_hood = stats_hoods.sort_values(by=['%_all_good_restaurants'],ascending=False)
@@ -200,7 +189,7 @@ best_district = best_hood.iloc[0]['district']
 best_district_per = round(best_hood.iloc[0]['%_all_good_restaurants']*100)
 
 # hoods and cuisine stats
-stats_hoods_cuisine = stats_per_hood_and_cuisine(df_copy_for_stats,
+stats_hoods_cuisine = get_stats_per_hood_and_cuisine(df_copy_for_stats,
                                                  rating_cutoff,
                                                  popularity_cutoff)
 main_cuisine_per_hood = list(stats_hoods_cuisine[stats_hoods_cuisine['district'] == options_district]['cuisine'][0:5])
@@ -209,7 +198,7 @@ stats_hoods_cuisine[stats_hoods_cuisine['district'] == options_district]['%_rest
 num_cuisine_per_hood = stats_hoods_cuisine
 
 
-stats_cuisine_hoods =stats_per_cuisine_and_hood(df_copy_for_stats, rating_cutoff, popularity_cutoff)
+stats_cuisine_hoods = get_stats_per_cuisine_and_hood(df_copy_for_stats, rating_cutoff, popularity_cutoff)
 
 # text to be displayed:
 
@@ -349,10 +338,10 @@ center_bad_center_good = calc_centers(df_local, rating_cutoff)
 
 if isinstance(center_bad_center_good, dict):
     first_key = next(iter(center_bad_center_good))
-    o = map_instance(zoom=15, initial_location=[center_bad_center_good[first_key][0], center_bad_center_good[first_key][1]],
+    o = get_map_instance(zoom=15, initial_location=[center_bad_center_good[first_key][0], center_bad_center_good[first_key][1]],
                         width=width, height=height)
 else:
-    o = map_instance(zoom=15, initial_location=[center_bad_center_good[1][0], center_bad_center_good[1][1]],
+    o = get_map_instance(zoom=15, initial_location=[center_bad_center_good[1][0], center_bad_center_good[1][1]],
                             width=width, height=height)
 
 # Making circles around the popularity and color coding it.

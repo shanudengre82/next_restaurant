@@ -1,7 +1,5 @@
-from next_restaurant.stats import percent_of_good_restaurants
 import pandas as pd
 import math
-import geocoder
 import streamlit as st
 
 #HOW TO USE#
