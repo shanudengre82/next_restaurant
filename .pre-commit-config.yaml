@@ -17,6 +17,13 @@ repos:
     - id: check-xml
     - id: check-added-large-files
 
+# TODO: add mypy
+# - repo: https://github.com/pre-commit/mirrors-mypy
+#   rev: v1.15.0  # Use the latest stable version
+#   hooks:
+#     - id: mypy
+#       args: ["--strict"]
+
 - repo: https://github.com/astral-sh/ruff-pre-commit
   rev: v0.9.4  # Check for the latest version
   hooks:

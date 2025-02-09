@@ -20,7 +20,8 @@ Clone the project and install it:
 ```bash
 git clone git@github.com:{group}/next_restaurant.git
 cd next_restaurant
-pip install -r requirements.txt
+
+poetry install
 ```
 Functional test with a script:
 

@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "next_restaurant"
+packages = [{ include = "next_restaurant", from = "src" }]
+version = "0.1.0"
+description = "This is a project which helps to discover new locations to open a restaurant. It focuses upon the city Berlin but can be generalized to other cities."
+authors = ["Shanu Dengre <shanudengre82@gmail.com>"]
+license = "MIT"
+readme = ["README.md", "LICENSE"]
+keywords = ["packaging", "poetry"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+pip = "^25.0"
+setuptools = "^75.8.0"
+twine = "^6.1.0"
+wheel = "^0.45.1"
+numpy = "^2.2.2"
+pandas = "^2.2.3"
+scikit-learn = "^1.6.1"
+seaborn = "^0.13.2"
+streamlit = "^1.42.0"
+folium = "^0.19.4"
+streamlit-folium = "^0.24.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.1.1"
+flake8 = "^7.0.0"
+isort = "^5.13.2"
+mypy = "^1.8.0"
+pylint = "^3.0.3"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.0"
+faker = "^22.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
