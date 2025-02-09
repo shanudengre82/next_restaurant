@@ -1,0 +1,67 @@
+
+# removing data files and notebooks
+*.egg-info
+raw_data/
+*.csv
+.github
+.trunk
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*.ipynb
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.tox/
+.nox/
+pytest_cache/
+nosetests.xml
+coverage.xml
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# C extensions
+# *.so
+
+# Logs and debugging
+*.log
+*.out
+*.err
+logs/
+
+# Local development files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PyInstaller
+*.spec
+
+# AWS credentials and Terraform state
+# .aws/
+# .terraform/
+# terraform.tfstate*
