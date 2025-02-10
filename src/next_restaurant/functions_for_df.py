@@ -1,5 +1,9 @@
 from folium.plugins import HeatMap
-from next_restaurant.parameters import zoom, Berlin_center, width, height, radius
+from next_restaurant.parameters import (
+    INITIAL_RADIUS,
+    BERLIN_CENTER,
+    WIDTH,
+)
 
 import streamlit as st
 import math
@@ -12,7 +16,7 @@ In this module we make functions which can be used to transform data frames
 """
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def get_lat_lng(df: pd.DataFrame):
     """
     This function let us to add a log and lng columns un a DataFrame bease on it's geometry column.
@@ -30,43 +34,42 @@ def get_lat_lng(df: pd.DataFrame):
     return df
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def get_popularity(pop):
     return pop
 
 
-# @st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def get_map_instance(
-    zoom=zoom, initial_location=Berlin_center, width=width, height=height
+    zoom=INITIAL_RADIUS, initial_location=BERLIN_CENTER, width=WIDTH, height=WIDTH
 ):
     """making a general map with different folium loayers"""
     # First map, focused on the ratings of the restaurant
     map_instance = folium.Map(
         width=width,
         height=height,
-        location=initial_location,
-        tiles="Stamen Toner",
+        location=tuple(initial_location),
+        # tiles="Stamen Toner",
         zoom_start=zoom,
         control_scale=True,
         prefer_canvas=True,
     )
-
-    folium.TileLayer("stamentoner").add_to(map_instance)
-    folium.TileLayer("stamenwatercolor").add_to(map_instance)
-    folium.TileLayer("cartodbpositron").add_to(map_instance)
-    folium.TileLayer("openstreetmap").add_to(map_instance)
-    folium.LayerControl().add_to(map_instance)
+    # folium.TileLayer("stamentoner").add_to(map_instance)
+    # folium.TileLayer("stamenwatercolor").add_to(map_instance)
+    # folium.TileLayer("cartodbpositron").add_to(map_instance)
+    # folium.TileLayer("openstreetmap").add_to(map_instance)
+    # folium.LayerControl().add_to(map_instance)
     return map_instance
 
 
-# @st.cache(suppress_st_warning=True, allow_output_mutation=True)
+# @st.cache_data
 def generating_circles(m, df, color: str):
     for i in range(len(df)):
         # address = df.iloc[i]["full_address"]
         folium.Circle(
             location=[df.iloc[i]["lat"], df.iloc[i]["lng"]],
             # popup=data.iloc[i]['name'],
-            radius=radius,
+            radius=INITIAL_RADIUS,
             color=df.iloc[i][color],
             popup=df.iloc[i]["full_address"],
             tooltip="Click for name and address info",
@@ -76,7 +79,7 @@ def generating_circles(m, df, color: str):
     return m
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def adding_heatmap(m, data):
     """making a heatmap of data with lng, lat and data"""
     HeatMap(
@@ -91,7 +94,7 @@ def adding_heatmap(m, data):
     return m
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def get_deg_to_rad(deg):
     """
     Function to convert radians to degree.
@@ -99,7 +102,7 @@ def get_deg_to_rad(deg):
     return deg * (math.pi / 180)
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def get_distance(lat1=40.7128, lng1=35.6895, lat2=74.0060, lng2=139.6917):
     """
     This function is based on Haversine formula to estimate distance based
@@ -123,7 +126,7 @@ def get_distance(lat1=40.7128, lng1=35.6895, lat2=74.0060, lng2=139.6917):
     return d
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def nearby_restaurants(df, lat, lng, range_in_km=2):
     """
     This function gives the restaurant near a coordinate point and withing the range in km.

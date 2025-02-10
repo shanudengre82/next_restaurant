@@ -4,7 +4,7 @@ import numpy as np
 import streamlit as st
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def generating_circular_coordinates(df, lat=52.5607405, lng=13.3808273, radius=100):
     """
     This function generates coordinates to search for best location
@@ -66,7 +66,7 @@ def generating_circular_coordinates(df, lat=52.5607405, lng=13.3808273, radius=1
     return box_sorted
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=False)
+@st.cache_data
 def get_locating_best_place_based_on_distance(df, box: list):
     """
     This function looks for the farthest possible place with respect to

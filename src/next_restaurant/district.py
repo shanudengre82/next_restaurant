@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+from typing import List
 
 berlin_areas = pd.read_csv("raw_data//berlin_areas.csv")
 
@@ -34,7 +35,7 @@ def district_to_df(df_name):
     return df_name
 
 
-list_districts = [
+BERLIN_DISTRICTS: List[str] = [
     "All",
     "Charlottenburg",
     "Kreuzberg",

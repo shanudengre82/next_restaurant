@@ -174,7 +174,7 @@ CUISINE_ORDERED: List[str] = [
     "African",
 ]
 
-CUSINE_ORDERED_DATA_FRAME = List[str] = [
+CUSINE_ORDERED_DATA_FRAME: List[str] = [
     "all",
     "european",
     "asian",

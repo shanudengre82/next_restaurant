@@ -12,7 +12,7 @@ import streamlit as st
 # lng = user_input.latlng[1]
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def deg_to_rad(deg):
     """
     Function to convert radians to degree.
@@ -20,7 +20,7 @@ def deg_to_rad(deg):
     return deg * (math.pi / 180)
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def distance(lat1, lng1, lat2, lng2):
     """
     This function is based on Haversine formula to estimate distance based
@@ -42,7 +42,7 @@ def distance(lat1, lng1, lat2, lng2):
     return d
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def k_neighbours_df(df, lat, lng, n_restaurants=20):
     """takes the df of restaurants and the lat,lng for the prefered user location and outputs a df of k nearest restaurants"""
     df["distance"] = ""
@@ -51,7 +51,7 @@ def k_neighbours_df(df, lat, lng, n_restaurants=20):
     return df.sort_values(by="distance")[:n_restaurants]
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def calc_centers(df, rating):
     """calculate the center of 'good' and 'bad' restaurants of the choosing location.
     Good and bad restaurants are decided based on the rating"""
@@ -86,7 +86,7 @@ def calc_centers(df, rating):
     return center_bad, center_good
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def neighbours_stats(df):
     """takes the k_neighbours_df and returns the most_frequent_price_leve, avg_rating , best_competitor(= rating * total No. of ratings) and the count of each cuisine in a dict"""
     price_dict = {

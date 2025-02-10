@@ -1,7 +1,7 @@
 import streamlit as st
 import folium
 import pandas as pd
-import geocoder
+from geopy.geocoders import Nominatim
 
 from streamlit_folium import folium_static
 from next_restaurant.cuisine_info import change_main_food_types
@@ -28,9 +28,9 @@ from next_restaurant.cuisine_info import (
     CUISINE_CLEAN_DATA_FRAME_TO_REMOVE,
     CUISINE_TO_REMOVE,
 )
-from next_restaurant.district import list_districts
+from next_restaurant.district import BERLIN_DISTRICTS
 from next_restaurant.local_search_coordinates import generating_circular_coordinates
-from next_restaurant.parameters import Berlin_center, width, height, zoom
+from next_restaurant.parameters import BERLIN_CENTER, WIDTH, HEIGHT, INITIAL_ZOOM
 from next_restaurant.local_search_coordinates import (
     get_locating_best_place_based_on_distance,
 )
@@ -92,7 +92,7 @@ if options_cuisine != "All":
 # District selection
 st.sidebar.subheader("Do you already have a district in mind?")
 
-options_district = st.sidebar.selectbox("Select a district", list_districts)
+options_district = st.sidebar.selectbox("Select a district", BERLIN_DISTRICTS)
 
 if options_district != "All":
     df = df[df["district"] == options_district]
@@ -125,14 +125,17 @@ st.sidebar.subheader("Do you already have an address in mind?")
 
 user_input = st.sidebar.text_input("Enter an address", "Mitte, Berlin")
 
-g = geocoder.osm(user_input)
+geolocator = Nominatim(user_agent="MyApp")
 
-local_lat = g.osm["y"]
-local_lng = g.osm["x"]
+location = geolocator.geocode(user_input)
 
-district = geocoder.osm(f"{options_district}, Berlin")
-local_lat_district = district.osm["y"]
-local_lng_district = district.osm["x"]
+# TODO: Uopdate defination properly there is a mismatch somehwere between latitude and longitude
+local_lat = location.latitude
+local_lng = location.longitude
+
+district = geolocator.geocode(f"{options_district}, Berlin")
+local_lng_district = district.latitude
+local_lat_district = district.longitude
 
 # Number of restaurants to be considered locally
 number_of_nearby_restaurant_to_be_considered = st.sidebar.slider(
@@ -155,14 +158,14 @@ df = df[df["user_ratings_total"] > popularity_cutoff]
 # Display the map
 if options_district == "All":
     m = get_map_instance(
-        zoom=zoom, initial_location=Berlin_center, width=width, height=height
+        zoom=INITIAL_ZOOM, initial_location=BERLIN_CENTER, width=WIDTH, height=HEIGHT
     )
 else:
     m = get_map_instance(
         zoom=14,
         initial_location=[local_lat_district, local_lng_district],
-        width=width,
-        height=height,
+        width=WIDTH,
+        height=HEIGHT,
     )
 
 if red_ratings and blue_ratings:
@@ -487,15 +490,15 @@ if isinstance(center_bad_center_good, dict):
             center_bad_center_good[first_key][0],
             center_bad_center_good[first_key][1],
         ],
-        width=width,
-        height=height,
+        width=WIDTH,
+        height=HEIGHT,
     )
 else:
     o = get_map_instance(
         zoom=15,
         initial_location=[center_bad_center_good[1][0], center_bad_center_good[1][1]],
-        width=width,
-        height=height,
+        width=WIDTH,
+        height=HEIGHT,
     )
 
 # Making circles around the popularity and color coding it.

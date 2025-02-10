@@ -95,7 +95,7 @@ here_to_eng = {
 }
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def german_to_english(x):
     if x in here_to_eng:
         return here_to_eng[x].capitalize()
@@ -103,7 +103,7 @@ def german_to_english(x):
         return x.capitalize()
 
 
-@st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache_data
 def food_type_conversion(df_name):
     df_name.replace({"food_type_2": food_type_conversion}, inplace=True)
     df_name.replace({"food_type": food_type_conversion}, inplace=True)
