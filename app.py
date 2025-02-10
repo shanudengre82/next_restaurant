@@ -18,15 +18,15 @@ from next_restaurant.stats import (
     get_percent_of_good_restaurants,
     get_number_of_good_restaurants,
 )
-from next_restaurant.suggestion_feature import (
+from next_restaurant.features_to_suggest import (
     calc_centers,
     k_neighbours_df,
     neighbours_stats,
 )
 from next_restaurant.cuisine_info import (
-    cuisine_num_wise_clean_data_frame_capitalise,
-    cuisine_clean_data_frame_to_remove,
-    cuisine_to_remove,
+    CUSINE_ORDERED_DATA_FRAME_CAPITALISE,
+    CUISINE_CLEAN_DATA_FRAME_TO_REMOVE,
+    CUISINE_TO_REMOVE,
 )
 from next_restaurant.district import list_districts
 from next_restaurant.local_search_coordinates import generating_circular_coordinates
@@ -80,8 +80,8 @@ st.sidebar.subheader("Do you already have a type of cuisine in mind?")
 
 selected_cuisine = [
     cuisine
-    for cuisine in cuisine_num_wise_clean_data_frame_capitalise
-    if cuisine not in cuisine_clean_data_frame_to_remove
+    for cuisine in CUSINE_ORDERED_DATA_FRAME_CAPITALISE
+    if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE
 ]
 
 options_cuisine = st.sidebar.selectbox("Select a type of cuisine", selected_cuisine)
@@ -185,7 +185,7 @@ folium_static(m)
 
 # Making list of clean cuisine for global choices
 cuisine_list = df["food_type_1_english"].value_counts().index.tolist()
-cuisine_list = [i for i in cuisine_list if i not in cuisine_clean_data_frame_to_remove]
+cuisine_list = [i for i in cuisine_list if i not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE]
 
 df_top_cuisine = df.loc[df["food_type_1_english"].isin(cuisine_list[0:10])]
 if len(cuisine_list) < 10:
@@ -227,7 +227,7 @@ best_rated_cuisines_df = best_rated_cuisines.sort_values(
     by=["%_considered_good"], ascending=False
 )
 best_rated = best_rated_cuisines_df[
-    ~best_rated_cuisines_df["cuisine"].isin(cuisine_to_remove)
+    ~best_rated_cuisines_df["cuisine"].isin(CUISINE_TO_REMOVE)
 ]
 best_rated_3_cuisines = list(best_rated["cuisine"])[0:3]
 best_rated_3_perc = list(best_rated["%_considered_good"] * 100)[0:3]
@@ -566,7 +566,9 @@ folium_static(o)
 # Making list of clean cuisine for local choices
 cuisine_list_local = df_local["food_type_1_english"].value_counts().index.tolist()
 cuisine_list_local = [
-    i for i in cuisine_list_local if i not in cuisine_clean_data_frame_to_remove
+    cuisine
+    for cuisine in cuisine_list_local
+    if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE
 ]
 
 if len(cuisine_list_local) < 10:

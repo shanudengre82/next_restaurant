@@ -3,7 +3,7 @@ import pandas as pd
 
 
 """ runs on a certain radius and for n runs starting form the city center lat, lng. returns a df and saves a df for each call in the function folder"""
-categoryId = "4d4b7105d754a06374d81259"  # category Food
+categoryId: str = "4d4b7105d754a06374d81259"  # category Food
 
 
 def get_four_sqr_api(client_id, client_secret, categoryId, runs, radius):

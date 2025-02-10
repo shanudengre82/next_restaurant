@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Dict, List
+import pandas as pd
 
 RESTAURANT_TYPE: List[str] = [
     "Asian",
@@ -142,7 +143,7 @@ RESTAURANT_TYPE: List[str] = [
 ]
 
 
-CUISINE_ORDERED = (
+CUISINE_ORDERED: List[str] = [
     "All",
     "Italian",
     "German",
@@ -171,9 +172,9 @@ CUISINE_ORDERED = (
     "Steak",
     "Brunch",
     "African",
-)
+]
 
-cuisine_num_wise_clean_data_frame = [
+CUSINE_ORDERED_DATA_FRAME = List[str] = [
     "all",
     "european",
     "asian",
@@ -228,18 +229,19 @@ CUISINE_CLEAN_DATA_FRAME_TO_REMOVE: List[str] = [
     "Caribbean",
 ]
 
-CUISINE_TO_REMOVE = [item.lower() for item in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE]
-
-cuisine_num_wise_clean_data_frame_capitalise = [
-    cuisine.capitalize() for cuisine in cuisine_num_wise_clean_data_frame
+CUISINE_TO_REMOVE: List[str] = [
+    item.lower() for item in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE
 ]
 
-CUISINE_MOST_FREQUENT = cuisine_num_wise_clean_data_frame_capitalise[0:10]
+CUSINE_ORDERED_DATA_FRAME_CAPITALISE: List[str] = [
+    cuisine.capitalize() for cuisine in CUSINE_ORDERED_DATA_FRAME
+]
 
-cuisine_LESS_FREQUENT = (
+CUISINE_MOST_FREQUENT: List[str] = CUSINE_ORDERED_DATA_FRAME_CAPITALISE[0:10]
+
+CUSINE_LESS_FREQUENT: List[str] = [
     cuisine for cuisine in RESTAURANT_TYPE if cuisine not in CUISINE_ORDERED
-)
-
+]
 
 # use this dict to convert food_type_2 into broader food_type categories
 FOOD_TYPE_CATEGORIES: Dict[str, str] = {
@@ -333,17 +335,15 @@ FOOD_TYPE_CATEGORIES: Dict[str, str] = {
 }
 
 
-def categorize_food_types(df_name):
+def categorize_food_types(df_name: pd.DataFrame) -> pd.DataFrame:
     # Temporary saves the first food_type categories into a new column
-
     df_name["food_type_3"] = df_name["food_type"]
 
     # Grouping the foodtypes by borader categories based on the dictionary above
-
     df_name = df_name.replace({"food_type": RESTAURANT_TYPE})
 
     # Replace the nans in the food_type_2 columns by food_type_3
-    # Replace values un food_type_2 columns by food_type_3 if food_type_2 is the same as food_type
+    # Replace values in food_type_2 columns by food_type_3 if food_type_2 is the same as food_type
 
     df_name.loc[df_name["food_type"] == df_name["food_type_2"], "food_type_2"] = (
         df_name["food_type_3"]
@@ -358,60 +358,6 @@ def categorize_food_types(df_name):
     df_name.drop(columns="Unnamed: 0", inplace=True)
 
     return df_name
-
-
-district_list = [
-    "All",
-    "Mitte",
-    "Charlottenburg",
-    "Kreuzberg",
-    "Prenzlauer Berg",
-    "Schöneberg",
-    "Neukölln",
-    "Wilmersdorf",
-    "Friedrichshain",
-    "Wedding",
-    "Moabit",
-    "Tiergarten",
-    "Friedenau",
-    "Charlottenburg-Nord",
-    "Steglitz",
-    "Britz",
-    "Pankow",
-    "Lichtenberg",
-    "Friedrichsfelde",
-    "Reinickendorf",
-    "Französisch Buchholz",
-    "Tegel",
-    "Weißensee",
-    "Wittenau",
-    "Niederschönhausen",
-    "Tempelhof",
-    "Oberschöneweide",
-    "Lichterfelde",
-    "Alt-Hohenschönhausen",
-    "Mariendorf",
-    "Alt-Treptow",
-    "Plänterwald",
-    "Karlshorst",
-    "Grunewald",
-    "Baumschulenweg",
-    "Stadtrandsiedlung Malchow",
-    "Niederschöneweide",
-    "Spandau",
-    "Karow",
-    "Gesundbrunnen",
-    "Marzahn",
-    "Buckow",
-    "Malchow",
-    "Neu-Hohenschönhausen",
-    "Marienfelde",
-    "Wartenberg",
-    "Blankenburg",
-    "Heinersdorf",
-    "Lichtenrade",
-    "Westend",
-]
 
 
 # change main food_types_2 to food_type (german, pizza, italian, vietnamese, japaneses, chinese, turkish, indian)

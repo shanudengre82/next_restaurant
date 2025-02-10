@@ -51,7 +51,7 @@ def k_neighbours_df(df, lat, lng, n_restaurants=20):
     return df.sort_values(by="distance")[:n_restaurants]
 
 
-# @st.cache(suppress_st_warning=True, allow_output_mutation=True)
+@st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def calc_centers(df, rating):
     """calculate the center of 'good' and 'bad' restaurants of the choosing location.
     Good and bad restaurants are decided based on the rating"""
