@@ -3,7 +3,7 @@ import folium
 import pandas as pd
 from geopy.geocoders import Nominatim
 
-from streamlit_folium import folium_static
+from streamlit_folium import st_folium
 from next_restaurant.cuisine_info import change_main_food_types
 from next_restaurant.functions_for_df import (
     get_map_instance,
@@ -11,10 +11,10 @@ from next_restaurant.functions_for_df import (
     get_popularity,
 )
 from next_restaurant.stats import (
-    get_stats_per_cuisine,
-    get_stats_per_hood,
-    get_stats_per_hood_and_cuisine,
-    get_stats_per_cuisine_and_hood,
+    update_stats_per_cuisine,
+    update_stats_per_hood,
+    update_stats_per_hood_and_cuisine,
+    update_stats_per_cuisine_and_hood,
     get_percent_of_good_restaurants,
     get_number_of_good_restaurants,
 )
@@ -24,7 +24,7 @@ from next_restaurant.features_to_suggest import (
     neighbours_stats,
 )
 from next_restaurant.cuisine_info import (
-    CUSINE_ORDERED_DATA_FRAME_CAPITALISE,
+    CUISINE_OPTIONS,
     CUISINE_CLEAN_DATA_FRAME_TO_REMOVE,
     CUISINE_TO_REMOVE,
 )
@@ -75,16 +75,8 @@ st.markdown("###### ")
 st.sidebar.markdown("""# Find the best place to open your restaurant""")
 
 # Cuisine selection
-
 st.sidebar.subheader("Do you already have a type of cuisine in mind?")
-
-selected_cuisine = [
-    cuisine
-    for cuisine in CUSINE_ORDERED_DATA_FRAME_CAPITALISE
-    if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE
-]
-
-options_cuisine = st.sidebar.selectbox("Select a type of cuisine", selected_cuisine)
+options_cuisine = st.sidebar.selectbox("Select a type of cuisine", CUISINE_OPTIONS)
 
 if options_cuisine != "All":
     df = df[df["food_type_1_english"] == options_cuisine]
@@ -133,6 +125,7 @@ location = geolocator.geocode(user_input)
 local_lat = location.latitude
 local_lng = location.longitude
 
+# TODO: UPdates since geolocatiopn sometimes does not work
 district = geolocator.geocode(f"{options_district}, Berlin")
 local_lng_district = district.latitude
 local_lat_district = district.longitude
@@ -184,11 +177,11 @@ else:
     m = generating_circles(m, df, "ratings_color")
 
 folium.LayerControl().add_to(m)
-folium_static(m)
+st_folium(m)
 
 # Making list of clean cuisine for global choices
 cuisine_list = df["food_type_1_english"].value_counts().index.tolist()
-cuisine_list = [i for i in cuisine_list if i not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE]
+cuisine_list = [cuisine for cuisine in cuisine_list if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE]
 
 df_top_cuisine = df.loc[df["food_type_1_english"].isin(cuisine_list[0:10])]
 if len(cuisine_list) < 10:
@@ -213,7 +206,7 @@ number_of_good_restaurants = get_number_of_good_restaurants(
 )
 
 # cuisine stats
-stats_cuisine = get_stats_per_cuisine(
+stats_cuisine = update_stats_per_cuisine(
     df_copy_for_stats, options_cuisine, rating_cutoff, popularity_cutoff
 )
 five_most_common_cuisines = list(stats_cuisine["cuisine"][0:5])
@@ -222,7 +215,7 @@ number_cuisine = round(list(stats_cuisine["number_restaurants_in_Berlin"])[0])
 percent_good_cuisine = list(stats_cuisine["%_considered_good"] * 100)[0]
 percent_of_all = list(stats_cuisine["%_all_restaurants_in_Berlin"] * 100)[0]
 
-best_rated_cuisines = get_stats_per_cuisine(
+best_rated_cuisines = update_stats_per_cuisine(
     df_copy_for_stats, "All", rating_cutoff, popularity_cutoff
 )
 
@@ -239,7 +232,7 @@ berlin_cuisine = stats_cuisine.iloc[0]["number_restaurants_in_Berlin"]
 berlin_good_cuisine = stats_cuisine.iloc[0]["%_considered_good"]
 
 # hoods stats
-stats_hoods = get_stats_per_hood(df_copy_for_stats, rating_cutoff, popularity_cutoff)
+stats_hoods = update_stats_per_hood(df_copy_for_stats, rating_cutoff, popularity_cutoff)
 most_restaurants = stats_hoods.iloc[0]["district"]
 most_restaurants_perc = round(stats_hoods.iloc[0]["%_all_berlin_restaurants"] * 100)
 best_hood = stats_hoods.sort_values(by=["%_all_good_restaurants"], ascending=False)
@@ -247,7 +240,7 @@ best_district = best_hood.iloc[0]["district"]
 best_district_per = round(best_hood.iloc[0]["%_all_good_restaurants"] * 100)
 
 # hoods and cuisine stats
-stats_hoods_cuisine = get_stats_per_hood_and_cuisine(
+stats_hoods_cuisine = update_stats_per_hood_and_cuisine(
     df_copy_for_stats, rating_cutoff, popularity_cutoff
 )
 main_cuisine_per_hood = list(
@@ -264,12 +257,12 @@ percent_main_cuisine = list(
 num_cuisine_per_hood = stats_hoods_cuisine
 
 
-stats_cuisine_hoods = get_stats_per_cuisine_and_hood(
+stats_cuisine_hoods = update_stats_per_cuisine_and_hood(
     df_copy_for_stats, rating_cutoff, popularity_cutoff
 )
 
 # text to be displayed:
-
+# TODO: To put it into own script
 if options_district == "All" and options_cuisine == "All":
     st.write(
         f"\
@@ -564,7 +557,7 @@ for i in best_location_based_on_distance_list:
     ).add_to(o)
     number += 1
 
-folium_static(o)
+st_folium(o)
 
 # Making list of clean cuisine for local choices
 cuisine_list_local = df_local["food_type_1_english"].value_counts().index.tolist()

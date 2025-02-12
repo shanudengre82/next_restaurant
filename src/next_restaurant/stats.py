@@ -24,49 +24,27 @@ def get_percent_of_good_restaurants(df, rating, popularity):
     return percentage_of_good_restaurants
 
 
-# get a list of all districts in the df
 @st.cache_data
-def get_hood(df_name):
-    hoods = list(df_name.district.unique())
-    return hoods
-
-
-# get a list of all cuisines in the df
-@st.cache_data
-def get_cuisines(df):
-    cuisines = list(df.food_type.unique())
-    return cuisines
-
-
-@st.cache_data
-def get_detail_cuisines(df):
-    cuisines_2 = list(df.food_type_2.unique())
-    return cuisines_2
-
-
-@st.cache_data
-def get_stats_per_cuisine(df, cuisine, rating, popularity):
+def update_stats_per_cuisine(df, cuisine, rating, popularity):
     lst_ = []
     if cuisine == "All":
-        cuisines = get_cuisines(df)
-        for cuisine in cuisines:
-            cuisine_type = df[df.food_type == cuisine]
-            good_cuisine_type = cuisine_type[cuisine_type.rating >= rating]
+        for cuisine, cuisine_df in df.groupby("food_type"):
+            good_cuisine_type = cuisine_df[cuisine_df.rating >= rating]
             good_cuisine_type_df = good_cuisine_type[
                 good_cuisine_type.user_ratings_total >= popularity
             ]
 
             lst_.append(cuisine)
-            lst_.append(cuisine_type["names_clean"].count())
+            lst_.append(cuisine_df["names_clean"].count())
             lst_.append(
                 round(
-                    cuisine_type["names_clean"].count() / df["names_clean"].count(), 2
+                    cuisine_df["names_clean"].count() / df["names_clean"].count(), 2
                 )
             )
             lst_.append(
                 round(
                     good_cuisine_type_df["names_clean"].count()
-                    / cuisine_type["names_clean"].count(),
+                    / cuisine_df["names_clean"].count(),
                     2,
                 )
             )
@@ -124,11 +102,9 @@ def get_stats_per_cuisine(df, cuisine, rating, popularity):
 
 
 @st.cache_data
-def get_stats_per_hood(df, rating, popularity):
+def update_stats_per_hood(df, rating, popularity):
     lst_2 = []
-    hoods = get_hood(df)
-    for hood in hoods:
-        hood_df = df[df.district == hood]
+    for hood, hood_df in df.groupby("district"):
         good_in_hood = hood_df[hood_df.rating >= rating]
         good_in_hood_df = good_in_hood[good_in_hood.user_ratings_total >= popularity]
 
@@ -164,12 +140,10 @@ def get_stats_per_hood(df, rating, popularity):
 
 
 @st.cache_data
-def get_stats_per_hood_and_cuisine(df, rating, popularity):
+def update_stats_per_hood_and_cuisine(df, rating, popularity):
     lst_3 = []
-    cuisines = get_cuisines(df)
-    hoods = get_hood(df)
-    for hood in hoods:
-        for cuisine in cuisines:
+    for hood, hood_df in df.groupby("district"):
+        for cuisine, cuisine_df in df.groupby("food_type"):
             hood_df = df[df.district == hood]
             cuisine_df = hood_df[hood_df.food_type == cuisine.lower()]
             good = cuisine_df[cuisine_df.rating >= rating]
@@ -220,12 +194,10 @@ def get_stats_per_hood_and_cuisine(df, rating, popularity):
 
 
 @st.cache_data
-def get_stats_per_cuisine_and_hood(df, rating, popularity):
+def update_stats_per_cuisine_and_hood(df, rating, popularity):
     lst_4 = []
-    cuisines = get_cuisines(df)
-    hoods = get_hood(df)
-    for cuisine in cuisines:
-        for hood in hoods:
+    for hood, hood_df in df.groupby("district"):
+        for cuisine, cuisine_df in df.groupby("food_type"):
             cuisine_df = df[df.food_type == cuisine]
             hood_df = cuisine_df[cuisine_df.district == hood]
 

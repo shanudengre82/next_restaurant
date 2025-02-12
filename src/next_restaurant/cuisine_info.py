@@ -335,79 +335,47 @@ FOOD_TYPE_CATEGORIES: Dict[str, str] = {
 }
 
 
-def categorize_food_types(df_name: pd.DataFrame) -> pd.DataFrame:
-    # Temporary saves the first food_type categories into a new column
-    df_name["food_type_3"] = df_name["food_type"]
-
-    # Grouping the foodtypes by borader categories based on the dictionary above
-    df_name = df_name.replace({"food_type": RESTAURANT_TYPE})
-
-    # Replace the nans in the food_type_2 columns by food_type_3
-    # Replace values in food_type_2 columns by food_type_3 if food_type_2 is the same as food_type
-
-    df_name.loc[df_name["food_type"] == df_name["food_type_2"], "food_type_2"] = (
-        df_name["food_type_3"]
-    )
-    df_name["food_type_2"] = np.where(
-        df_name["food_type_2"].isna(), df_name["food_type_3"], df_name["food_type_2"]
-    )
-
-    # Drop the food_type_3 columns as it is not needed anymore, also drop useless columns
-
-    df_name.drop(columns="food_type_3", inplace=True)
-    df_name.drop(columns="Unnamed: 0", inplace=True)
-
-    return df_name
+CUISINE_OPTIONS: List[str] = [
+    cuisine
+    for cuisine in CUSINE_ORDERED_DATA_FRAME_CAPITALISE
+    if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE
+]
 
 
-# change main food_types_2 to food_type (german, pizza, italian, vietnamese, japaneses, chinese, turkish, indian)
+def categorize_food_types(df: pd.DataFrame, restaurant_type_mapping: Dict[str, str]) -> pd.DataFrame:
+    # Backup original 'food_type' column
+    df["food_type_3"] = df["food_type"]
+
+    # Replace food_type values based on mapping
+    df["food_type"] = df["food_type"].replace(restaurant_type_mapping)
+
+    # Update 'food_type_2' where it is either NaN or identical to the new 'food_type'
+    df["food_type_2"] = df["food_type_2"].fillna(df["food_type_3"])
+    df.loc[df["food_type"] == df["food_type_2"], "food_type_2"] = df["food_type_3"]
+
+    # Drop unnecessary columns if they exist
+    df.drop(columns=[col for col in ["food_type_3", "Unnamed: 0"] if col in df], inplace=True)
+
+    return df
 
 
-def change_main_food_types(df):
-    df["food_type"] = np.where(
-        (df["food_type_2"] == "german") & (df["food_type"] == "european"),
-        df["food_type_2"],
-        df["food_type"],
-    )
+def change_main_food_types(df: pd.DataFrame) -> pd.DataFrame:
+    # Define mapping conditions: (current food_type, new food_type_2) -> updated food_type
+    mapping = {
+        ("european", "german"): "german",
+        ("european", "italian"): "italian",
+        ("asian", "vietnamese"): "vietnamese",
+        ("asian", "japanese"): "japanese",
+        ("asian", "chinese"): "chinese",
+        ("asian", "indian"): "indian",
+        ("middle eastern", "turkish"): "turkish",
+    }
 
-    df["food_type"] = np.where(
-        (df["food_type_2"] == "italian") & (df["food_type"] == "european"),
-        df["food_type_2"],
-        df["food_type"],
-    )
+    # Use vectorized operations with .replace and .map
+    mask = df[["food_type", "food_type_2"]].apply(tuple, axis=1).map(mapping)
+    df["food_type"] = mask.fillna(df["food_type"])
 
-    df["food_type"] = np.where(
-        df["food_type_2"] == "pizza", df["food_type_2"], df["food_type"]
-    )
-
-    df["food_type"] = np.where(
-        (df["food_type_2"] == "vietnamese") & (df["food_type"] == "asian"),
-        df["food_type_2"],
-        df["food_type"],
-    )
-
-    df["food_type"] = np.where(
-        (df["food_type_2"] == "japanese") & (df["food_type"] == "asian"),
-        df["food_type_2"],
-        df["food_type"],
-    )
-
-    df["food_type"] = np.where(
-        (df["food_type_2"] == "chinese") & (df["food_type"] == "asian"),
-        df["food_type_2"],
-        df["food_type"],
-    )
-
-    df["food_type"] = np.where(
-        (df["food_type_2"] == "indian") & (df["food_type"] == "asian"),
-        df["food_type_2"],
-        df["food_type"],
-    )
-
-    df["food_type"] = np.where(
-        (df["food_type_2"] == "turkish") & (df["food_type"] == "middle eastern"),
-        df["food_type_2"],
-        df["food_type"],
-    )
+    # Ensure "pizza" always takes precedence
+    df["food_type"] = np.where(df["food_type_2"] == "pizza", "pizza", df["food_type"])
 
     return df
