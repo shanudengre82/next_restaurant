@@ -3,7 +3,7 @@ import folium
 import pandas as pd
 from geopy.geocoders import Nominatim
 
-from streamlit_folium import folium_static 
+from streamlit_folium import folium_static
 from next_restaurant.cuisine_info import change_main_food_types
 from next_restaurant.functions_for_df import (
     get_map_instance,
@@ -35,7 +35,14 @@ from next_restaurant.local_search_coordinates import (
     get_locating_best_place_based_on_distance,
 )
 
-from next_restaurant.cuisine_stats_display import (all_district_all_cuisines, all_district_selected_cuisine, selected_district_all_cuisine, selected_district_selected_cuisine)
+from next_restaurant.cuisine_stats_display import (
+    all_district_all_cuisines,
+    all_district_selected_cuisine,
+    selected_district_all_cuisine,
+    selected_district_selected_cuisine,
+    display_additional_stats,
+)
+
 # SET LAYOUT
 st.set_page_config(
     page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide"
@@ -182,7 +189,11 @@ folium_static(m)
 
 # Making list of clean cuisine for global choices
 cuisine_list = df["food_type_1_english"].value_counts().index.tolist()
-cuisine_list = [cuisine for cuisine in cuisine_list if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE]
+cuisine_list = [
+    cuisine
+    for cuisine in cuisine_list
+    if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE
+]
 
 df_top_cuisine = df.loc[df["food_type_1_english"].isin(cuisine_list[0:10])]
 if len(cuisine_list) < 10:
@@ -263,39 +274,45 @@ stats_cuisine_hoods = update_stats_per_cuisine_and_hood(
 )
 
 if options_district == "All" and options_cuisine == "All":
-    all_district_all_cuisines(total_number_of_restaurants=total_num_of_restaurants,
-                              number_of_good_restaurants=number_of_good_restaurants,
-                              five_most_common_cuisines=five_most_common_cuisines,
-                              five_most_common_percent=five_most_common_percent
+    all_district_all_cuisines(
+        total_number_of_restaurants=total_num_of_restaurants,
+        number_of_good_restaurants=number_of_good_restaurants,
+        five_most_common_cuisines=five_most_common_cuisines,
+        five_most_common_percent=five_most_common_percent,
     )
 elif options_district == "All" and options_cuisine != "All":
-    all_district_selected_cuisine(total_number_of_restaurants=total_num_of_restaurants,
-                                    number_of_good_restaurants=number_of_good_restaurants,
-                                    number_cuisine=number_cuisine,
-                                    percent_good_cuisine=percent_good_cuisine,
-                                    percent_of_all=percent_of_all,
-                                    best_rated_3_cuisines=best_rated_3_cuisines,
-                                    best_rated_3_perc=best_rated_3_perc
+    all_district_selected_cuisine(
+        total_number_of_restaurants=total_num_of_restaurants,
+        number_of_good_restaurants=number_of_good_restaurants,
+        number_cuisine=number_cuisine,
+        percent_good_cuisine=percent_good_cuisine,
+        percent_of_all=percent_of_all,
+        best_rated_3_cuisines=best_rated_3_cuisines,
+        best_rated_3_perc=best_rated_3_perc,
     )
 elif options_district != "All" and options_cuisine == "All":
-    selected_district_all_cuisine(options_district=options_district,
-                                  main_cuisine_per_hood=main_cuisine_per_hood,
-                                  percent_main_cuisine=percent_main_cuisine,
-                                  total_num_of_restaurants=total_num_of_restaurants,
-                                  number_of_good_restaurants=number_of_good_restaurants,
-                                  most_restaurants=most_restaurants,
-                                  most_restaurants_perc=most_restaurants_perc,
-                                  best_district=best_district,
-                                  best_district_per=best_district_per,
-                                  five_most_common_cuisines=five_most_common_cuisines,
-                                  five_most_common_percent=five_most_common_percent)
+    selected_district_all_cuisine(
+        options_district=options_district,
+        main_cuisine_per_hood=main_cuisine_per_hood,
+        percent_main_cuisine=percent_main_cuisine,
+        total_num_of_restaurants=total_num_of_restaurants,
+        number_of_good_restaurants=number_of_good_restaurants,
+        most_restaurants=most_restaurants,
+        most_restaurants_perc=most_restaurants_perc,
+        best_district=best_district,
+        best_district_per=best_district_per,
+        five_most_common_cuisines=five_most_common_cuisines,
+        five_most_common_percent=five_most_common_percent,
+    )
 else:
-    selected_district_selected_cuisine(stats_hoods_cuisine=stats_hoods_cuisine,
-                                      stats_cuisine_hoods=stats_cuisine_hoods,
-                                      options_district=options_district,
-                                      options_cuisine=options_cuisine,
-                                      berlin_cuisine=berlin_cuisine,
-                                      berlin_good_cuisine=berlin_good_cuisine)
+    selected_district_selected_cuisine(
+        stats_hoods_cuisine=stats_hoods_cuisine,
+        stats_cuisine_hoods=stats_cuisine_hoods,
+        options_district=options_district,
+        options_cuisine=options_cuisine,
+        berlin_cuisine=berlin_cuisine,
+        berlin_good_cuisine=berlin_good_cuisine,
+    )
 
 # MAP ZOOMED IN
 df_local = k_neighbours_df(
@@ -334,33 +351,14 @@ for competitor in best_competitor.split():
         best_competitor_capitalise.append(competitor)
 best_competitor = " ".join(best_competitor_capitalise)
 
-# Printing local stats
-st.markdown(f"Most of them have price level **{most_frq_price_level}**.")
-st.markdown(
-    f"Their average rating is **{round(avg_rating, 2)}**, and **{good_restaurants_per}%** of restaurants are considered as good."
-)
-st.markdown(
-    f"Based on the address you provided, your top potential competitor would be: **{best_competitor}**."
+display_additional_stats(
+    most_frq_price_level=most_frq_price_level,
+    avg_rating=avg_rating,
+    good_restaurants_per=good_restaurants_per,
+    best_competitor=best_competitor,
 )
 
-# Making heading for the suggestion part
-st.header("Our suggestions in the area")
-
-# Adding description for the marker.
-st.markdown(
-    '#### <span style="color:orange">*Orange marker*</span>: center of low rated resaturants of the area',
-    unsafe_allow_html=True,
-)
-st.markdown(
-    '#### <span style="color:blue">*Blue marker*</span>: center of high rated resaturants of the area',
-    unsafe_allow_html=True,
-)
-st.markdown(
-    '#### <span style="color:lightgreen">*Lightreen marker*</span>: furthest locations from all restaurants in the area',
-    unsafe_allow_html=True,
-)
-st.markdown("###### ")
-
+# Starting with second map, finding best places to open a restaurant
 # Estimating centroid bad and centroid good
 center_bad_center_good = calc_centers(df_local, rating_cutoff)
 

@@ -342,7 +342,9 @@ CUISINE_OPTIONS: List[str] = [
 ]
 
 
-def categorize_food_types(df: pd.DataFrame, restaurant_type_mapping: Dict[str, str]) -> pd.DataFrame:
+def categorize_food_types(
+    df: pd.DataFrame, restaurant_type_mapping: Dict[str, str]
+) -> pd.DataFrame:
     # Backup original 'food_type' column
     df["food_type_3"] = df["food_type"]
 
@@ -354,7 +356,10 @@ def categorize_food_types(df: pd.DataFrame, restaurant_type_mapping: Dict[str, s
     df.loc[df["food_type"] == df["food_type_2"], "food_type_2"] = df["food_type_3"]
 
     # Drop unnecessary columns if they exist
-    df.drop(columns=[col for col in ["food_type_3", "Unnamed: 0"] if col in df], inplace=True)
+    df.drop(
+        columns=[col for col in ["food_type_3", "Unnamed: 0"] if col in df],
+        inplace=True,
+    )
 
     return df
 

@@ -1,10 +1,47 @@
 import streamlit as st
 import pandas as pd
 
-# text to be displayed:
-# TODO: To put it into own script
 
-def all_district_all_cuisines(total_number_of_restaurants: int, number_of_good_restaurants: int, five_most_common_cuisines: list, five_most_common_percent: list):
+def display_additional_stats(
+    most_frq_price_level: str,
+    avg_rating: float,
+    good_restaurants_per: int,
+    best_competitor: str,
+):
+    # Printing local stats
+    st.markdown(f"Most of them have price level **{most_frq_price_level}**.")
+    st.markdown(
+        f"Their average rating is **{round(avg_rating, 2)}**, and **{good_restaurants_per}%** of restaurants are considered as good."
+    )
+    st.markdown(
+        f"Based on the address you provided, your top potential competitor would be: **{best_competitor}**."
+    )
+
+    # Making heading for the suggestion part
+    st.header("Our suggestions in the area")
+
+    # Adding description for the marker.
+    st.markdown(
+        '#### <span style="color:orange">*Orange marker*</span>: center of low rated resaturants of the area',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '#### <span style="color:blue">*Blue marker*</span>: center of high rated resaturants of the area',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '#### <span style="color:lightgreen">*Lightreen marker*</span>: furthest locations from all restaurants in the area',
+        unsafe_allow_html=True,
+    )
+    st.markdown("###### ")
+
+
+def all_district_all_cuisines(
+    total_number_of_restaurants: int,
+    number_of_good_restaurants: int,
+    five_most_common_cuisines: list,
+    five_most_common_percent: list,
+):
     st.write(
         f"\
     - There are {total_number_of_restaurants} restaurants in Berlin, \
@@ -21,7 +58,16 @@ def all_district_all_cuisines(total_number_of_restaurants: int, number_of_good_r
     st.write("For more information, select a district and a cuisine type.")
 
 
-def all_district_selected_cuisine(stats_hoods_cuisine: pd.DataFrame, stats_cuisine_hoods: pd.DataFrame, options_cuisine: str, number_cuisine: int, percent_good_cuisine: int, percent_of_all: int, best_rated_3_cuisines: list, best_rated_3_perc: list):
+def all_district_selected_cuisine(
+    stats_hoods_cuisine: pd.DataFrame,
+    stats_cuisine_hoods: pd.DataFrame,
+    options_cuisine: str,
+    number_cuisine: int,
+    percent_good_cuisine: int,
+    percent_of_all: int,
+    best_rated_3_cuisines: list,
+    best_rated_3_perc: list,
+):
     main_hood_per_cuisine = list(
         stats_cuisine_hoods[stats_hoods_cuisine["cuisine"] == options_cuisine.lower()][
             "district"
@@ -59,7 +105,20 @@ def all_district_selected_cuisine(stats_hoods_cuisine: pd.DataFrame, stats_cuisi
     )
 
 
-def selected_district_all_cuisine(stats_hoods: pd.DataFrame, options_district: str, main_cuisine_per_hood: str, percent_main_cuisine: str, total_num_of_restaurants: int, number_of_good_restaurants: int, most_restaurants: str, most_restaurants_perc: int, best_district: str, best_district_per: int, five_most_common_cuisines: list, five_most_common_percent: list):
+def selected_district_all_cuisine(
+    stats_hoods: pd.DataFrame,
+    options_district: str,
+    main_cuisine_per_hood: str,
+    percent_main_cuisine: str,
+    total_num_of_restaurants: int,
+    number_of_good_restaurants: int,
+    most_restaurants: str,
+    most_restaurants_perc: int,
+    best_district: str,
+    best_district_per: int,
+    five_most_common_cuisines: list,
+    five_most_common_percent: list,
+):
     stats_hoods_hood = stats_hoods[stats_hoods["district"] == options_district]
 
     num_restaurants = stats_hoods_hood.iloc[0]["number_of_restaurants"]
@@ -100,7 +159,15 @@ def selected_district_all_cuisine(stats_hoods: pd.DataFrame, options_district: s
      {five_most_common_cuisines[2].capitalize()} ({round(five_most_common_percent[2])}%)"
     )
 
-def selected_district_selected_cuisine(stats_hoods_cuisine: pd.DataFrame, stats_cuisine_hoods: pd.DataFrame, options_district: str, options_cuisine: str, berlin_cuisine: int, berlin_good_cuisine: int):
+
+def selected_district_selected_cuisine(
+    stats_hoods_cuisine: pd.DataFrame,
+    stats_cuisine_hoods: pd.DataFrame,
+    options_district: str,
+    options_cuisine: str,
+    berlin_cuisine: int,
+    berlin_good_cuisine: int,
+):
     stats_hoods_cuisine_hood = stats_hoods_cuisine[
         stats_hoods_cuisine["district"] == options_district
     ]

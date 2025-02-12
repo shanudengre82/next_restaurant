@@ -37,9 +37,7 @@ def update_stats_per_cuisine(df, cuisine, rating, popularity):
             lst_.append(cuisine)
             lst_.append(cuisine_df["names_clean"].count())
             lst_.append(
-                round(
-                    cuisine_df["names_clean"].count() / df["names_clean"].count(), 2
-                )
+                round(cuisine_df["names_clean"].count() / df["names_clean"].count(), 2)
             )
             lst_.append(
                 round(
