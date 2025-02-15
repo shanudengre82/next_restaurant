@@ -1,6 +1,8 @@
 import pandas as pd
-import math
 import streamlit as st
+from typing import Tuple, Optional, Any
+
+from next_restaurant.functions_for_df import get_distance
 
 # HOW TO USE#
 """ 1. run the k_neighbours_df function with the data_df, the lat, lng of the choosen location and the number of restaurants to return
@@ -12,47 +14,21 @@ import streamlit as st
 # lng = user_input.latlng[1]
 
 
-@st.cache_data
-def deg_to_rad(deg):
-    """
-    Function to convert radians to degree.
-    """
-    return deg * (math.pi / 180)
-
-
-@st.cache_data
-def distance(lat1, lng1, lat2, lng2):
-    """
-    This function is based on Haversine formula to estimate distance based
-    on 2 sets of latitude and longitude
-    a = sin²(ΔlatDifference/2) + cos(lat1).cos(lat2).sin²(ΔlonDifference/2)
-    c = 2.atan2(√a, √(1−a))
-    d = R.c
-    """
-    delta_lat = deg_to_rad(lat1 - lat2)
-    delta_lng = deg_to_rad(lng1 - lng2)
-    a = ((math.sin(delta_lat / 2)) * (math.sin(delta_lat / 2))) + (
-        math.cos(deg_to_rad(lat1))
-        * math.cos(deg_to_rad(lat2))
-        * ((math.sin(delta_lng / 2)) * (math.sin(delta_lng / 2)))
-    )
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    R = 6371  # This is in km, and the results are also in Km
-    d = R * c
-    return d
-
-
-@st.cache_data
-def k_neighbours_df(df, lat, lng, n_restaurants=20):
+@st.cache_data  # type: ignore
+def k_neighbours_df(
+    df: pd.DataFrame, lat: float, lng: float, n_restaurants: int = 20
+) -> pd.DataFrame:
     """takes the df of restaurants and the lat,lng for the prefered user location and outputs a df of k nearest restaurants"""
-    df["distance"] = ""
-    for i in range(len(df)):
-        df["distance"][i] = distance(lat, lng, df["lat"][i], df["lng"][i])
+    df["distance"] = df.apply(
+        lambda row: get_distance(lat1=row["lat"], lat2=lat, lng1=row["lng"], lng2=lng),
+        axis=1,
+    )
     return df.sort_values(by="distance")[:n_restaurants]
 
 
-@st.cache_data
-def calc_centers(df, rating):
+# TODO: To optimise function for proper mypy return type, perhaps split the function
+@st.cache_data  # type: ignore
+def calc_centers(df: pd.DataFrame, rating: float) -> Any:
     """calculate the center of 'good' and 'bad' restaurants of the choosing location.
     Good and bad restaurants are decided based on the rating"""
 
@@ -60,34 +36,37 @@ def calc_centers(df, rating):
 
     good_rest = df[df["rating"] >= rating]
 
-    if len(bad_rest) == 0 and len(good_rest) == 0:
+    def calculate_center(restaurants: pd.DataFrame) -> Optional[Tuple[float, float]]:
+        if len(restaurants) == 0:
+            return None
+        weighted_lat = (restaurants["rating"] * restaurants["lat"]).sum() / restaurants[
+            "rating"
+        ].sum()
+        weighted_lng = (restaurants["rating"] * restaurants["lng"]).sum() / restaurants[
+            "rating"
+        ].sum()
+        return weighted_lat, weighted_lng
+
+    # Calculate centers for good and bad restaurants
+    center_good = calculate_center(good_rest)
+    center_bad = calculate_center(bad_rest)
+
+    if center_good is None and center_bad is None:
         return None
-    elif len(bad_rest) == 0 and len(good_rest) != 0:
-        center_good = (
-            (good_rest["rating"] * good_rest["lat"]).sum() / good_rest["rating"].sum(),
-            (good_rest["rating"] * good_rest["lng"]).sum() / good_rest["rating"].sum(),
-        )
-        return {"center_good": center_good}
-    elif len(bad_rest) != 0 and len(good_rest) == 0:
-        center_bad = (
-            (bad_rest["rating"] * bad_rest["lat"]).sum() / bad_rest["rating"].sum(),
-            (bad_rest["rating"] * bad_rest["lng"]).sum() / bad_rest["rating"].sum(),
-        )
-        return {"center_bad": center_bad}
-    else:
-        center_bad = (
-            (bad_rest["rating"] * bad_rest["lat"]).sum() / bad_rest["rating"].sum(),
-            (bad_rest["rating"] * bad_rest["lng"]).sum() / bad_rest["rating"].sum(),
-        )
-        center_good = (
-            (good_rest["rating"] * good_rest["lat"]).sum() / good_rest["rating"].sum(),
-            (good_rest["rating"] * good_rest["lng"]).sum() / good_rest["rating"].sum(),
-        )
-    return center_bad, center_good
+
+    result = {}
+    if center_good is not None:
+        result["center_good"] = center_good
+    if center_bad is not None:
+        result["center_bad"] = center_bad
+
+    return result
 
 
-@st.cache_data
-def neighbours_stats(df):
+@st.cache_data  # type: ignore
+def neighbours_stats(
+    df: pd.DataFrame,
+) -> Tuple[str, Any, Any, dict[Any, Any], int, int]:
     """takes the k_neighbours_df and returns the most_frequent_price_leve, avg_rating , best_competitor(= rating * total No. of ratings) and the count of each cuisine in a dict"""
     price_dict = {
         "€": 1.0,
@@ -100,8 +79,9 @@ def neighbours_stats(df):
         "4.0": 4.0,
     }
     df.replace({"price_level": price_dict}, inplace=True)
-    most_frq_price_level = df["price_level"].mode()
-    most_frq_price_level = int(most_frq_price_level) * "€"
+
+    most_frq_price_level = int(df.price_level.mode()) * "€"
+
     avg_rating = df["rating"].mean()
     df["rating_total"] = df["rating"] * df["user_ratings_total"]
 

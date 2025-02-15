@@ -1,13 +1,13 @@
 # In this script we define the parameters for the visualization of the map for Berlin
 
 
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 #  Starting point
 # Berlin_center = [52.5200066, 13.404954]
 
 # Changed center to make it symmeteric
-BERLIN_CENTER: List[float] = [52.5, 13.49]
+BERLIN_CENTER: Tuple[float, float] = (52.5, 13.49)
 
 # Defining intial parameters for the map visuals
 WIDTH: int = 1000

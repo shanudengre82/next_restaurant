@@ -1,20 +1,20 @@
 import pandas as pd
 import re
-from typing import List
+from typing import List, Any
 
 berlin_areas = pd.read_csv("raw_data//berlin_areas.csv")
 
 # extracts the postcodes from the full address using regex
 
 
-def extract_postcode(text):
+def extract_postcode(text: str) -> Any:
     return re.findall(r"(?:^|\D)(\d{5})(?!\d)", text)[0]
 
 
 # Returns district based on postcodes
 
 
-def get_district(zip_code):
+def get_district(zip_code: str) -> Any:
     zipco = berlin_areas.loc[berlin_areas["PLZ"] == int(zip_code), "Stadtteil"]
 
     if len(zipco) == 1:
@@ -24,12 +24,14 @@ def get_district(zip_code):
     elif len(zipco) > 1:
         zip_co_lst = list(zipco)
         return zip_co_lst[0]
+    else:
+        return "Not Found"
 
 
 # get zipcode and district for all restaurants
 
 
-def district_to_df(df_name):
+def district_to_df(df_name: pd.DataFrame) -> pd.DataFrame:
     df_name["zip_code"] = df_name.full_address.apply(extract_postcode)
     df_name["district"] = df_name.zip_code.apply(get_district)
     return df_name

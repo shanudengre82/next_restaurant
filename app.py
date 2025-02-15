@@ -8,7 +8,6 @@ from next_restaurant.cuisine_info import change_main_food_types
 from next_restaurant.functions_for_df import (
     get_map_instance,
     generating_circles,
-    get_popularity,
 )
 from next_restaurant.stats import (
     update_stats_per_cuisine,
@@ -43,16 +42,27 @@ from next_restaurant.cuisine_stats_display import (
     display_additional_stats,
 )
 
+from typing import List
+
 # SET LAYOUT
 st.set_page_config(
     page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide"
 )
 
 # LOAD THE DATAFRAME
-df = pd.read_csv("raw_data//clean_dataframe_1.csv")
+df = pd.read_csv("raw_data//clean_dataframe.csv")
 
-# Determining the popularity based on number of ratings and color for a separator
-df["popularity_res"] = df["user_ratings_total"].apply(get_popularity)
+columns_required: List[str] = [
+    "price_level",
+    "rating",
+    "user_ratings_total",
+    "lat",
+    "lng",
+    "full_address",
+    "district",
+    "food_type",
+    "food_type_2",
+]
 
 # Capitalize food_types for the selection dropdown
 df = change_main_food_types(df)
@@ -86,6 +96,7 @@ st.sidebar.markdown("""# Find the best place to open your restaurant""")
 st.sidebar.subheader("Do you already have a type of cuisine in mind?")
 options_cuisine = st.sidebar.selectbox("Select a type of cuisine", CUISINE_OPTIONS)
 
+# TODO make a small function
 if options_cuisine != "All":
     df = df[df["food_type_1_english"] == options_cuisine]
 
@@ -108,7 +119,7 @@ rating_cutoff = st.sidebar.slider(
 
 # user popularity cutoff
 popularity_cutoff = st.sidebar.slider(
-    "Please select a number of rating", min_value=0, max_value=2000, step=1, value=40
+    "Minimim number of reviews", min_value=0, max_value=2000, step=1, value=40
 )
 
 # Conditions for generating maps
@@ -282,8 +293,9 @@ if options_district == "All" and options_cuisine == "All":
     )
 elif options_district == "All" and options_cuisine != "All":
     all_district_selected_cuisine(
-        total_number_of_restaurants=total_num_of_restaurants,
-        number_of_good_restaurants=number_of_good_restaurants,
+        stats_hoods_cuisine=stats_hoods_cuisine,
+        stats_cuisine_hoods=stats_cuisine_hoods,
+        options_cuisine=options_cuisine,
         number_cuisine=number_cuisine,
         percent_good_cuisine=percent_good_cuisine,
         percent_of_all=percent_of_all,
@@ -292,6 +304,7 @@ elif options_district == "All" and options_cuisine != "All":
     )
 elif options_district != "All" and options_cuisine == "All":
     selected_district_all_cuisine(
+        stats_hoods=stats_hoods,
         options_district=options_district,
         main_cuisine_per_hood=main_cuisine_per_hood,
         percent_main_cuisine=percent_main_cuisine,
@@ -399,7 +412,7 @@ local_box = generating_circular_coordinates(
 best_location_based_on_distance_list = []
 for _ in range(suggestion_number_distance):
     best_location_based_on_distance = get_locating_best_place_based_on_distance(
-        box=local_box, df=df_local_lat_lng
+        boxes=local_box, df=df_local_lat_lng
     )
     best_location_based_on_distance_list.append(best_location_based_on_distance)
     to_append = [

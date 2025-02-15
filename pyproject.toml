@@ -23,6 +23,7 @@ folium = "^0.19.4"
 streamlit-folium = "^0.24.0"
 geocoder = "^1.38.1"
 geopy = "^2.4.1"
+pandas-stubs = "^2.2.3.241126"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.1.1"
@@ -30,6 +31,7 @@ flake8 = "^7.0.0"
 isort = "^5.13.2"
 mypy = "^1.8.0"
 pylint = "^3.0.3"
+pandas-stubs = "^2.2.3.241126"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.0.0"
@@ -38,3 +40,6 @@ faker = "^22.6.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mypy]
+ignore_missing_imports = true

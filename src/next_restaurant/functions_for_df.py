@@ -11,13 +11,15 @@ import pandas as pd
 import ast
 import folium
 
+from typing import Tuple
+
 """
-In this module we make functions which can be used to transform data frames
+In this module we make functions which can be used to transform DataFrames
 """
 
 
-@st.cache_data
-def get_lat_lng(df: pd.DataFrame):
+@st.cache_data  # type: ignore
+def get_lat_lng(df: pd.DataFrame) -> pd.DataFrame:
     """
     This function let us to add a log and lng columns un a DataFrame bease on it's geometry column.
     """
@@ -34,53 +36,43 @@ def get_lat_lng(df: pd.DataFrame):
     return df
 
 
-@st.cache_data
-def get_popularity(pop):
-    return pop
-
-
-@st.cache_data
+@st.cache_data  # type: ignore
 def get_map_instance(
-    zoom=INITIAL_RADIUS, initial_location=BERLIN_CENTER, width=WIDTH, height=WIDTH
-):
+    zoom: int = INITIAL_RADIUS,
+    initial_location: Tuple[float, float] = BERLIN_CENTER,
+    width: int = WIDTH,
+    height: int = WIDTH,
+) -> folium.Map:
     """making a general map with different folium loayers"""
     # First map, focused on the ratings of the restaurant
     map_instance = folium.Map(
         width=width,
         height=height,
         location=tuple(initial_location),
-        # tiles="Stamen Toner",
         zoom_start=zoom,
         control_scale=True,
         prefer_canvas=True,
     )
-    # folium.TileLayer("stamentoner").add_to(map_instance)
-    # folium.TileLayer("stamenwatercolor").add_to(map_instance)
-    # folium.TileLayer("cartodbpositron").add_to(map_instance)
-    # folium.TileLayer("openstreetmap").add_to(map_instance)
-    # folium.LayerControl().add_to(map_instance)
     return map_instance
 
 
-# @st.cache_data
-def generating_circles(m, df, color: str):
-    for i in range(len(df)):
-        # address = df.iloc[i]["full_address"]
+# @st.cache_data  # type: ignore
+def generating_circles(map: folium.Map, df: pd.DataFrame, color: str) -> folium.Map:
+    for _, row in df.iterrows():  # More efficient row iteration
         folium.Circle(
-            location=[df.iloc[i]["lat"], df.iloc[i]["lng"]],
-            # popup=data.iloc[i]['name'],
+            location=[row["lat"], row["lng"]],  # Direct access
             radius=INITIAL_RADIUS,
-            color=df.iloc[i][color],
-            popup=df.iloc[i]["full_address"],
+            color=row[color],
+            popup=row["full_address"],
             tooltip="Click for name and address info",
             fill=True,
-            fill_color=df.iloc[i][color],
-        ).add_to(m)
-    return m
+            fill_color=row[color],
+        ).add_to(map)
+    return map
 
 
-@st.cache_data
-def adding_heatmap(m, data):
+@st.cache_data  # type: ignore
+def adding_heatmap(map: folium.Map, data: pd.DataFrame) -> folium.Map:
     """making a heatmap of data with lng, lat and data"""
     HeatMap(
         data=data,
@@ -89,21 +81,26 @@ def adding_heatmap(m, data):
         min_opacity=1,
         max_val=0.01,
         gradient={0: "blue", 0.5: "lime", 0.7: "red", 0.9: "orange"},
-    ).add_to(folium.FeatureGroup(name="Heat Map").add_to(m))
-    folium.LayerControl().add_to(m)
-    return m
+    ).add_to(folium.FeatureGroup(name="Heat Map").add_to(map))
+    folium.LayerControl().add_to(map)
+    return map
 
 
-@st.cache_data
-def get_deg_to_rad(deg):
+@st.cache_data  # type: ignore
+def get_deg_to_rad(deg: float) -> float:
     """
     Function to convert radians to degree.
     """
     return deg * (math.pi / 180)
 
 
-@st.cache_data
-def get_distance(lat1=40.7128, lng1=35.6895, lat2=74.0060, lng2=139.6917):
+@st.cache_data  # type: ignore
+def get_distance(
+    lat1: float = 40.7128,
+    lng1: float = 35.6895,
+    lat2: float = 74.0060,
+    lng2: float = 139.6917,
+) -> float:
     """
     This function is based on Haversine formula to estimate distance based
     on 2 sets of latitude and longitude
@@ -121,23 +118,25 @@ def get_distance(lat1=40.7128, lng1=35.6895, lat2=74.0060, lng2=139.6917):
     )
 
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    R = 6371  # This is in km, and the results are also in Km
-    d = R * c
-    return d
+    earth_radius = 6371  # This is in km, and the results are also in Km
+    distance = earth_radius * c
+    return distance
 
 
-@st.cache_data
-def nearby_restaurants(df, lat, lng, range_in_km=2):
+@st.cache_data  # type: ignore
+def nearby_restaurants(
+    df: pd.DataFrame, lat: float, lng: float, range_in_km: int = 2
+) -> pd.DataFrame:
     """
     This function gives the restaurant near a coordinate point and withing the range in km.
     Default range is 2 KM
     """
     df_copy = df.copy()
-    df_copy["distance"] = df["lng"]
-    # print(df_copy.head())
-    for i in range(len(df_copy["distance"])):
-        df_copy["distance"][i] = get_distance(
-            lat1=lat, lng1=lng, lat2=df_copy["lat"][i], lng2=df_copy["lng"][i]
-        )
+
+    # Use vectorized operations to calculate the distance for each row
+    df_copy["distance"] = df_copy.apply(
+        lambda row: get_distance(lat1=lat, lng1=lng, lat2=row["lat"], lng2=row["lng"]),
+        axis=1,
+    )
     df_copy = df_copy[df_copy["distance"] < range_in_km]
     return df_copy

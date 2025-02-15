@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from typing import List
 
 
 def display_additional_stats(
@@ -7,7 +8,7 @@ def display_additional_stats(
     avg_rating: float,
     good_restaurants_per: int,
     best_competitor: str,
-):
+) -> None:
     # Printing local stats
     st.markdown(f"Most of them have price level **{most_frq_price_level}**.")
     st.markdown(
@@ -39,9 +40,9 @@ def display_additional_stats(
 def all_district_all_cuisines(
     total_number_of_restaurants: int,
     number_of_good_restaurants: int,
-    five_most_common_cuisines: list,
-    five_most_common_percent: list,
-):
+    five_most_common_cuisines: List[str],
+    five_most_common_percent: List[int],
+) -> None:
     st.write(
         f"\
     - There are {total_number_of_restaurants} restaurants in Berlin, \
@@ -65,9 +66,9 @@ def all_district_selected_cuisine(
     number_cuisine: int,
     percent_good_cuisine: int,
     percent_of_all: int,
-    best_rated_3_cuisines: list,
-    best_rated_3_perc: list,
-):
+    best_rated_3_cuisines: List[str],
+    best_rated_3_perc: List[int],
+) -> None:
     main_hood_per_cuisine = list(
         stats_cuisine_hoods[stats_hoods_cuisine["cuisine"] == options_cuisine.lower()][
             "district"
@@ -108,17 +109,17 @@ def all_district_selected_cuisine(
 def selected_district_all_cuisine(
     stats_hoods: pd.DataFrame,
     options_district: str,
-    main_cuisine_per_hood: str,
-    percent_main_cuisine: str,
+    main_cuisine_per_hood: List[str],
+    percent_main_cuisine: List[int],
     total_num_of_restaurants: int,
     number_of_good_restaurants: int,
     most_restaurants: str,
     most_restaurants_perc: int,
     best_district: str,
     best_district_per: int,
-    five_most_common_cuisines: list,
-    five_most_common_percent: list,
-):
+    five_most_common_cuisines: List[str],
+    five_most_common_percent: List[int],
+) -> None:
     stats_hoods_hood = stats_hoods[stats_hoods["district"] == options_district]
 
     num_restaurants = stats_hoods_hood.iloc[0]["number_of_restaurants"]
@@ -139,9 +140,9 @@ def selected_district_all_cuisine(
     st.write(
         f"\
     - Most common type of cuisine in {options_district}:\
-    {main_cuisine_per_hood[0].capitalize()}, ({round(percent_main_cuisine[0])}%) \
-    {main_cuisine_per_hood[1].capitalize()} ({round(percent_main_cuisine[1])}%) \
-    and {main_cuisine_per_hood[2].capitalize()} ({round(percent_main_cuisine[2])}%)."
+    {main_cuisine_per_hood[0].capitalize()}, ({percent_main_cuisine[0]}%) \
+    {main_cuisine_per_hood[1].capitalize()} ({percent_main_cuisine[1]}%) \
+    and {main_cuisine_per_hood[2].capitalize()} ({percent_main_cuisine[2]}%)."
     )
 
     st.write(
@@ -154,9 +155,9 @@ def selected_district_all_cuisine(
     )
     st.write(
         f"The most common types of cuisines in Berlin are:\
-     {five_most_common_cuisines[0].capitalize()} ({round(five_most_common_percent[0])}%), \
-     {five_most_common_cuisines[1].capitalize()} ({round(five_most_common_percent[1])}%) and \
-     {five_most_common_cuisines[2].capitalize()} ({round(five_most_common_percent[2])}%)"
+     {five_most_common_cuisines[0].capitalize()} ({five_most_common_percent[0]}%), \
+     {five_most_common_cuisines[1].capitalize()} ({five_most_common_percent[1]}%) and \
+     {five_most_common_cuisines[2].capitalize()} ({five_most_common_percent[2]}%)"
     )
 
 
@@ -167,7 +168,7 @@ def selected_district_selected_cuisine(
     options_cuisine: str,
     berlin_cuisine: int,
     berlin_good_cuisine: int,
-):
+) -> None:
     stats_hoods_cuisine_hood = stats_hoods_cuisine[
         stats_hoods_cuisine["district"] == options_district
     ]
