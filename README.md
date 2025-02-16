@@ -3,6 +3,8 @@
 ## Introduction
 This project is focused upon the location Berlin. We have huge numbers of restaurant in Berlin and with this app, we try to use data of existing restaurants to predict best locations to open next restaurant.
 
+To use streamlit app, please follow the [link](https://nextrestaurant.streamlit.app/)
+
 ## Installation steps
 
 1. Clone the project and install it:
@@ -38,3 +40,7 @@ streamlit run app.py
 ![My Image](/images/image_1.png)
 
 On the left, different selections related to the neighbourhood and cuisines are provided. The data will be filtered based on user defined preferences like the neighbourhood, cuisine and rating threshold.
+
+3. In the bottom, another plot is provided which displays best areas to open a resturant based on user selection preferences. For reference, please see image below
+
+![My Image](/images/image_3.png)
