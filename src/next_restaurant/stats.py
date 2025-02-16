@@ -8,7 +8,7 @@ def get_number_of_good_restaurants(
 ) -> int:
     good_restaurants = df[df["rating"] >= rating]
     number_of_good_restaurants = len(
-        good_restaurants[good_restaurants["user_ratings_total"] >= popularity]
+        good_restaurants[good_restaurants["userRatingsTotal"] >= popularity]
     )
     return number_of_good_restaurants
 
@@ -20,7 +20,7 @@ def get_percent_of_good_restaurants(
     total_num_of_restaurants = len(df)
     good_restaurants = df[df["rating"] >= rating]
     number_of_good_restaurants = len(
-        good_restaurants[good_restaurants["user_ratings_total"] >= popularity]
+        good_restaurants[good_restaurants["userRatingsTotal"] >= popularity]
     )
     percentage_of_good_restaurants = (
         number_of_good_restaurants / total_num_of_restaurants
@@ -47,19 +47,19 @@ def update_stats_per_cuisine(
     results = []
 
     # Total number of restaurants for calculating percentages
-    total_restaurants = df["names_clean"].count()
+    total_restaurants = df["namesClean"].count()
 
     if cuisine == "All":
         # Group by cuisine type
-        for cuisine_name, cuisine_df in df.groupby("food_type"):
-            total_cuisine_restaurants = cuisine_df["names_clean"].count()
+        for cuisine_name, cuisine_df in df.groupby("foodType"):
+            total_cuisine_restaurants = cuisine_df["namesClean"].count()
 
             # Filter for good restaurants
             good_cuisine_df = cuisine_df[
                 (cuisine_df["rating"] >= rating)
-                & (cuisine_df["user_ratings_total"] >= popularity)
+                & (cuisine_df["userRatingsTotal"] >= popularity)
             ]
-            good_cuisine_count = good_cuisine_df["names_clean"].count()
+            good_cuisine_count = good_cuisine_df["namesClean"].count()
 
             # Compute percentages
             percent_all = (
@@ -80,15 +80,15 @@ def update_stats_per_cuisine(
 
     else:
         # Filter for a specific cuisine
-        cuisine_df = df[df["food_type"] == cuisine.lower()]
-        total_cuisine_restaurants = cuisine_df["names_clean"].count()
+        cuisine_df = df[df["foodType"] == cuisine.lower()]
+        total_cuisine_restaurants = cuisine_df["namesClean"].count()
 
         # Filter for good restaurants
         good_cuisine_df = cuisine_df[
             (cuisine_df["rating"] >= rating)
-            & (cuisine_df["user_ratings_total"] >= popularity)
+            & (cuisine_df["userRatingsTotal"] >= popularity)
         ]
-        good_cuisine_count = good_cuisine_df["names_clean"].count()
+        good_cuisine_count = good_cuisine_df["namesClean"].count()
 
         # Compute percentages
         percent_all = (
@@ -125,14 +125,14 @@ def update_stats_per_hood(
 ) -> pd.DataFrame:
     # Pre-filter the good restaurants based on rating and popularity
     good_restaurants = df[
-        (df["rating"] >= rating) & (df["user_ratings_total"] >= popularity)
+        (df["rating"] >= rating) & (df["userRatingsTotal"] >= popularity)
     ]
 
     # List to store the results
     result_lst = []
 
     # Get total number of restaurants
-    total_restaurants_count = df["names_clean"].count()
+    total_restaurants_count = df["namesClean"].count()
 
     # Iterate over each district (hood)
     for hood, hood_df in df.groupby("district"):
@@ -140,16 +140,16 @@ def update_stats_per_hood(
         good_in_hood_df = good_restaurants[good_restaurants["district"] == hood]
 
         # Calculate the number of restaurants in the hood and other metrics
-        count_hood = hood_df["names_clean"].count()
+        count_hood = hood_df["namesClean"].count()
         percent_hood = (
             round(count_hood / total_restaurants_count, 2)
             if total_restaurants_count > 0
             else 0
         )
-        count_good_hood = good_in_hood_df["names_clean"].count()
+        count_good_hood = good_in_hood_df["namesClean"].count()
 
         # Calculate percentage of good restaurants in the hood out of all good restaurants
-        good_restaurants_count = good_restaurants["names_clean"].count()
+        good_restaurants_count = good_restaurants["namesClean"].count()
         percent_good_hood = (
             round(count_good_hood / good_restaurants_count, 2)
             if good_restaurants_count > 0
@@ -197,23 +197,23 @@ def update_stats_per_hood_and_cuisine(
     results = []
 
     # Precompute "good" restaurants (satisfying rating & popularity criteria)
-    good_df = df[(df["rating"] >= rating) & (df["user_ratings_total"] >= popularity)]
-    good_cuisine_counts = good_df.groupby("food_type")["names_clean"].count().to_dict()
+    good_df = df[(df["rating"] >= rating) & (df["userRatingsTotal"] >= popularity)]
+    good_cuisine_counts = good_df.groupby("foodType")["namesClean"].count().to_dict()
 
     # Group by district once instead of repeatedly filtering
     for hood, hood_df in df.groupby("district"):
-        total_hood_restaurants = hood_df["food_type"].count()
+        total_hood_restaurants = hood_df["foodType"].count()
 
         # Iterate over cuisines within the current district
-        for cuisine, cuisine_df in hood_df.groupby("food_type"):
-            total_cuisine_count = cuisine_df["food_type"].count()
+        for cuisine, cuisine_df in hood_df.groupby("foodType"):
+            total_cuisine_count = cuisine_df["foodType"].count()
 
             # Filter for good restaurants in this district and cuisine
             good_cuisine_df = cuisine_df[
                 (cuisine_df["rating"] >= rating)
-                & (cuisine_df["user_ratings_total"] >= popularity)
+                & (cuisine_df["userRatingsTotal"] >= popularity)
             ]
-            good_cuisine_count = good_cuisine_df["names_clean"].count()
+            good_cuisine_count = good_cuisine_df["namesClean"].count()
 
             # Compute statistics
             percent_in_district = (
@@ -266,29 +266,29 @@ def update_stats_per_hood_and_cuisine(
 def update_stats_per_cuisine_and_hood(
     df: pd.DataFrame, rating: float, popularity: float
 ) -> pd.DataFrame:
-    # Filter data where rating and user_ratings_total meet the criteria
-    df_good = df[(df["rating"] >= rating) & (df["user_ratings_total"] >= popularity)]
+    # Filter data where rating and userRatingsTotal meet the criteria
+    df_good = df[(df["rating"] >= rating) & (df["userRatingsTotal"] >= popularity)]
 
     # Initialize a list to store results
     result_lst = []
 
     # Iterate over each group by district and food type (combined in one loop)
-    for (hood, cuisine), group in df.groupby(["district", "food_type"]):
+    for (hood, cuisine), group in df.groupby(["district", "foodType"]):
         # Filter hood and cuisine specific data
         hood_df = group
         good_df = df_good[
-            (df_good["district"] == hood) & (df_good["food_type"] == cuisine)
+            (df_good["district"] == hood) & (df_good["foodType"] == cuisine)
         ]
 
         # All restaurants for the given cuisine
-        all_cuisines_df = df[df["food_type"] == cuisine]
-        all_good_cuisines_df = df_good[df_good["food_type"] == cuisine]
+        all_cuisines_df = df[df["foodType"] == cuisine]
+        all_good_cuisines_df = df_good[df_good["foodType"] == cuisine]
 
         # Calculate the metrics
-        count_hood = hood_df["names_clean"].count()
-        count_all_cuisine = all_cuisines_df["names_clean"].count()
-        count_good_hood = good_df["names_clean"].count()
-        count_good_all_cuisine = all_good_cuisines_df["names_clean"].count()
+        count_hood = hood_df["namesClean"].count()
+        count_all_cuisine = all_cuisines_df["namesClean"].count()
+        count_good_hood = good_df["namesClean"].count()
+        count_good_all_cuisine = all_good_cuisines_df["namesClean"].count()
 
         # Append the results
         result_lst.append(

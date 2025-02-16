@@ -5,6 +5,8 @@ raw_data/
 *.csv
 .github
 .trunk
+.streamlit
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

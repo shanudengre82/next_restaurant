@@ -32,7 +32,7 @@ def get_district(zip_code: str) -> Any:
 
 
 def district_to_df(df_name: pd.DataFrame) -> pd.DataFrame:
-    df_name["zip_code"] = df_name.full_address.apply(extract_postcode)
+    df_name["zip_code"] = df_name.fullAddress.apply(extract_postcode)
     df_name["district"] = df_name.zip_code.apply(get_district)
     return df_name
 

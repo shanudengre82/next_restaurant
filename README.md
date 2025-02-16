@@ -28,7 +28,7 @@ streamlit run app.py
 
 1. Please note that for the working of the app, raw_data/clean_dataframe.csv file is needed with following format
 
-| price_level | rating | user_ratings_total | lat | lng | full_address | district | food_type | food_type_2 |
+| priceLevel | rating | userRatingsTotal | lat | lng | fullAddress | district | foodType | foodType_2 |
 |-------------|--------|--------------------|-----|-----|--------------|----------|-----------|-------------|
 | $$ | 4.3 | 980 | 52.1 | 13.1 | Address 1, Mitte, Berlin | Mitte | Indian | North Indian |
 | $ | 4.2 | 1100 | 52.2 | 13.15 | Address 2, Mitte, Berlin | Mitte | Chinese | Chinese |
@@ -37,4 +37,4 @@ streamlit run app.py
 
 ![My Image](/images/image_1.png)
 
-On the left, different selections related to the neighbourhood and cuisines are provided. The data will be filtered based on user defined preferences like
+On the left, different selections related to the neighbourhood and cuisines are provided. The data will be filtered based on user defined preferences like the neighbourhood, cuisine and rating threshold.

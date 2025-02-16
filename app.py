@@ -4,7 +4,7 @@ import pandas as pd
 from geopy.geocoders import Nominatim
 
 from streamlit_folium import folium_static
-from next_restaurant.cuisine_info import change_main_food_types
+from next_restaurant.cuisine_info import change_main_foodTypes
 from next_restaurant.functions_for_df import (
     get_map_instance,
     generating_circles,
@@ -45,6 +45,8 @@ from next_restaurant.cuisine_stats_display import (
 
 from typing import List
 
+import requests  # type: ignore
+
 from next_restaurant.german_to_english import german_to_english
 
 # SET LAYOUT
@@ -52,28 +54,41 @@ st.set_page_config(
     page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide"
 )
 
-# LOAD THE DATAFRAME
-df = pd.read_csv("raw_data//clean_dataframe.csv")
+try:
+    response = requests.get(
+        st.secrets["URL_TO_DATA"], auth=(st.secrets["USERNAME"], st.secrets["PASSWORD"])
+    )
+    if response.status_code != 200:
+        print(f"Error: {response.status_code}, {response.text}")
+        print("Unable to load file from web, looking file locally")
+    else:
+        data = response.json()["sheet1"]
+        df = pd.DataFrame(data, index=False)
+except Exception:
+    try:
+        df = pd.read_csv("raw_data//clean_dataframe.csv")
+    except Exception:
+        raise FileNotFoundError("Unable to find file raw_data/clean_dataframe.csv")
 
 columns_required: List[str] = [
-    "price_level",
+    "priceLevel",
     "rating",
-    "user_ratings_total",
+    "userRatingsTotal",
     "lat",
     "lng",
-    "names_clean",
-    "full_address",
+    "namesClean",
+    "fullAddress",
     "district",
-    "food_type",
-    "food_type_2",
+    "foodType",
+    "foodType_2",
 ]
 
 # Updating dataframe
 df = df[columns_required]
 df = german_to_english(df)
 
-# Capitalize food_types for the selection dropdown
-df = change_main_food_types(df)
+# Capitalize foodTypes for the selection dropdown
+df = change_main_foodTypes(df)
 
 # makes copies of the df for the second plot and the stats
 df_copy = df.copy()
@@ -168,7 +183,7 @@ df_cusine_district["ratings_color"] = df_cusine_district["rating"].apply(
 
 # Chopping data frame with respect to popularity cutoff
 df_cusine_district = df_cusine_district[
-    df_cusine_district["user_ratings_total"] > popularity_cutoff
+    df_cusine_district["userRatingsTotal"] > popularity_cutoff
 ]
 
 # FIRST MAP
@@ -208,19 +223,19 @@ folium_static(map)
 # Getting information from global dataframe
 
 # Making list of clean cuisine for global choices
-cuisine_list = df["food_type"].value_counts().index.tolist()
+cuisine_list = df["foodType"].value_counts().index.tolist()
 cuisine_list = [
     cuisine
     for cuisine in cuisine_list
     if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE
 ]
 
-df_top_cuisine = df.loc[df["food_type"].isin(cuisine_list[0:10])]
+df_top_cuisine = df.loc[df["foodType"].isin(cuisine_list[0:10])]
 if len(cuisine_list) < 10:
-    df_top_cuisine = df_top_cuisine.loc[df_top_cuisine["food_type"].isin(cuisine_list)]
+    df_top_cuisine = df_top_cuisine.loc[df_top_cuisine["foodType"].isin(cuisine_list)]
 else:
     df_top_cuisine = df_top_cuisine.loc[
-        df_top_cuisine["food_type"].isin(cuisine_list[0:10])
+        df_top_cuisine["foodType"].isin(cuisine_list[0:10])
     ]
 
 st.header("Key points")
@@ -350,13 +365,13 @@ df_local["ratings_color"] = df_local["rating"].apply(
 )
 
 # Chopping data frame with respect to popularity cutoff
-df_local = df_local[df_local["user_ratings_total"] > popularity_cutoff]
+df_local = df_local[df_local["userRatingsTotal"] > popularity_cutoff]
 
 # In case of address input
 st.header("Your closest competitors")
 
 (
-    most_frq_price_level,
+    most_frq_priceLevel,
     avg_rating,
     best_competitor,
     cuisine_distribution,
@@ -374,7 +389,7 @@ for competitor in best_competitor.split():
 best_competitor = " ".join(best_competitor_capitalise)
 
 display_additional_stats(
-    most_frq_price_level=most_frq_price_level,
+    most_frq_priceLevel=most_frq_priceLevel,
     avg_rating=avg_rating,
     good_restaurants_per=good_restaurants_per,
     best_competitor=best_competitor,
@@ -469,7 +484,7 @@ for i in best_location_based_on_distance_list:
 folium_static(o)
 
 # Making list of clean cuisine for local choices
-cuisine_list_local = df_local["food_type"].value_counts().index.tolist()
+cuisine_list_local = df_local["foodType"].value_counts().index.tolist()
 cuisine_list_local = [
     cuisine
     for cuisine in cuisine_list_local
@@ -477,8 +492,8 @@ cuisine_list_local = [
 ]
 
 if len(cuisine_list_local) < 10:
-    df_top_cuisine_local = df_local.loc[df_local["food_type"].isin(cuisine_list_local)]
+    df_top_cuisine_local = df_local.loc[df_local["foodType"].isin(cuisine_list_local)]
 else:
     df_top_cuisine_local = df_local.loc[
-        df_local["food_type"].isin(cuisine_list_local[0:10])
+        df_local["foodType"].isin(cuisine_list_local[0:10])
     ]

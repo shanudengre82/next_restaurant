@@ -31,7 +31,7 @@ def update_df_based_on_selected_cusine_and_district(
         district_list = BERLIN_DISTRICTS
 
     df_cuisine_district = df[
-        (df["food_type"].isin(cuisine_list)) & (df["district"].isin(district_list))
+        (df["foodType"].isin(cuisine_list)) & (df["district"].isin(district_list))
     ]
     return df_cuisine_district
 
@@ -81,7 +81,7 @@ def generating_circles(map: folium.Map, df: pd.DataFrame, color: str) -> folium.
             location=[row["lat"], row["lng"]],  # Direct access
             radius=INITIAL_RADIUS,
             color=row[color],
-            popup=row["full_address"],
+            popup=row["fullAddress"],
             tooltip="Click for name and address info",
             fill=True,
             fill_color=row[color],

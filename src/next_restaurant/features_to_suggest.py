@@ -74,21 +74,21 @@ def neighbours_stats(
         3.0: "€€€",
         4.0: "€€€€",
     }
-    df.replace({"price_level": price_dict}, inplace=True)
-    most_frq_price_level = df["price_level"].dropna().mode()[0]
+    df.replace({"priceLevel": price_dict}, inplace=True)
+    most_frq_priceLevel = df["priceLevel"].dropna().mode()[0]
 
     avg_rating = df["rating"].mean()
-    df["rating_total"] = df["rating"] * df["user_ratings_total"]
+    df["rating_total"] = df["rating"] * df["userRatingsTotal"]
 
     # Making best competitor
     best_competitor_df = df[df["rating_total"] == df["rating_total"].max()]
     df_1 = pd.DataFrame.from_dict(best_competitor_df)
     df_1 = df_1.reset_index()
-    best_competitor = df_1["names_clean"][0]
+    best_competitor = df_1["namesClean"][0]
     # best_competitor = best_competitor.capitalise()
     cuisine_distribution = {}
-    for i in df["food_type"].unique():
-        cuisine_distribution[i] = df[df["food_type"] == i]["food_type"].count()
+    for i in df["foodType"].unique():
+        cuisine_distribution[i] = df[df["foodType"] == i]["foodType"].count()
 
     percent_of_good_restaurants = round(
         len(df[df["ratings_color"] == "blue"]) * 100 / len(df)
@@ -98,7 +98,7 @@ def neighbours_stats(
     )
 
     return (
-        most_frq_price_level,
+        most_frq_priceLevel,
         avg_rating,
         best_competitor,
         cuisine_distribution,

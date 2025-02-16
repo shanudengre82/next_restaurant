@@ -4,13 +4,13 @@ from typing import List
 
 
 def display_additional_stats(
-    most_frq_price_level: str,
+    most_frq_priceLevel: str,
     avg_rating: float,
     good_restaurants_per: int,
     best_competitor: str,
 ) -> None:
     # Printing local stats
-    st.markdown(f"Most of them have price level **{most_frq_price_level}**.")
+    st.markdown(f"Most of them have price level **{most_frq_priceLevel}**.")
     st.markdown(
         f"Their average rating is **{round(avg_rating, 2)}**, and **{good_restaurants_per}%** of restaurants are considered as good."
     )
