@@ -28,7 +28,7 @@ streamlit run app.py
 
 1. Please note that for the working of the app, raw_data/clean_dataframe.csv file is needed with following format
 
-| priceLevel | rating | userRatingsTotal | lat | lng | fullAddress | district | foodType | foodType_2 |
+| priceLevel | rating | userRatingsTotal | lat | lng | fullAddress | district | foodType | foodType2 |
 |-------------|--------|--------------------|-----|-----|--------------|----------|-----------|-------------|
 | $$ | 4.3 | 980 | 52.1 | 13.1 | Address 1, Mitte, Berlin | Mitte | Indian | North Indian |
 | $ | 4.2 | 1100 | 52.2 | 13.15 | Address 2, Mitte, Berlin | Mitte | Chinese | Chinese |

@@ -100,11 +100,11 @@ here_to_eng: Dict[str, str] = {
 @st.cache_data  # type: ignore
 def german_to_english(df: pd.DataFrame) -> pd.DataFrame:
     df["foodType"] = df["foodType"].str.capitalize()
-    df["foodType_2"] = df["foodType_2"].str.capitalize()
+    df["foodType2"] = df["foodType2"].str.capitalize()
     df["foodType"] = df["foodType"].apply(
         lambda cuisine: here_to_eng.get(cuisine, cuisine)
     )
-    df["foodType_2"] = df["foodType_2"].apply(
+    df["foodType2"] = df["foodType2"].apply(
         lambda cuisine: here_to_eng.get(cuisine, cuisine)
     )
     return df

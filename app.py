@@ -58,17 +58,18 @@ try:
     response = requests.get(
         st.secrets["URL_TO_DATA"], auth=(st.secrets["USERNAME"], st.secrets["PASSWORD"])
     )
-    if response.status_code != 200:
+    if response.status_code == 200:
+        data = response.json()["sheet1"]
+        df = pd.DataFrame(data)
+    else:
         print(f"Error: {response.status_code}, {response.text}")
         print("Unable to load file from web, looking file locally")
-    else:
-        data = response.json()["sheet1"]
-        df = pd.DataFrame(data, index=False)
 except Exception:
     try:
+        st.write("Unable to load file from web, looking file locally")
         df = pd.read_csv("raw_data//clean_dataframe.csv")
     except Exception:
-        raise FileNotFoundError("Unable to find file raw_data/clean_dataframe.csv")
+        raise FileNotFoundError("Unable to find file raw_data//clean_dataframe.csv")
 
 columns_required: List[str] = [
     "priceLevel",
@@ -80,7 +81,7 @@ columns_required: List[str] = [
     "fullAddress",
     "district",
     "foodType",
-    "foodType_2",
+    "foodType2",
 ]
 
 # Updating dataframe

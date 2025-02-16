@@ -243,7 +243,7 @@ CUSINE_LESS_FREQUENT: List[str] = [
     cuisine for cuisine in RESTAURANT_TYPE if cuisine not in CUISINE_ORDERED
 ]
 
-# use this dict to convert foodType_2 into broader foodType categories
+# use this dict to convert foodType2 into broader foodType categories
 foodType_CATEGORIES: Dict[str, str] = {
     "japanese": "asian",
     "indonesian": "asian",
@@ -351,9 +351,9 @@ def categorize_foodTypes(
     # Replace foodType values based on mapping
     df["foodType"] = df["foodType"].replace(restaurant_type_mapping)
 
-    # Update 'foodType_2' where it is either NaN or identical to the new 'foodType'
-    df["foodType_2"] = df["foodType_2"].fillna(df["foodType_3"])
-    df.loc[df["foodType"] == df["foodType_2"], "foodType_2"] = df["foodType_3"]
+    # Update 'foodType2' where it is either NaN or identical to the new 'foodType'
+    df["foodType2"] = df["foodType2"].fillna(df["foodType_3"])
+    df.loc[df["foodType"] == df["foodType2"], "foodType2"] = df["foodType_3"]
 
     # Drop unnecessary columns if they exist
     df.drop(
@@ -365,7 +365,7 @@ def categorize_foodTypes(
 
 
 def change_main_foodTypes(df: pd.DataFrame) -> pd.DataFrame:
-    # Define mapping conditions: (current foodType, new foodType_2) -> updated foodType
+    # Define mapping conditions: (current foodType, new foodType2) -> updated foodType
     mapping = {
         ("european", "german"): "german",
         ("european", "italian"): "italian",
@@ -377,10 +377,10 @@ def change_main_foodTypes(df: pd.DataFrame) -> pd.DataFrame:
     }
 
     # Use vectorized operations with .replace and .map
-    mask = df[["foodType", "foodType_2"]].apply(tuple, axis=1).map(mapping)
+    mask = df[["foodType", "foodType2"]].apply(tuple, axis=1).map(mapping)
     df["foodType"] = mask.fillna(df["foodType"])
 
     # Ensure "pizza" always takes precedence
-    df["foodType"] = np.where(df["foodType_2"] == "pizza", "pizza", df["foodType"])
+    df["foodType"] = np.where(df["foodType2"] == "pizza", "pizza", df["foodType"])
 
     return df
