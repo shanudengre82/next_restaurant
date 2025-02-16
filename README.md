@@ -35,6 +35,6 @@ streamlit run app.py
 
 2. Once the streamlit web app is ruinning, we will see the following
 
-![My Image](raw_data/images/image_1.png)
+![My Image](/images/image_1.png)
 
 On the left, different selections related to the neighbourhood and cuisines are provided. The data will be filtered based on user defined preferences like
