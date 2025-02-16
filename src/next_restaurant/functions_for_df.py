@@ -4,7 +4,8 @@ from next_restaurant.parameters import (
     BERLIN_CENTER,
     WIDTH,
 )
-
+from next_restaurant.district import BERLIN_DISTRICTS
+from next_restaurant.cuisine_info import CUISINE_OPTIONS
 import streamlit as st
 import math
 import pandas as pd
@@ -16,6 +17,23 @@ from typing import Tuple
 """
 In this module we make functions which can be used to transform DataFrames
 """
+
+
+def update_df_based_on_selected_cusine_and_district(
+    df: pd.DataFrame, cuisine: str, district: str
+) -> pd.DataFrame:
+    cuisine_list = [cuisine]
+    if cuisine == "All":
+        cuisine_list = CUISINE_OPTIONS
+
+    district_list = [district]
+    if district == "All":
+        district_list = BERLIN_DISTRICTS
+
+    df_cuisine_district = df[
+        (df["food_type"].isin(cuisine_list)) & (df["district"].isin(district_list))
+    ]
+    return df_cuisine_district
 
 
 @st.cache_data  # type: ignore

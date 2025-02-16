@@ -3,31 +3,38 @@
 ## Introduction
 This project is focused upon the location Berlin. We have huge numbers of restaurant in Berlin and with this app, we try to use data of existing restaurants to predict best locations to open next restaurant.
 
-## Install
+## Installation steps
 
-Go to `https://github.com/shanudengre82/next_restaurant` to see the project, manage issues,
-setup you ssh public key, ...
-
-Create a python3 virtualenv and activate it:
+1. Clone the project and install it:
 
 ```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv -ppython3 ~/venv ; source ~/venv/bin/activate
-```
-
-Clone the project and install it:
-
-```bash
-git clone git@github.com:{group}/next_restaurant.git
+git clone git@github.com:shanudengre82/next_restaurant.git
 cd next_restaurant
+```
+2. Python version requirement, python = ">=3.10,<3.13"
 
+3. Install depedencies, please note that it requires
+```bash
 poetry install
 ```
-Functional test with a script:
+
+4. Once all the dependencies are installed, we can run the streamlit app using
 
 ```bash
-cd
-mkdir tmp
-cd tmp
-next_restaurant-run
+streamlit run app.py
 ```
+
+## User Instructions
+
+1. Please note that for the working of the app, raw_data/clean_dataframe.csv file is needed with following format
+
+| price_level | rating | user_ratings_total | lat | lng | full_address | district | food_type | food_type_2 |
+|-------------|--------|--------------------|-----|-----|--------------|----------|-----------|-------------|
+| $$ | 4.3 | 980 | 52.1 | 13.1 | Address 1, Mitte, Berlin | Mitte | Indian | North Indian |
+| $ | 4.2 | 1100 | 52.2 | 13.15 | Address 2, Mitte, Berlin | Mitte | Chinese | Chinese |
+
+2. Once the streamlit web app is ruinning, we will see the following
+
+![My Image](raw_data/images/image_1.png)
+
+On the left, different selections related to the neighbourhood and cuisines are provided. The data will be filtered based on user defined preferences like

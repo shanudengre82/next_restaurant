@@ -69,18 +69,13 @@ def neighbours_stats(
 ) -> Tuple[str, Any, Any, dict[Any, Any], int, int]:
     """takes the k_neighbours_df and returns the most_frequent_price_leve, avg_rating , best_competitor(= rating * total No. of ratings) and the count of each cuisine in a dict"""
     price_dict = {
-        "€": 1.0,
-        "€€": 2.0,
-        "€€€": 3.0,
-        "€€€€": 4.0,
-        "1.0": 1.0,
-        "2.0": 2.0,
-        "3.0": 3.0,
-        "4.0": 4.0,
+        1.0: "€",
+        2.0: "€€",
+        3.0: "€€€",
+        4.0: "€€€€",
     }
     df.replace({"price_level": price_dict}, inplace=True)
-
-    most_frq_price_level = int(df.price_level.mode()) * "€"
+    most_frq_price_level = df["price_level"].dropna().mode()[0]
 
     avg_rating = df["rating"].mean()
     df["rating_total"] = df["rating"] * df["user_ratings_total"]

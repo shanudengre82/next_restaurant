@@ -8,6 +8,7 @@ from next_restaurant.cuisine_info import change_main_food_types
 from next_restaurant.functions_for_df import (
     get_map_instance,
     generating_circles,
+    update_df_based_on_selected_cusine_and_district,
 )
 from next_restaurant.stats import (
     update_stats_per_cuisine,
@@ -25,7 +26,7 @@ from next_restaurant.features_to_suggest import (
 from next_restaurant.cuisine_info import (
     CUISINE_OPTIONS,
     CUISINE_CLEAN_DATA_FRAME_TO_REMOVE,
-    CUISINE_TO_REMOVE,
+    # CUISINE_TO_REMOVE,
 )
 from next_restaurant.district import BERLIN_DISTRICTS
 from next_restaurant.local_search_coordinates import generating_circular_coordinates
@@ -36,13 +37,15 @@ from next_restaurant.local_search_coordinates import (
 
 from next_restaurant.cuisine_stats_display import (
     all_district_all_cuisines,
-    all_district_selected_cuisine,
-    selected_district_all_cuisine,
-    selected_district_selected_cuisine,
+    # all_district_selected_cuisine,
+    # selected_district_all_cuisine,
+    # selected_district_selected_cuisine,
     display_additional_stats,
 )
 
 from typing import List
+
+from next_restaurant.german_to_english import german_to_english
 
 # SET LAYOUT
 st.set_page_config(
@@ -58,16 +61,19 @@ columns_required: List[str] = [
     "user_ratings_total",
     "lat",
     "lng",
+    "names_clean",
     "full_address",
     "district",
     "food_type",
     "food_type_2",
 ]
 
+# Updating dataframe
+df = df[columns_required]
+df = german_to_english(df)
+
 # Capitalize food_types for the selection dropdown
 df = change_main_food_types(df)
-
-df["food_type_1_english"] = df["food_type"].str.capitalize()
 
 # makes copies of the df for the second plot and the stats
 df_copy = df.copy()
@@ -94,19 +100,16 @@ st.sidebar.markdown("""# Find the best place to open your restaurant""")
 
 # Cuisine selection
 st.sidebar.subheader("Do you already have a type of cuisine in mind?")
-options_cuisine = st.sidebar.selectbox("Select a type of cuisine", CUISINE_OPTIONS)
-
-# TODO make a small function
-if options_cuisine != "All":
-    df = df[df["food_type_1_english"] == options_cuisine]
+selected_cuisine = st.sidebar.selectbox("Select a type of cuisine", CUISINE_OPTIONS)
 
 # District selection
 st.sidebar.subheader("Do you already have a district in mind?")
+selected_district = st.sidebar.selectbox("Select a district", BERLIN_DISTRICTS)
 
-options_district = st.sidebar.selectbox("Select a district", BERLIN_DISTRICTS)
 
-if options_district != "All":
-    df = df[df["district"] == options_district]
+df_cusine_district = update_df_based_on_selected_cusine_and_district(
+    df=df, cuisine=selected_cuisine, district=selected_district
+)
 
 # input popularity and ratings
 st.sidebar.subheader(
@@ -145,9 +148,9 @@ local_lat = location.latitude
 local_lng = location.longitude
 
 # TODO: UPdates since geolocatiopn sometimes does not work
-district = geolocator.geocode(f"{options_district}, Berlin")
-local_lng_district = district.latitude
-local_lat_district = district.longitude
+district = geolocator.geocode(f"{selected_district}, Berlin")
+local_lat_district = district.latitude
+local_lng_district = district.longitude
 
 # Number of restaurants to be considered locally
 number_of_nearby_restaurant_to_be_considered = st.sidebar.slider(
@@ -159,61 +162,65 @@ number_of_nearby_restaurant_to_be_considered = st.sidebar.slider(
 )
 
 # Determining color for ratings cutoff
-df["ratings_color"] = df["rating"].apply(
+df_cusine_district["ratings_color"] = df_cusine_district["rating"].apply(
     lambda x: "orange" if x < rating_cutoff else "blue"
 )
 
 # Chopping data frame with respect to popularity cutoff
-df = df[df["user_ratings_total"] > popularity_cutoff]
+df_cusine_district = df_cusine_district[
+    df_cusine_district["user_ratings_total"] > popularity_cutoff
+]
 
 # FIRST MAP
 # Display the map
-if options_district == "All":
-    m = get_map_instance(
+if selected_district == "All":
+    map = get_map_instance(
         zoom=INITIAL_ZOOM, initial_location=BERLIN_CENTER, width=WIDTH, height=HEIGHT
     )
 else:
-    m = get_map_instance(
+    map = get_map_instance(
         zoom=14,
         initial_location=[local_lat_district, local_lng_district],
         height=HEIGHT,
         width=WIDTH,
     )
 
+
+# TODO: Make a separatre funtion to update map
 if red_ratings and blue_ratings:
-    m = generating_circles(m, df, "ratings_color")
+    map = generating_circles(map=map, df=df_cusine_district, color="ratings_color")
 
 elif red_ratings and not blue_ratings:
-    df_red = df[df["ratings_color"] == "orange"]
+    df_red = df_cusine_district[df_cusine_district["ratings_color"] == "orange"]
     heatmap_red_ratings = df_red[["lat", "lng", "rating"]]
-    m = generating_circles(m, df_red, "ratings_color")
+    map = generating_circles(map=map, df=df_red, color="ratings_color")
 
 elif blue_ratings and not red_ratings:
-    df_blue = df[df["ratings_color"] == "blue"]
+    df_blue = df_cusine_district[df_cusine_district["ratings_color"] == "blue"]
     heatmap_blue_ratings = df_blue[["lat", "lng", "rating"]]
-    m = generating_circles(m, df_blue, "ratings_color")
+    map = generating_circles(map=map, df=df_blue, color="ratings_color")
 else:
-    m = generating_circles(m, df, "ratings_color")
+    map = generating_circles(map=map, df=df_cusine_district, color="ratings_color")
 
-folium.LayerControl().add_to(m)
-folium_static(m)
+folium.LayerControl().add_to(map)
+folium_static(map)
+
+# Getting information from global dataframe
 
 # Making list of clean cuisine for global choices
-cuisine_list = df["food_type_1_english"].value_counts().index.tolist()
+cuisine_list = df["food_type"].value_counts().index.tolist()
 cuisine_list = [
     cuisine
     for cuisine in cuisine_list
     if cuisine not in CUISINE_CLEAN_DATA_FRAME_TO_REMOVE
 ]
 
-df_top_cuisine = df.loc[df["food_type_1_english"].isin(cuisine_list[0:10])]
+df_top_cuisine = df.loc[df["food_type"].isin(cuisine_list[0:10])]
 if len(cuisine_list) < 10:
-    df_top_cuisine = df_top_cuisine.loc[
-        df_top_cuisine["food_type_1_english"].isin(cuisine_list)
-    ]
+    df_top_cuisine = df_top_cuisine.loc[df_top_cuisine["food_type"].isin(cuisine_list)]
 else:
     df_top_cuisine = df_top_cuisine.loc[
-        df_top_cuisine["food_type_1_english"].isin(cuisine_list[0:10])
+        df_top_cuisine["food_type"].isin(cuisine_list[0:10])
     ]
 
 st.header("Key points")
@@ -230,7 +237,7 @@ number_of_good_restaurants = get_number_of_good_restaurants(
 
 # cuisine stats
 stats_cuisine = update_stats_per_cuisine(
-    df_copy_for_stats, options_cuisine, rating_cutoff, popularity_cutoff
+    df_copy_for_stats, selected_cuisine, rating_cutoff, popularity_cutoff
 )
 five_most_common_cuisines = list(stats_cuisine["cuisine"][0:5])
 five_most_common_percent = list(stats_cuisine["%_all_restaurants_in_Berlin"] * 100)[0:5]
@@ -246,7 +253,7 @@ best_rated_cuisines_df = best_rated_cuisines.sort_values(
     by=["%_considered_good"], ascending=False
 )
 best_rated = best_rated_cuisines_df[
-    ~best_rated_cuisines_df["cuisine"].isin(CUISINE_TO_REMOVE)
+    ~best_rated_cuisines_df["cuisine"].isin(CUISINE_OPTIONS)
 ]
 best_rated_3_cuisines = list(best_rated["cuisine"])[0:3]
 best_rated_3_perc = list(best_rated["%_considered_good"] * 100)[0:3]
@@ -267,12 +274,12 @@ stats_hoods_cuisine = update_stats_per_hood_and_cuisine(
     df_copy_for_stats, rating_cutoff, popularity_cutoff
 )
 main_cuisine_per_hood = list(
-    stats_hoods_cuisine[stats_hoods_cuisine["district"] == options_district]["cuisine"][
+    stats_hoods_cuisine[stats_hoods_cuisine["district"] == selected_cuisine]["cuisine"][
         0:5
     ]
 )
 percent_main_cuisine = list(
-    stats_hoods_cuisine[stats_hoods_cuisine["district"] == options_district][
+    stats_hoods_cuisine[stats_hoods_cuisine["district"] == selected_district][
         "%_restaurants_in_district"
     ][0:5]
     * 100
@@ -284,48 +291,50 @@ stats_cuisine_hoods = update_stats_per_cuisine_and_hood(
     df_copy_for_stats, rating_cutoff, popularity_cutoff
 )
 
-if options_district == "All" and options_cuisine == "All":
+if selected_district == "All" and selected_cuisine == "All":
     all_district_all_cuisines(
         total_number_of_restaurants=total_num_of_restaurants,
         number_of_good_restaurants=number_of_good_restaurants,
         five_most_common_cuisines=five_most_common_cuisines,
         five_most_common_percent=five_most_common_percent,
     )
-elif options_district == "All" and options_cuisine != "All":
-    all_district_selected_cuisine(
-        stats_hoods_cuisine=stats_hoods_cuisine,
-        stats_cuisine_hoods=stats_cuisine_hoods,
-        options_cuisine=options_cuisine,
-        number_cuisine=number_cuisine,
-        percent_good_cuisine=percent_good_cuisine,
-        percent_of_all=percent_of_all,
-        best_rated_3_cuisines=best_rated_3_cuisines,
-        best_rated_3_perc=best_rated_3_perc,
-    )
-elif options_district != "All" and options_cuisine == "All":
-    selected_district_all_cuisine(
-        stats_hoods=stats_hoods,
-        options_district=options_district,
-        main_cuisine_per_hood=main_cuisine_per_hood,
-        percent_main_cuisine=percent_main_cuisine,
-        total_num_of_restaurants=total_num_of_restaurants,
-        number_of_good_restaurants=number_of_good_restaurants,
-        most_restaurants=most_restaurants,
-        most_restaurants_perc=most_restaurants_perc,
-        best_district=best_district,
-        best_district_per=best_district_per,
-        five_most_common_cuisines=five_most_common_cuisines,
-        five_most_common_percent=five_most_common_percent,
-    )
-else:
-    selected_district_selected_cuisine(
-        stats_hoods_cuisine=stats_hoods_cuisine,
-        stats_cuisine_hoods=stats_cuisine_hoods,
-        options_district=options_district,
-        options_cuisine=options_cuisine,
-        berlin_cuisine=berlin_cuisine,
-        berlin_good_cuisine=berlin_good_cuisine,
-    )
+
+# TODO: Update all cases properly
+# elif selected_district == "All" and selected_cuisine != "All":
+#     all_district_selected_cuisine(
+#         stats_hoods_cuisine=stats_hoods_cuisine,
+#         stats_cuisine_hoods=stats_cuisine_hoods,
+#         options_cuisine=selected_cuisine,
+#         number_cuisine=number_cuisine,
+#         percent_good_cuisine=percent_good_cuisine,
+#         percent_of_all=percent_of_all,
+#         best_rated_3_cuisines=best_rated_3_cuisines,
+#         best_rated_3_perc=best_rated_3_perc,
+#     )
+# elif selected_district != "All" and selected_cuisine == "All":
+#     selected_district_all_cuisine(
+#         stats_hoods=stats_hoods,
+#         options_district=selected_district,
+#         main_cuisine_per_hood=main_cuisine_per_hood,
+#         percent_main_cuisine=percent_main_cuisine,
+#         total_num_of_restaurants=total_num_of_restaurants,
+#         number_of_good_restaurants=number_of_good_restaurants,
+#         most_restaurants=most_restaurants,
+#         most_restaurants_perc=most_restaurants_perc,
+#         best_district=best_district,
+#         best_district_per=best_district_per,
+#         five_most_common_cuisines=five_most_common_cuisines,
+#         five_most_common_percent=five_most_common_percent,
+#     )
+# else:
+#     selected_district_selected_cuisine(
+#         stats_hoods_cuisine=stats_hoods_cuisine,
+#         stats_cuisine_hoods=stats_cuisine_hoods,
+#         options_district=selected_district,
+#         options_cuisine=selected_cuisine,
+#         berlin_cuisine=berlin_cuisine,
+#         berlin_good_cuisine=berlin_good_cuisine,
+#     )
 
 # MAP ZOOMED IN
 df_local = k_neighbours_df(
@@ -353,7 +362,7 @@ st.header("Your closest competitors")
     cuisine_distribution,
     good_restaurants_per,
     bad_restaurants_per,
-) = neighbours_stats(df)
+) = neighbours_stats(df_cusine_district)
 
 # Capitalising names
 best_competitor_capitalise = []
@@ -460,7 +469,7 @@ for i in best_location_based_on_distance_list:
 folium_static(o)
 
 # Making list of clean cuisine for local choices
-cuisine_list_local = df_local["food_type_1_english"].value_counts().index.tolist()
+cuisine_list_local = df_local["food_type"].value_counts().index.tolist()
 cuisine_list_local = [
     cuisine
     for cuisine in cuisine_list_local
@@ -468,10 +477,8 @@ cuisine_list_local = [
 ]
 
 if len(cuisine_list_local) < 10:
-    df_top_cuisine_local = df_local.loc[
-        df_local["food_type_1_english"].isin(cuisine_list_local)
-    ]
+    df_top_cuisine_local = df_local.loc[df_local["food_type"].isin(cuisine_list_local)]
 else:
     df_top_cuisine_local = df_local.loc[
-        df_local["food_type_1_english"].isin(cuisine_list_local[0:10])
+        df_local["food_type"].isin(cuisine_list_local[0:10])
     ]

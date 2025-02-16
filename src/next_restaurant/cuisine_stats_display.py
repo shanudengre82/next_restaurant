@@ -70,7 +70,7 @@ def all_district_selected_cuisine(
     best_rated_3_perc: List[int],
 ) -> None:
     main_hood_per_cuisine = list(
-        stats_cuisine_hoods[stats_hoods_cuisine["cuisine"] == options_cuisine.lower()][
+        stats_hoods_cuisine[stats_hoods_cuisine["cuisine"] == options_cuisine.lower()][
             "district"
         ][0:5]
     )

@@ -1,10 +1,12 @@
 import streamlit as st
+import pandas as pd
+from typing import Dict
 
 """
 In this module we make a function all the functions
 needed to convert German names from here to English
 """
-here_to_eng = {
+here_to_eng: Dict[str, str] = {
     "Pizza": "Pizza",
     "International": "International",
     "Sandwiches": "Sandwiches",
@@ -95,18 +97,14 @@ here_to_eng = {
 }
 
 
-@st.cache_data
-def german_to_english(x):
-    if x in here_to_eng:
-        return here_to_eng[x].capitalize()
-    else:
-        return x.capitalize()
-
-
-@st.cache_data
-def food_type_conversion(df_name):
-    df_name.replace({"food_type_2": food_type_conversion}, inplace=True)
-    df_name.replace({"food_type": food_type_conversion}, inplace=True)
-    df_name["food_type"] = df_name["food_type"].str.lower()
-    df_name["food_type_2"] = df_name["food_type_2"].str.lower()
-    return df_name
+@st.cache_data  # type: ignore
+def german_to_english(df: pd.DataFrame) -> pd.DataFrame:
+    df["food_type"] = df["food_type"].str.capitalize()
+    df["food_type_2"] = df["food_type_2"].str.capitalize()
+    df["food_type"] = df["food_type"].apply(
+        lambda cuisine: here_to_eng.get(cuisine, cuisine)
+    )
+    df["food_type_2"] = df["food_type_2"].apply(
+        lambda cuisine: here_to_eng.get(cuisine, cuisine)
+    )
+    return df
