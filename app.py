@@ -48,13 +48,13 @@ st.set_page_config(
 csv_file_path = "raw_data/clean_dataframe.csv"
 # reading file locally
 try:
-    df = pd.read_csv(filepath=csv_file_path)
+    df = pd.read_csv(csv_file_path)
     APP_LOGGER.info("Raw data found locally, proceeding without download")
 except FileNotFoundError:
     APP_LOGGER.info(f"File {csv_file_path} not found locally, trying to download")
 
-if get_raw_data(csv_file_path):
-    df = pd.read_csv(filepath=csv_file_path)
+if get_raw_data(filepath=csv_file_path):
+    df = pd.read_csv(csv_file_path)
 else:
     APP_LOGGER.warning(
         "Unable to download and save raw data, please check above logs for more info"
