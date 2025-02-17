@@ -1,4 +1,5 @@
 import folium
+import pandas as pd
 import streamlit as st
 from geopy.geocoders import Nominatim
 from streamlit_folium import folium_static
@@ -11,6 +12,7 @@ from next_restaurant.cuisine_stats_display import (  # all_district_selected_cui
     all_district_all_cuisines,
     display_additional_stats,
 )
+from next_restaurant.custom_logger import APP_LOGGER
 from next_restaurant.district import BERLIN_DISTRICTS
 from next_restaurant.features_to_suggest import (
     calc_centers,
@@ -23,7 +25,7 @@ from next_restaurant.functions_for_df import (
     preprocessing_df,
     update_df_based_on_selected_cusine_and_district,
 )
-from next_restaurant.get_data import get_raw_df
+from next_restaurant.get_data import get_raw_data
 from next_restaurant.local_search_coordinates import (
     generating_circular_coordinates,
     get_locating_best_place_based_on_distance,
@@ -43,7 +45,21 @@ st.set_page_config(
     page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide"
 )
 
-df = get_raw_df()
+csv_file_path = "raw_data/clean_dataframe.csv"
+# reading file locally
+try:
+    df = pd.read_csv(filepath=csv_file_path)
+    APP_LOGGER.info("Raw data found locally, proceeding without download")
+except FileNotFoundError:
+    APP_LOGGER.info(f"File {csv_file_path} not found locally, trying to download")
+
+if get_raw_data(csv_file_path):
+    df = pd.read_csv(filepath=csv_file_path)
+else:
+    APP_LOGGER.warning(
+        "Unable to download and save raw data, please check above logs for more info"
+    )
+    raise ValueError("Unable to access data")
 
 df = preprocessing_df(df)
 

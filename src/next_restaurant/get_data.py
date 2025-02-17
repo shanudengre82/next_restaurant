@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import requests  # type: ignore
 import streamlit as st
@@ -5,7 +7,10 @@ import streamlit as st
 from next_restaurant.custom_logger import APP_LOGGER
 
 
-def get_raw_df() -> pd.DataFrame:
+def get_raw_data(filepath: str) -> bool:
+    APP_LOGGER.warning(
+        "Unable to load file from web, looking file locally, trying to download data"
+    )
     try:
         response = requests.get(
             st.secrets["URL_TO_DATA"],
@@ -22,19 +27,12 @@ def get_raw_df() -> pd.DataFrame:
         APP_LOGGER.info("Logging successfull, accessing data and making ")
         data = response.json()["sheet1"]
         df = pd.DataFrame(data)
+        df.to_csv(filepath, index=False)
         APP_LOGGER.info("Fetching file from web complete")
     else:
         APP_LOGGER.info(
             f"Error fetchhing data from web: {response.status_code}, {response.text}"
         )
-        APP_LOGGER.info("Unable to load file from web, looking file locally")
-
-    # reading file locally
-    try:
-        df = pd.read_csv("../../raw_data/clean_dataframe.csv")
-    except FileNotFoundError:
-        APP_LOGGER.warning("Unable to load file from web, looking file locally")
-        raise FileNotFoundError(
-            "Unable to find file ../../raw_data//clean_dataframe.csv"
-        )
-    return df
+    if os.path.exists(filepath):
+        return True
+    return False

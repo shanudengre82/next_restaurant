@@ -22,10 +22,10 @@ repos:
     - id: ruff
     - id: ruff-format  # Optional: Auto-format your code
 
--   repo: https://github.com/pycqa/isort
-    rev: "6.0.0"  # Check for the latest version
-    hooks:
-      - id: isort
+# -   repo: https://github.com/pycqa/isort
+#     rev: "6.0.0"  # Check for the latest version
+#     hooks:
+#       - id: isort
 
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.15.0  # Use the latest stable version
