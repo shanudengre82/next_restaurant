@@ -1,22 +1,46 @@
-from folium.plugins import HeatMap
-from next_restaurant.parameters import (
-    INITIAL_RADIUS,
-    BERLIN_CENTER,
-    WIDTH,
-)
-from next_restaurant.district import BERLIN_DISTRICTS
-from next_restaurant.cuisine_info import CUISINE_OPTIONS
-import streamlit as st
-import math
-import pandas as pd
 import ast
-import folium
+import math
+from typing import List, Tuple
 
-from typing import Tuple
+import folium
+import pandas as pd
+import streamlit as st
+from folium.plugins import HeatMap
+
+from next_restaurant.cuisine_info import CUISINE_OPTIONS, change_main_foodTypes
+from next_restaurant.district import BERLIN_DISTRICTS
+from next_restaurant.german_to_english import german_to_english
+from next_restaurant.parameters import BERLIN_CENTER, INITIAL_RADIUS, WIDTH
 
 """
 In this module we make functions which can be used to transform DataFrames
 """
+
+COLUMNS_REQUIRED: List[str] = [
+    "priceLevel",
+    "rating",
+    "userRatingsTotal",
+    "lat",
+    "lng",
+    "namesClean",
+    "fullAddress",
+    "district",
+    "foodType",
+    "foodType2",
+]
+
+
+def preprocessing_df(df: pd.DataFrame) -> pd.DataFrame:
+    # Updating dataframe
+    df = df[COLUMNS_REQUIRED]
+    df = german_to_english(df)
+
+    # Capitalize foodTypes for the selection dropdown
+    df = change_main_foodTypes(df)
+
+    # selecting required cuisines
+    df = df[df["foodType"].isin(CUISINE_OPTIONS)]
+    return df
 
 
 def update_df_based_on_selected_cusine_and_district(

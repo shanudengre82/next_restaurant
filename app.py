@@ -1,95 +1,52 @@
-import streamlit as st
 import folium
-import pandas as pd
+import streamlit as st
 from geopy.geocoders import Nominatim
-
 from streamlit_folium import folium_static
-from next_restaurant.cuisine_info import change_main_foodTypes
-from next_restaurant.functions_for_df import (
-    get_map_instance,
-    generating_circles,
-    update_df_based_on_selected_cusine_and_district,
+
+from next_restaurant.cuisine_info import (  # CUISINE_TO_REMOVE,
+    CUISINE_CLEAN_DATA_FRAME_TO_REMOVE,
+    CUISINE_OPTIONS,
 )
-from next_restaurant.stats import (
-    update_stats_per_cuisine,
-    update_stats_per_hood,
-    update_stats_per_hood_and_cuisine,
-    update_stats_per_cuisine_and_hood,
-    get_percent_of_good_restaurants,
-    get_number_of_good_restaurants,
+from next_restaurant.cuisine_stats_display import (  # all_district_selected_cuisine,; selected_district_all_cuisine,; selected_district_selected_cuisine,
+    all_district_all_cuisines,
+    display_additional_stats,
 )
+from next_restaurant.district import BERLIN_DISTRICTS
 from next_restaurant.features_to_suggest import (
     calc_centers,
     k_neighbours_df,
     neighbours_stats,
 )
-from next_restaurant.cuisine_info import (
-    CUISINE_OPTIONS,
-    CUISINE_CLEAN_DATA_FRAME_TO_REMOVE,
-    # CUISINE_TO_REMOVE,
+from next_restaurant.functions_for_df import (
+    generating_circles,
+    get_map_instance,
+    preprocessing_df,
+    update_df_based_on_selected_cusine_and_district,
 )
-from next_restaurant.district import BERLIN_DISTRICTS
-from next_restaurant.local_search_coordinates import generating_circular_coordinates
-from next_restaurant.parameters import BERLIN_CENTER, WIDTH, HEIGHT, INITIAL_ZOOM
+from next_restaurant.get_data import get_raw_df
 from next_restaurant.local_search_coordinates import (
+    generating_circular_coordinates,
     get_locating_best_place_based_on_distance,
 )
-
-from next_restaurant.cuisine_stats_display import (
-    all_district_all_cuisines,
-    # all_district_selected_cuisine,
-    # selected_district_all_cuisine,
-    # selected_district_selected_cuisine,
-    display_additional_stats,
+from next_restaurant.parameters import BERLIN_CENTER, HEIGHT, INITIAL_ZOOM, WIDTH
+from next_restaurant.stats import (
+    get_number_of_good_restaurants,
+    get_percent_of_good_restaurants,
+    update_stats_per_cuisine,
+    update_stats_per_cuisine_and_hood,
+    update_stats_per_hood,
+    update_stats_per_hood_and_cuisine,
 )
-
-from typing import List
-
-import requests  # type: ignore
-
-from next_restaurant.german_to_english import german_to_english
 
 # SET LAYOUT
 st.set_page_config(
     page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide"
 )
 
-try:
-    response = requests.get(
-        st.secrets["URL_TO_DATA"], auth=(st.secrets["USERNAME"], st.secrets["PASSWORD"])
-    )
-    if response.status_code == 200:
-        data = response.json()["sheet1"]
-        df = pd.DataFrame(data)
-    else:
-        print(f"Error: {response.status_code}, {response.text}")
-        print("Unable to load file from web, looking file locally")
-except Exception:
-    try:
-        st.write("Unable to load file from web, looking file locally")
-        df = pd.read_csv("raw_data//clean_dataframe.csv")
-    except Exception:
-        raise FileNotFoundError("Unable to find file raw_data//clean_dataframe.csv")
+df = get_raw_df()
 
-columns_required: List[str] = [
-    "priceLevel",
-    "rating",
-    "userRatingsTotal",
-    "lat",
-    "lng",
-    "namesClean",
-    "fullAddress",
-    "district",
-    "foodType",
-    "foodType2",
-]
+df = preprocessing_df(df)
 
-# Updating dataframe
-df = df[columns_required]
-df = german_to_english(df)
-
-# Capitalize foodTypes for the selection dropdown
-df = change_main_foodTypes(df)
 
 # makes copies of the df for the second plot and the stats
 df_copy = df.copy()
