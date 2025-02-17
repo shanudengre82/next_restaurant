@@ -22,7 +22,9 @@ def get_raw_data(filepath: str) -> bool:
         )
 
     if response.status_code == 402:
-        APP_LOGGER.warning("Please verify values of all the credentials")
+        APP_LOGGER.warning(
+            f"Please verify values of all the credentials. Full error info is {response.status_code}, {response.text}"
+        )
     if response.status_code == 200:
         APP_LOGGER.info("Logging successfull, accessing data and making ")
         data = response.json()["sheet1"]
