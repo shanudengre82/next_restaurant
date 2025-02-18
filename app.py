@@ -1,5 +1,4 @@
 import folium
-import pandas as pd
 import streamlit as st
 from geopy.geocoders import Nominatim
 from streamlit_folium import folium_static
@@ -22,7 +21,6 @@ from next_restaurant.features_to_suggest import (
 from next_restaurant.functions_for_df import (
     generating_circles,
     get_map_instance,
-    preprocessing_df,
     update_df_based_on_selected_cusine_and_district,
 )
 from next_restaurant.get_data import get_raw_data
@@ -45,23 +43,11 @@ st.set_page_config(
     page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide"
 )
 
-csv_file_path = "raw_data/clean_dataframe.csv"
-# reading file locally
 try:
-    df = pd.read_csv(csv_file_path)
+    df = get_raw_data()
     APP_LOGGER.info("Raw data found locally, proceeding without download")
 except FileNotFoundError:
-    APP_LOGGER.info(f"File {csv_file_path} not found locally, trying to download")
-
-if get_raw_data(filepath=csv_file_path):
-    df = pd.read_csv(csv_file_path)
-else:
-    APP_LOGGER.warning(
-        "Unable to download and save raw data, please check above logs for more info"
-    )
-    raise ValueError("Unable to access data")
-
-df = preprocessing_df(df)
+    APP_LOGGER.info("Raw data not foun, please check the streamlit toml")
 
 
 # makes copies of the df for the second plot and the stats

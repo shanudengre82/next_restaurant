@@ -49,5 +49,5 @@ build-backend = "poetry.core.masonry.api"
 ignore_missing_imports = true
 
 [tool.ruff]
-line-length = 90  # or your preferred length
+line-length = 88  # or your preferred length
 extend-select = ["I"]  # Enable Ruff's isort-compatible import sorting

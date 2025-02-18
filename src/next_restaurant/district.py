@@ -1,8 +1,9 @@
-import pandas as pd
 import re
-from typing import List, Any
+from typing import Any, List
 
-berlin_areas = pd.read_csv("raw_data//berlin_areas.csv")
+import pandas as pd
+
+berlin_areas = pd.read_csv("raw_data/berlin_areas.csv")
 
 # extracts the postcodes from the full address using regex
 
