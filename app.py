@@ -43,12 +43,13 @@ st.set_page_config(
     page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide"
 )
 
+
 try:
     df = get_raw_data()
     APP_LOGGER.info("Raw data found locally, proceeding without download")
 except FileNotFoundError:
-    APP_LOGGER.info("Raw data not foun, please check the streamlit toml")
-
+    APP_LOGGER.info("Raw data not found, please check the streamlit toml")
+    st.error("Unable to laad data file, please reach out to shanudengre82@gmail.com")
 
 # makes copies of the df for the second plot and the stats
 df_copy = df.copy()
@@ -56,7 +57,7 @@ df_copy_for_stats = df.copy()
 
 # MAIN PAGE
 # Title and subheader
-st.title("Next Restaurant")
+st.title("Next Restaurant: Find the best place to open your restaurant")
 st.header("Browse through the restaurants in Berlin")
 
 st.markdown("###### ")
@@ -71,7 +72,7 @@ st.markdown(
 st.markdown("###### ")
 
 # Title
-st.sidebar.markdown("""# Find the best place to open your restaurant""")
+st.sidebar.title("""User Options""")
 
 # Cuisine selection
 st.sidebar.subheader("Do you already have a type of cuisine in mind?")
@@ -118,11 +119,9 @@ geolocator = Nominatim(user_agent="MyApp")
 
 location = geolocator.geocode(user_input)
 
-# TODO: Uopdate defination properly there is a mismatch somehwere between latitude and longitude
 local_lat = location.latitude
 local_lng = location.longitude
 
-# TODO: UPdates since geolocatiopn sometimes does not work
 district = geolocator.geocode(f"{selected_district}, Berlin")
 local_lat_district = district.latitude
 local_lng_district = district.longitude
