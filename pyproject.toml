@@ -27,6 +27,7 @@ pandas-stubs = "^2.2.3.241126"
 gdown = "^5.2.0"
 python-dotenv = "^1.0.1"
 types-requests = "^2.32.0.20241016"
+ruff = "^0.9.10"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.1.1"
@@ -50,4 +51,4 @@ ignore_missing_imports = true
 
 [tool.ruff]
 line-length = 88  # or your preferred length
-extend-select = ["I"]  # Enable Ruff's isort-compatible import sorting
+lint.extend-select = ["I"]  # Enable Ruff's isort-compatible import sorting

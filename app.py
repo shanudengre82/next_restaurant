@@ -9,7 +9,11 @@ from next_restaurant.cuisine_info import (  # CUISINE_TO_REMOVE,
 )
 from next_restaurant.cuisine_stats_display import (  # all_district_selected_cuisine,; selected_district_all_cuisine,; selected_district_selected_cuisine,
     all_district_all_cuisines,
+    all_district_selected_cuisine,
     display_additional_stats,
+    display_suggestions_text,
+    selected_district_all_cuisine,
+    selected_district_selected_cuisine,
 )
 from next_restaurant.custom_logger import APP_LOGGER
 from next_restaurant.district import BERLIN_DISTRICTS
@@ -197,6 +201,8 @@ else:
         df_top_cuisine["foodType"].isin(cuisine_list[0:10])
     ]
 
+
+# Key points
 st.header("Key points")
 st.subheader("Consider this information when chosing a location for your restaurant:")
 
@@ -213,24 +219,28 @@ number_of_good_restaurants = get_number_of_good_restaurants(
 stats_cuisine = update_stats_per_cuisine(
     df_copy_for_stats, selected_cuisine, rating_cutoff, popularity_cutoff
 )
+
+# getting 5 most common cuisines in Berlin
 five_most_common_cuisines = list(stats_cuisine["cuisine"][0:5])
 five_most_common_percent = list(stats_cuisine["%_all_restaurants_in_Berlin"] * 100)[0:5]
+
 number_cuisine = round(list(stats_cuisine["number_restaurants_in_Berlin"])[0])
 percent_good_cuisine = list(stats_cuisine["%_considered_good"] * 100)[0]
 percent_of_all = list(stats_cuisine["%_all_restaurants_in_Berlin"] * 100)[0]
 
-best_rated_cuisines = update_stats_per_cuisine(
+df_best_rated_cuisines = update_stats_per_cuisine(
     df_copy_for_stats, "All", rating_cutoff, popularity_cutoff
 )
 
-best_rated_cuisines_df = best_rated_cuisines.sort_values(
+df_best_rated_cuisines = df_best_rated_cuisines.sort_values(
     by=["%_considered_good"], ascending=False
 )
-best_rated = best_rated_cuisines_df[
-    ~best_rated_cuisines_df["cuisine"].isin(CUISINE_OPTIONS)
+
+df_best_rated_cuisines = df_best_rated_cuisines[
+    df_best_rated_cuisines["cuisine"].isin(CUISINE_OPTIONS)
 ]
-best_rated_3_cuisines = list(best_rated["cuisine"])[0:3]
-best_rated_3_perc = list(best_rated["%_considered_good"] * 100)[0:3]
+best_rated_3_cuisines = list(df_best_rated_cuisines["cuisine"])[0:3]
+best_rated_3_perc = list(df_best_rated_cuisines["%_considered_good"] * 100)[0:3]
 
 berlin_cuisine = stats_cuisine.iloc[0]["number_restaurants_in_Berlin"]
 berlin_good_cuisine = stats_cuisine.iloc[0]["%_considered_good"]
@@ -274,41 +284,42 @@ if selected_district == "All" and selected_cuisine == "All":
     )
 
 # TODO: Update all cases properly
-# elif selected_district == "All" and selected_cuisine != "All":
-#     all_district_selected_cuisine(
-#         stats_hoods_cuisine=stats_hoods_cuisine,
-#         stats_cuisine_hoods=stats_cuisine_hoods,
-#         options_cuisine=selected_cuisine,
-#         number_cuisine=number_cuisine,
-#         percent_good_cuisine=percent_good_cuisine,
-#         percent_of_all=percent_of_all,
-#         best_rated_3_cuisines=best_rated_3_cuisines,
-#         best_rated_3_perc=best_rated_3_perc,
-#     )
-# elif selected_district != "All" and selected_cuisine == "All":
-#     selected_district_all_cuisine(
-#         stats_hoods=stats_hoods,
-#         options_district=selected_district,
-#         main_cuisine_per_hood=main_cuisine_per_hood,
-#         percent_main_cuisine=percent_main_cuisine,
-#         total_num_of_restaurants=total_num_of_restaurants,
-#         number_of_good_restaurants=number_of_good_restaurants,
-#         most_restaurants=most_restaurants,
-#         most_restaurants_perc=most_restaurants_perc,
-#         best_district=best_district,
-#         best_district_per=best_district_per,
-#         five_most_common_cuisines=five_most_common_cuisines,
-#         five_most_common_percent=five_most_common_percent,
-#     )
-# else:
-#     selected_district_selected_cuisine(
-#         stats_hoods_cuisine=stats_hoods_cuisine,
-#         stats_cuisine_hoods=stats_cuisine_hoods,
-#         options_district=selected_district,
-#         options_cuisine=selected_cuisine,
-#         berlin_cuisine=berlin_cuisine,
-#         berlin_good_cuisine=berlin_good_cuisine,
-#     )
+elif selected_district == "All" and selected_cuisine != "All":
+    all_district_selected_cuisine(
+        stats_hoods_cuisine=stats_hoods_cuisine,
+        stats_cuisine_hoods=stats_cuisine_hoods,
+        options_cuisine=selected_cuisine,
+        number_cuisine=number_cuisine,
+        percent_good_cuisine=percent_good_cuisine,
+        percent_of_all=percent_of_all,
+        best_rated_3_cuisines=best_rated_3_cuisines,
+        best_rated_3_perc=best_rated_3_perc,
+    )
+elif selected_district != "All" and selected_cuisine == "All":
+    selected_district_all_cuisine(
+        stats_hoods=stats_hoods,
+        options_district=selected_district,
+        main_cuisine_per_hood=main_cuisine_per_hood,
+        percent_main_cuisine=percent_main_cuisine,
+        total_num_of_restaurants=total_num_of_restaurants,
+        number_of_good_restaurants=number_of_good_restaurants,
+        most_restaurants=most_restaurants,
+        most_restaurants_perc=most_restaurants_perc,
+        best_district=best_district,
+        best_district_per=best_district_per,
+        five_most_common_cuisines=five_most_common_cuisines,
+        five_most_common_percent=five_most_common_percent,
+    )
+else:
+    selected_district_selected_cuisine(
+        stats_hoods_cuisine=stats_hoods_cuisine,
+        stats_cuisine_hoods=stats_cuisine_hoods,
+        options_district=selected_district,
+        options_cuisine=selected_cuisine,
+        berlin_cuisine=berlin_cuisine,
+        berlin_good_cuisine=berlin_good_cuisine,
+    )
+
 
 # MAP ZOOMED IN
 df_local = k_neighbours_df(
@@ -325,6 +336,9 @@ df_local["ratings_color"] = df_local["rating"].apply(
 
 # Chopping data frame with respect to popularity cutoff
 df_local = df_local[df_local["userRatingsTotal"] > popularity_cutoff]
+
+
+# Closest Competitors
 
 # In case of address input
 st.header("Your closest competitors")
@@ -353,6 +367,10 @@ display_additional_stats(
     good_restaurants_per=good_restaurants_per,
     best_competitor=best_competitor,
 )
+
+# Sugggestions
+# Displaying suggestions
+display_suggestions_text()
 
 # Starting with second map, finding best places to open a restaurant
 # Estimating centroid bad and centroid good

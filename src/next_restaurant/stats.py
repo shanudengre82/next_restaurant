@@ -80,7 +80,7 @@ def update_stats_per_cuisine(
 
     else:
         # Filter for a specific cuisine
-        cuisine_df = df[df["foodType"] == cuisine.lower()]
+        cuisine_df = df[df["foodType"] == cuisine]
         total_cuisine_restaurants = cuisine_df["namesClean"].count()
 
         # Filter for good restaurants

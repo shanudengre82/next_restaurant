@@ -1,6 +1,7 @@
-import streamlit as st
-import pandas as pd
 from typing import List
+
+import pandas as pd
+import streamlit as st
 
 
 def display_additional_stats(
@@ -17,7 +18,10 @@ def display_additional_stats(
     st.markdown(
         f"Based on the address you provided, your top potential competitor would be: **{best_competitor}**."
     )
+    return None
 
+
+def display_suggestions_text() -> None:
     # Making heading for the suggestion part
     st.header("Our suggestions in the area")
 
@@ -35,6 +39,7 @@ def display_additional_stats(
         unsafe_allow_html=True,
     )
     st.markdown("###### ")
+    return None
 
 
 def all_district_all_cuisines(
@@ -70,12 +75,12 @@ def all_district_selected_cuisine(
     best_rated_3_perc: List[int],
 ) -> None:
     main_hood_per_cuisine = list(
-        stats_hoods_cuisine[stats_hoods_cuisine["cuisine"] == options_cuisine.lower()][
+        stats_hoods_cuisine[stats_hoods_cuisine["cuisine"] == options_cuisine][
             "district"
         ][0:5]
     )
-    p = list(
-        stats_cuisine_hoods[stats_cuisine_hoods["cuisine"] == options_cuisine.lower()][
+    cuisine_percentage = list(
+        stats_cuisine_hoods[stats_cuisine_hoods["cuisine"] == options_cuisine][
             "percent_all_restaurants_of_berlin"
         ][0:5]
         * 100
@@ -94,8 +99,8 @@ def all_district_selected_cuisine(
     st.write(
         f"\
         - {options_cuisine} restaurants are mostly located in \
-    {main_hood_per_cuisine[0]} ({round(p[0])}%), {main_hood_per_cuisine[1]} ({round(p[1])}%) and \
-    {main_hood_per_cuisine[2]} ({round(p[2])}%)"
+    {main_hood_per_cuisine[0]} ({round(cuisine_percentage[0])}%), {main_hood_per_cuisine[1]} ({round(cuisine_percentage[1])}%) and \
+    {main_hood_per_cuisine[2]} ({round(cuisine_percentage[2])}%)"
     )
 
     st.write(
@@ -173,7 +178,7 @@ def selected_district_selected_cuisine(
         stats_hoods_cuisine["district"] == options_district
     ]
     stats_hoods_cuisine_cuisine = stats_hoods_cuisine_hood[
-        stats_hoods_cuisine_hood["cuisine"] == options_cuisine.lower()
+        stats_hoods_cuisine_hood["cuisine"] == options_cuisine
     ]
     num = stats_hoods_cuisine_cuisine.iloc[0]["count"]
     good = round(stats_hoods_cuisine_cuisine.iloc[0]["%_considered_good"] * 100)
@@ -185,12 +190,12 @@ def selected_district_selected_cuisine(
     )
 
     stats_hoods_good = stats_cuisine_hoods[
-        stats_cuisine_hoods["cuisine"] == options_cuisine.lower()
+        stats_cuisine_hoods["cuisine"] == options_cuisine
     ].sort_values(by=["percent_all_restaurants_of_berlin"], ascending=False)
     name = stats_hoods_good.iloc[0]["district"]
     perce = round(stats_hoods_good.iloc[0]["percent_all_restaurants_of_berlin"] * 100)
     stats_hoods_2 = stats_cuisine_hoods[
-        stats_cuisine_hoods["cuisine"] == options_cuisine.lower()
+        stats_cuisine_hoods["cuisine"] == options_cuisine
     ].sort_values(
         by=["%_all_good_restaurants_for_this_cuisine_in_berlin"], ascending=False
     )
