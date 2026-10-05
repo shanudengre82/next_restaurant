@@ -44,3 +44,9 @@ On the left, different selections related to the neighbourhood and cuisines are 
 3. In the bottom, another plot is provided which displays best areas to open a resturant based on user selection preferences. For reference, please see image below
 
 ![My Image](/images/image_3.png)
+
+## Deploying on Render (free tier)
+
+1. Create a Web Service from this repo (or use the `render.yaml` Blueprint), plan **Free**.
+2. Under *Environment → Secret Files*, add `secrets.toml` with the contents of your local `.streamlit/secrets.toml` (it holds `[my_secrets] raw_data`).
+3. Deploy. The free tier sleeps after 15 minutes idle, so the first load can take 30-60 seconds.

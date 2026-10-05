@@ -1,9 +1,12 @@
 import re
+from pathlib import Path
 from typing import Any, List
 
 import pandas as pd
 
-berlin_areas = pd.read_csv("raw_data/berlin_areas.csv")
+berlin_areas = pd.read_csv(
+    Path(__file__).resolve().parents[2] / "raw_data" / "berlin_areas.csv"
+)
 
 # extracts the postcodes from the full address using regex
 

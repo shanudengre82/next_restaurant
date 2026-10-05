@@ -51,9 +51,10 @@ st.set_page_config(
 try:
     df = get_raw_data()
     APP_LOGGER.info("Raw data found locally, proceeding without download")
-except FileNotFoundError:
+except (FileNotFoundError, KeyError, st.errors.StreamlitSecretNotFoundError):
     APP_LOGGER.info("Raw data not found, please check the streamlit toml")
-    st.error("Unable to laad data file, please reach out to shanudengre82@gmail.com")
+    st.error("Unable to load data file, please reach out to shanudengre82@gmail.com")
+    st.stop()
 
 # makes copies of the df for the second plot and the stats
 df_copy = df.copy()
@@ -119,16 +120,30 @@ st.sidebar.subheader("Do you already have an address in mind?")
 
 user_input = st.sidebar.text_input("Enter an address", "Mitte, Berlin")
 
-geolocator = Nominatim(user_agent="MyApp")
 
-location = geolocator.geocode(user_input)
 
-local_lat = location.latitude
-local_lng = location.longitude
+@st.cache_data(show_spinner=False)
+def geocode_address(address: str):
+    """Return (lat, lng) for an address or None; cached to spare Nominatim."""
+    try:
+        geolocator = Nominatim(user_agent="next_restaurant_streamlit_app", timeout=10)
+        found = geolocator.geocode(address)
+    except Exception as exc:  # network errors, rate limiting
+        APP_LOGGER.info(f"Geocoding failed for {address}: {exc}")
+        return None
+    return (found.latitude, found.longitude) if found else None
 
-district = geolocator.geocode(f"{selected_district}, Berlin")
-local_lat_district = district.latitude
-local_lng_district = district.longitude
+
+location = geocode_address(user_input)
+if location is None:
+    st.sidebar.warning("Could not find that address, using the Berlin center.")
+    location = tuple(BERLIN_CENTER)
+local_lat, local_lng = location
+
+district = geocode_address(f"{selected_district}, Berlin")
+if district is None:
+    district = tuple(BERLIN_CENTER)
+local_lat_district, local_lng_district = district
 
 # Number of restaurants to be considered locally
 number_of_nearby_restaurant_to_be_considered = st.sidebar.slider(
