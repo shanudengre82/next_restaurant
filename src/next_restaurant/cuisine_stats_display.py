@@ -127,6 +127,10 @@ def selected_district_all_cuisine(
 ) -> None:
     stats_hoods_hood = stats_hoods[stats_hoods["district"] == options_district]
 
+    if stats_hoods_hood.empty:
+        st.info(f"No restaurant data found for {options_district}.")
+        return
+
     num_restaurants = stats_hoods_hood.iloc[0]["number_of_restaurants"]
     num_good_restaurants = stats_hoods_hood.iloc[0]["number_good_restaurants"]
     percentage_good_restaurants_hood = round(
@@ -180,6 +184,12 @@ def selected_district_selected_cuisine(
     stats_hoods_cuisine_cuisine = stats_hoods_cuisine_hood[
         stats_hoods_cuisine_hood["cuisine"] == options_cuisine
     ]
+    if stats_hoods_cuisine_cuisine.empty:
+        st.info(
+            f"No {options_cuisine.capitalize()} restaurants found in {options_district}."
+        )
+        return
+
     num = stats_hoods_cuisine_cuisine.iloc[0]["count"]
     good = round(stats_hoods_cuisine_cuisine.iloc[0]["%_considered_good"] * 100)
     percent_of_all = round(
@@ -192,6 +202,9 @@ def selected_district_selected_cuisine(
     stats_hoods_good = stats_cuisine_hoods[
         stats_cuisine_hoods["cuisine"] == options_cuisine
     ].sort_values(by=["percent_all_restaurants_of_berlin"], ascending=False)
+    if stats_hoods_good.empty:
+        st.info(f"No district data found for {options_cuisine.capitalize()}.")
+        return
     name = stats_hoods_good.iloc[0]["district"]
     perce = round(stats_hoods_good.iloc[0]["percent_all_restaurants_of_berlin"] * 100)
     stats_hoods_2 = stats_cuisine_hoods[
