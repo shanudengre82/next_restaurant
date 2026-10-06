@@ -1,7 +1,13 @@
+import sys
+from pathlib import Path
+
 import folium
 import streamlit as st
 from geopy.geocoders import Nominatim
 from streamlit_folium import folium_static
+
+# make the src-layout package importable without installing it (e.g. on Render)
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 from next_restaurant.cuisine_info import (  # CUISINE_TO_REMOVE,
     CUISINE_CLEAN_DATA_FRAME_TO_REMOVE,
