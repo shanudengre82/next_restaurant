@@ -21,25 +21,18 @@ def display_additional_stats(
     return None
 
 
+def display_map_legend() -> None:
+    st.caption("🔵 **Blue circles**: high rated restaurants · 🟠 **Orange circles**: low rated restaurants")
+
+
 def display_suggestions_text() -> None:
     # Making heading for the suggestion part
     st.header("Our suggestions in the area")
-
-    # Adding description for the marker.
-    st.markdown(
-        '#### <span style="color:orange">*Orange marker*</span>: center of low rated resaturants of the area',
-        unsafe_allow_html=True,
+    st.caption(
+        "🟠 **Orange marker**: center of low rated restaurants of the area · "
+        "🔵 **Blue marker**: center of high rated restaurants of the area · "
+        "🟢 **Light green marker**: furthest locations from all restaurants in the area"
     )
-    st.markdown(
-        '#### <span style="color:blue">*Blue marker*</span>: center of high rated resaturants of the area',
-        unsafe_allow_html=True,
-    )
-    st.markdown(
-        '#### <span style="color:lightgreen">*Lightreen marker*</span>: furthest locations from all restaurants in the area',
-        unsafe_allow_html=True,
-    )
-    st.markdown("###### ")
-    return None
 
 
 def all_district_all_cuisines(
