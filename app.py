@@ -55,18 +55,6 @@ st.set_page_config(
 )
 
 
-try:
-    df = get_raw_data()
-    APP_LOGGER.info("Raw data found locally, proceeding without download")
-except (FileNotFoundError, KeyError, st.errors.StreamlitSecretNotFoundError):
-    APP_LOGGER.info("Raw data not found, please check the streamlit toml")
-    st.error("Unable to load data file, please reach out to shanudengre82@gmail.com")
-    st.stop()
-
-# makes copies of the df for the second plot and the stats
-df_copy = df.copy()
-df_copy_for_stats = df.copy()
-
 # MAIN PAGE
 DEFAULTS = {
     "cuisine": "All",
@@ -131,6 +119,29 @@ st.caption(
     "Use the filters on the left, then explore the tabs below: "
     "**Explore Berlin**, **Your competitors** and **Where to open**."
 )
+
+# LOADING PROGRESS: a progress bar that is removed once the page is ready
+progress_box = st.empty()
+progress_bar = progress_box.progress(0, text="Starting up...")
+
+
+def step(percent: int, text: str) -> None:
+    progress_bar.progress(percent, text=text)
+
+
+step(5, "Loading restaurant data...")
+try:
+    df = get_raw_data()
+    APP_LOGGER.info("Raw data found locally, proceeding without download")
+except (FileNotFoundError, KeyError, st.errors.StreamlitSecretNotFoundError):
+    APP_LOGGER.info("Raw data not found, please check the streamlit toml")
+    progress_box.empty()
+    st.error("Unable to load data file, please reach out to shanudengre82@gmail.com")
+    st.stop()
+
+# makes copies of the df for the second plot and the stats
+df_copy = df.copy()
+df_copy_for_stats = df.copy()
 
 # SIDEBAR FILTERS
 st.sidebar.title("Your filters")
@@ -208,6 +219,7 @@ def geocode_address(address: str):
     return (found.latitude, found.longitude) if found else None
 
 
+step(20, "Locating your address...")
 location = geocode_address(user_input)
 if location is None:
     st.sidebar.warning("Could not find that address, using the Berlin center.")
@@ -220,6 +232,7 @@ if district is None:
 local_lat_district, local_lng_district = district
 
 
+step(35, "Filtering restaurants...")
 # Determining color for ratings cutoff
 df_cusine_district["ratings_color"] = df_cusine_district["rating"].apply(
     lambda x: "orange" if x < rating_cutoff else "blue"
@@ -237,6 +250,7 @@ df_cusine_district = df_cusine_district[
 with tab_explore:
     kpi_box = st.container()
 
+step(50, "Drawing the Berlin map...")
 with tab_explore:
     # FIRST MAP
     # Display the map
@@ -292,6 +306,7 @@ else:
     ]
 
 
+step(65, "Calculating market statistics...")
 with tab_explore:
     # Key points
     st.header("Key points")
@@ -420,6 +435,7 @@ with kpi_box:
     kpi_cols[3].metric("Most common cuisine", cuisine_list[0].capitalize())
 
 
+step(80, "Finding your closest competitors...")
 # MAP ZOOMED IN
 df_local = k_neighbours_df(
     df_copy,
@@ -487,6 +503,7 @@ with tab_competitors:
         width="stretch",
     )
 
+step(92, "Searching for the best spots...")
 with tab_where:
     # Sugggestions
     # Displaying suggestions
@@ -619,3 +636,6 @@ Use the results as a starting point, not as a final decision.
         "Source code: [github.com/shanudengre82/next_restaurant]"
         "(https://github.com/shanudengre82/next_restaurant)"
     )
+
+step(100, "Done")
+progress_box.empty()
