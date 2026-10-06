@@ -29,6 +29,12 @@ from next_restaurant.features_to_suggest import (
     k_neighbours_df,
     neighbours_stats,
 )
+from next_restaurant.nlp_search import (
+    RestaurantIndex,
+    build_vocabulary,
+    validate_query,
+    search,
+)
 from next_restaurant.functions_for_df import (
     generating_circles,
     get_map_instance,
@@ -117,7 +123,7 @@ for _col, (_title, _text, _preset) in zip(st.columns(len(USE_CASES)), USE_CASES)
         )
 st.caption(
     "Use the filters on the left, then explore the tabs below: "
-    "**Explore Berlin**, **Your competitors** and **Where to open**."
+    "**Search**, **Explore Berlin**, **Your competitors** and **Where to open**."
 )
 
 # LOADING PROGRESS: a progress bar that is removed once the page is ready
@@ -142,6 +148,17 @@ except (FileNotFoundError, KeyError, st.errors.StreamlitSecretNotFoundError):
 # makes copies of the df for the second plot and the stats
 df_copy = df.copy()
 df_copy_for_stats = df.copy()
+
+# Build vocabulary and search index for NLP search (cached)
+@st.cache_resource
+def build_search_index(dataframe):
+    """Build and cache the restaurant search index."""
+    step(8, "Building search vocabulary and index...")
+    vocab = build_vocabulary(dataframe)
+    index = RestaurantIndex.build(dataframe)
+    return vocab, index
+
+vocab, search_index = build_search_index(df)
 
 # SIDEBAR FILTERS
 st.sidebar.title("Your filters")
@@ -244,9 +261,111 @@ df_cusine_district = df_cusine_district[
 ]
 
 
-(tab_explore, tab_competitors, tab_where, tab_about) = st.tabs(
-    ["Explore Berlin", "Your competitors", "Where to open", "About"]
+(tab_search, tab_explore, tab_competitors, tab_where, tab_about) = st.tabs(
+    ["Search", "Explore Berlin", "Your competitors", "Where to open", "About"]
 )
+
+# SEARCH TAB
+with tab_search:
+    st.markdown("### Find restaurants by natural language query")
+    st.markdown(
+        "Enter what you're looking for, e.g., *'Italian restaurants'*, "
+        "*'sushi in Mitte'*, or *'vegan in Kreuzberg'*."
+    )
+
+    # Example query buttons
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("Try: Italian in Kreuzberg", key="search_example_1"):
+            st.session_state.search_query = "italian in kreuzberg"
+    with col2:
+        if st.button("Try: Asian restaurants", key="search_example_2"):
+            st.session_state.search_query = "asian restaurants"
+    with col3:
+        if st.button("Try: Pizza in Mitte", key="search_example_3"):
+            st.session_state.search_query = "pizza in mitte"
+
+    # Search input
+    search_query = st.text_input(
+        "Search query",
+        value=st.session_state.get("search_query", ""),
+        placeholder="e.g., 'italian restaurants', 'sushi in mitte'",
+        key="search_input",
+    )
+
+    # Optional search filters
+    search_min_rating = st.slider(
+        "Minimum rating for search results",
+        min_value=0.0,
+        max_value=5.0,
+        step=0.1,
+        value=0.0,
+        key="search_rating",
+    )
+    search_min_reviews = st.slider(
+        "Minimum number of reviews for search results",
+        min_value=0,
+        max_value=500,
+        step=10,
+        value=0,
+        key="search_reviews",
+    )
+
+    # Validate and search
+    if search_query:
+        validation = validate_query(search_query, vocab)
+        if not validation.ok:
+            st.warning(validation.message)
+        else:
+            # Perform search
+            parsed = validation.parsed
+            results = search(
+                search_index, df, parsed, min_rating=search_min_rating, min_reviews=search_min_reviews
+            )
+
+            # Display results
+            if len(results) == 0:
+                st.info(
+                    f"No restaurants found matching your query. "
+                    f"Try different keywords or adjust the filters."
+                )
+            else:
+                st.markdown(f"**Found {len(results)} restaurant(s)**")
+
+                # Display as table
+                st.dataframe(
+                    results[[
+                        "namesClean",
+                        "foodType",
+                        "district",
+                        "rating",
+                        "userRatingsTotal",
+                        "lat",
+                        "lng",
+                    ]].rename(
+                        columns={
+                            "namesClean": "Restaurant",
+                            "foodType": "Cuisine",
+                            "district": "District",
+                            "rating": "Rating",
+                            "userRatingsTotal": "Reviews",
+                            "lat": "Lat",
+                            "lng": "Lng",
+                        }
+                    ),
+                    use_container_width=True,
+                    hide_index=True,
+                )
+
+                # Display on map
+                with st.container():
+                    st.markdown("#### Map")
+                    search_map = get_map_instance(
+                        zoom=11, initial_location=BERLIN_CENTER, width=WIDTH, height=HEIGHT
+                    )
+                    search_map = generating_circles(search_map, results, color=None)
+                    folium_static(search_map, width=WIDTH, height=HEIGHT)
+
 with tab_explore:
     kpi_box = st.container()
 

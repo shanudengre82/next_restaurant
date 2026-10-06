@@ -28,6 +28,17 @@ streamlit run app.py
 
 ## User Instructions
 
+### Search Tab (Natural-Language Query)
+
+The new **Search** tab lets you find restaurants by natural language queries:
+
+- **Examples**: *"Italian restaurants"*, *"sushi in Mitte"*, *"vegan in Kreuzberg"*
+- **Guardrails**: Your query must include a cuisine or a Berlin district to be valid. The app will reject queries like *"what's good near me"* and suggest valid options.
+- **Ranking**: Results are ranked by semantic similarity (TF-IDF) blended with restaurant ratings.
+- **Filters**: You can also set minimum rating and review thresholds for search results.
+
+### Sidebar Filters and Tabs
+
 1. Please note that for the working of the app, raw_data/clean_dataframe.csv file is needed with following format
 
 | priceLevel | rating | userRatingsTotal | lat | lng | fullAddress | district | foodType | foodType2 |
