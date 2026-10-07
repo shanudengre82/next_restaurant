@@ -104,6 +104,9 @@ def render():
 
     # Get statistics
     df_local_copy = df_local.copy()
+    df_local_copy["ratings_color"] = df_local_copy["rating"].apply(
+        lambda x: "orange" if x < rating_cutoff else "blue"
+    )
     stats = neighbours_stats(df_local_copy)
 
     col1, col2, col3 = st.columns(3)
@@ -176,11 +179,7 @@ def render():
                 zoom=13, initial_location=[local_lat, local_lng], height=HEIGHT
             )
 
-            # Add existing restaurants
-            df_local_copy = df_local.copy()
-            df_local_copy["ratings_color"] = df_local_copy["rating"].apply(
-                lambda x: "orange" if x < rating_cutoff else "blue"
-            )
+            # Add existing restaurants (reuse df_local_copy with ratings_color from above)
             m = generating_circles(m, df_local_copy, color="ratings_color")
 
             # Add suggestions as green markers
