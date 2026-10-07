@@ -113,7 +113,8 @@ def generating_circles(map: folium.Map, df: pd.DataFrame, color: Optional[str] =
 
         name = html.escape(str(row.get("namesClean", "Restaurant")))
         rating = row.get("rating", 0)
-        reviews = int(pd.to_numeric(row.get("userRatingsTotal", 0), errors="coerce").fillna(0))
+        reviews_val = pd.to_numeric(row.get("userRatingsTotal", 0), errors="coerce")
+        reviews = int(reviews_val) if pd.notna(reviews_val) else 0
         cuisine = html.escape(str(row.get("foodType", "")))
         district = html.escape(str(row.get("district", "")))
         price = row.get("priceLevel", "")
