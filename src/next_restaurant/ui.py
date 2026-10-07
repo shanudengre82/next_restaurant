@@ -96,6 +96,36 @@ def inject_theme():
             outline-offset: 2px !important;
         }
 
+        /* Dropdown/popover styling (opens outside sidebar) */
+        [data-baseweb="popover"] [data-baseweb="menu"],
+        ul[role="listbox"] {
+            background-color: #FAFAF8 !important;
+            border: 1px solid #E4EAF1 !important;
+        }
+
+        [data-baseweb="popover"] li,
+        [data-baseweb="popover"] li *,
+        [role="option"],
+        [role="option"] * {
+            color: #1B1F24 !important;
+        }
+
+        [role="option"]:hover,
+        [role="option"][aria-selected="true"] {
+            background-color: #E4EAF1 !important;
+            color: #1B1F24 !important;
+        }
+
+        [role="option"][aria-selected="true"] {
+            font-weight: 600;
+        }
+
+        /* Select clear button and icons */
+        [data-baseweb="select"] svg {
+            fill: #1B1F24 !important;
+            color: #1B1F24 !important;
+        }
+
         /* Main content background */
         .main {
             background-color: #FAFAF8;
