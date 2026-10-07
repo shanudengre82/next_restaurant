@@ -73,8 +73,8 @@ def render():
 
     # Geocode address
     try:
-        geolocator = Nominatim(user_agent="next_restaurant")
-        location = geolocator.geocode(address)
+        geolocator = Nominatim(user_agent="next_restaurant", timeout=10)
+        location = geolocator.geocode(address, timeout=10)
         if not location:
             st.error(f"Could not find '{address}'. Please try another address.")
             return

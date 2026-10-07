@@ -95,8 +95,8 @@ def render():
     else:
         try:
             from geopy.geocoders import Nominatim
-            geolocator = Nominatim(user_agent="next_restaurant")
-            location = geolocator.geocode(f"{district}, Berlin")
+            geolocator = Nominatim(user_agent="next_restaurant", timeout=10)
+            location = geolocator.geocode(f"{district}, Berlin", timeout=10)
             if location:
                 m = get_map_instance(
                     zoom=14, initial_location=[location.latitude, location.longitude], height=HEIGHT
