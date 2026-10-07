@@ -388,7 +388,7 @@ with tab_search:
                 st.markdown("#### Map")
                 results_with_color = results.copy()
                 results_with_color["ratings_color"] = results_with_color["rating"].apply(
-                    lambda x: "orange" if x < search_min_rating else "blue"
+                    lambda x: "orange" if x < rating_cutoff else "blue"
                 )
                 search_map = get_map_instance(
                     zoom=12, initial_location=BERLIN_CENTER, height=HEIGHT

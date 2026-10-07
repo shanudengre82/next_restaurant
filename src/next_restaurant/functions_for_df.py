@@ -1,11 +1,12 @@
 import ast
+import html
 import math
 from typing import Callable, List, Optional, Tuple
 
 import folium
 import pandas as pd
 import streamlit as st
-from folium.plugins import FullScreen, HeatMap
+from folium.plugins import Fullscreen, HeatMap
 from streamlit_folium import st_folium
 
 from next_restaurant.cuisine_info import CUISINE_OPTIONS, change_main_foodTypes
@@ -95,7 +96,7 @@ def get_map_instance(
     )
     folium.TileLayer("OpenStreetMap").add_to(map_instance)
     folium.TileLayer("CartoDB dark_matter").add_to(map_instance)
-    FullScreen().add_to(map_instance)
+    Fullscreen().add_to(map_instance)
     return map_instance
 
 
@@ -110,12 +111,11 @@ def generating_circles(map: folium.Map, df: pd.DataFrame, color: Optional[str] =
             rating = row["rating"]
             circle_color = "orange" if rating < 4.0 else "blue"
 
-        name = row.get("namesClean", "Restaurant")
+        name = html.escape(str(row.get("namesClean", "Restaurant")))
         rating = row.get("rating", 0)
-        reviews = int(row.get("userRatingsTotal", 0))
-        cuisine = row.get("foodType", "")
-        district = row.get("district", "")
-        address = row.get("fullAddress", "")
+        reviews = int(pd.to_numeric(row.get("userRatingsTotal", 0), errors="coerce").fillna(0))
+        cuisine = html.escape(str(row.get("foodType", "")))
+        district = html.escape(str(row.get("district", "")))
         price = row.get("priceLevel", "")
 
         tooltip_text = f"{name} · {rating:.1f} ★ ({reviews} reviews)"
