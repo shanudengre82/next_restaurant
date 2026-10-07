@@ -86,16 +86,13 @@ def get_map_instance(
     initial_location: Tuple[float, float] = BERLIN_CENTER,
     height: int = 600,
 ) -> folium.Map:
-    """Create a map with a clean light basemap and layer options."""
+    """Create a map with OpenStreetMap basemap (open-source)."""
     map_instance = folium.Map(
         location=tuple(initial_location),
         zoom_start=zoom,
         control_scale=True,
         prefer_canvas=True,
-        tiles="CartoDB positron",
     )
-    folium.TileLayer("OpenStreetMap").add_to(map_instance)
-    folium.TileLayer("CartoDB dark_matter").add_to(map_instance)
     Fullscreen().add_to(map_instance)
     return map_instance
 
@@ -152,8 +149,6 @@ def show_map(
     legend: Optional[Callable[[], None]] = None,
 ) -> None:
     """Render a centered map with optional legend below."""
-    folium.LayerControl().add_to(m)
-
     col1, col2, col3 = st.columns([1, 8, 1])
     with col2:
         st_folium(
