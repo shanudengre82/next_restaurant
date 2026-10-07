@@ -1,11 +1,12 @@
 import ast
 import math
-from typing import List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import folium
 import pandas as pd
 import streamlit as st
-from folium.plugins import HeatMap
+from folium.plugins import FullScreen, HeatMap
+from streamlit_folium import st_folium
 
 from next_restaurant.cuisine_info import CUISINE_OPTIONS, change_main_foodTypes
 from next_restaurant.district import BERLIN_DISTRICTS
@@ -82,35 +83,87 @@ def get_lat_lng(df: pd.DataFrame) -> pd.DataFrame:
 def get_map_instance(
     zoom: int = INITIAL_RADIUS,
     initial_location: Tuple[float, float] = BERLIN_CENTER,
-    width: int = WIDTH,
-    height: int = WIDTH,
+    height: int = 600,
 ) -> folium.Map:
-    """making a general map with different folium loayers"""
-    # First map, focused on the ratings of the restaurant
+    """Create a map with a clean light basemap and layer options."""
     map_instance = folium.Map(
-        width=width,
-        height=height,
         location=tuple(initial_location),
         zoom_start=zoom,
         control_scale=True,
         prefer_canvas=True,
+        tiles="CartoDB positron",
     )
+    folium.TileLayer("OpenStreetMap").add_to(map_instance)
+    folium.TileLayer("CartoDB dark_matter").add_to(map_instance)
+    FullScreen().add_to(map_instance)
     return map_instance
 
 
 # @st.cache_data  # type: ignore
-def generating_circles(map: folium.Map, df: pd.DataFrame, color: str) -> folium.Map:
-    for _, row in df.iterrows():  # More efficient row iteration
+def generating_circles(map: folium.Map, df: pd.DataFrame, color: Optional[str] = None) -> folium.Map:
+    for _, row in df.iterrows():
+        lat, lng = row["lat"], row["lng"]
+
+        if color and color in row.index:
+            circle_color = row[color]
+        else:
+            rating = row["rating"]
+            circle_color = "orange" if rating < 4.0 else "blue"
+
+        name = row.get("namesClean", "Restaurant")
+        rating = row.get("rating", 0)
+        reviews = int(row.get("userRatingsTotal", 0))
+        cuisine = row.get("foodType", "")
+        district = row.get("district", "")
+        address = row.get("fullAddress", "")
+        price = row.get("priceLevel", "")
+
+        tooltip_text = f"{name} · {rating:.1f} ★ ({reviews} reviews)"
+        popup_html = f"""
+        <div style="font-family: Arial; width: 200px;">
+            <b>{name}</b><br>
+            {cuisine}{f" · {price}" if price else ""}<br>
+            Rating: {rating:.1f} ★ ({reviews} reviews)<br>
+            {district}
+        </div>
+        """
+
+        radius = 30 + min(reviews / 20, 90)
+
         folium.Circle(
-            location=[row["lat"], row["lng"]],  # Direct access
-            radius=INITIAL_RADIUS,
-            color=row[color],
-            popup=row["fullAddress"],
-            tooltip="Click for name and address info",
+            location=[lat, lng],
+            radius=radius,
+            color=circle_color,
+            popup=folium.Popup(popup_html, max_width=200),
+            tooltip=tooltip_text,
             fill=True,
-            fill_color=row[color],
+            fill_color=circle_color,
+            fill_opacity=0.6,
+            weight=2,
         ).add_to(map)
     return map
+
+
+def show_map(
+    m: folium.Map,
+    key: str,
+    height: int = 600,
+    legend: Optional[Callable[[], None]] = None,
+) -> None:
+    """Render a centered map with optional legend below."""
+    folium.LayerControl().add_to(m)
+
+    col1, col2, col3 = st.columns([1, 8, 1])
+    with col2:
+        st_folium(
+            m,
+            use_container_width=True,
+            height=height,
+            key=key,
+            returned_objects=[],
+        )
+        if legend:
+            legend()
 
 
 @st.cache_data  # type: ignore

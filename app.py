@@ -4,7 +4,6 @@ from pathlib import Path
 import folium
 import streamlit as st
 from geopy.geocoders import Nominatim
-from streamlit_folium import folium_static
 
 # make the src-layout package importable without installing it (e.g. on Render)
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
@@ -38,6 +37,7 @@ from next_restaurant.nlp_search import (
 from next_restaurant.functions_for_df import (
     generating_circles,
     get_map_instance,
+    show_map,
     update_df_based_on_selected_cusine_and_district,
 )
 from next_restaurant.get_data import get_raw_data
@@ -45,7 +45,7 @@ from next_restaurant.local_search_coordinates import (
     generating_circular_coordinates,
     get_locating_best_place_based_on_distance,
 )
-from next_restaurant.parameters import BERLIN_CENTER, HEIGHT, INITIAL_ZOOM, WIDTH
+from next_restaurant.parameters import BERLIN_CENTER, HEIGHT, INITIAL_ZOOM
 from next_restaurant.stats import (
     get_number_of_good_restaurants,
     get_percent_of_good_restaurants,
@@ -385,13 +385,22 @@ with tab_search:
                 )
 
                 # Display on map
-                with st.container():
-                    st.markdown("#### Map")
-                    search_map = get_map_instance(
-                        zoom=11, initial_location=BERLIN_CENTER, width=WIDTH, height=HEIGHT
-                    )
-                    search_map = generating_circles(search_map, results, color=None)
-                    folium_static(search_map, width=WIDTH, height=HEIGHT)
+                st.markdown("#### Map")
+                results_with_color = results.copy()
+                results_with_color["ratings_color"] = results_with_color["rating"].apply(
+                    lambda x: "orange" if x < search_min_rating else "blue"
+                )
+                search_map = get_map_instance(
+                    zoom=12, initial_location=BERLIN_CENTER, height=HEIGHT
+                )
+                search_map = generating_circles(search_map, results_with_color, color="ratings_color")
+                if len(results) > 0:
+                    bounds = [
+                        (results["lat"].min(), results["lng"].min()),
+                        (results["lat"].max(), results["lng"].max()),
+                    ]
+                    search_map.fit_bounds(bounds)
+                show_map(search_map, key="map_search", height=HEIGHT)
 
 with tab_explore:
     st.divider()
@@ -404,16 +413,14 @@ with tab_explore:
     # Display the map
     if selected_district == "All":
         map = get_map_instance(
-            zoom=INITIAL_ZOOM, initial_location=BERLIN_CENTER, width=WIDTH, height=HEIGHT
+            zoom=INITIAL_ZOOM, initial_location=BERLIN_CENTER, height=HEIGHT
         )
     else:
         map = get_map_instance(
             zoom=14,
             initial_location=[local_lat_district, local_lng_district],
             height=HEIGHT,
-            width=WIDTH,
         )
-
 
     # TODO: Make a separatre funtion to update map
     if red_ratings and blue_ratings:
@@ -431,9 +438,7 @@ with tab_explore:
     else:
         map = generating_circles(map=map, df=df_cusine_district, color="ratings_color")
 
-    folium.LayerControl().add_to(map)
-    folium_static(map)
-    display_map_legend()
+    show_map(map, key="map_explore", height=HEIGHT, legend=display_map_legend)
 
 # Getting information from global dataframe
 
@@ -672,14 +677,12 @@ with tab_where:
                 center_bad_center_good[first_key][0],
                 center_bad_center_good[first_key][1],
             ],
-            width=WIDTH,
             height=HEIGHT,
         )
     else:
         o = get_map_instance(
             zoom=15,
             initial_location=[center_bad_center_good[1][0], center_bad_center_good[1][1]],
-            width=WIDTH,
             height=HEIGHT,
         )
 
@@ -746,7 +749,7 @@ with tab_where:
         ).add_to(o)
         number += 1
 
-    folium_static(o)
+    show_map(o, key="map_where", height=HEIGHT)
 
 # Making list of clean cuisine for local choices
 cuisine_list_local = df_local["foodType"].value_counts().index.tolist()
