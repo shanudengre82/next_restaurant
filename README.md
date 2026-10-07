@@ -28,31 +28,33 @@ streamlit run app.py
 
 ## User Instructions
 
-### Search Tab (Natural-Language Query)
+### Search Section (Natural-Language Query)
 
-The new **Search** tab lets you find restaurants by natural language queries:
+The new **Search** section lets you find restaurants by natural language queries:
 
 - **Examples**: *"Italian restaurants"*, *"sushi in Mitte"*, *"vegan in Kreuzberg"*
 - **Guardrails**: Your query must include a cuisine or a Berlin district to be valid. The app will reject queries like *"what's good near me"* and suggest valid options.
 - **Ranking**: Results are ranked by semantic similarity (TF-IDF) blended with restaurant ratings.
 - **Filters**: You can also set minimum rating and review thresholds for search results.
 
-### Sidebar Filters and Tabs
+### Sidebar Filters and Sections
 
-1. Please note that for the working of the app, raw_data/clean_dataframe.csv file is needed with following format
+1. The sidebar contains three filter expanders (**Where & what**, **What is a good restaurant?**, **Map display**) and an **About** section at the bottom. The main content is a single scrollable page with four sections: **Search**, **Explore Berlin**, **Your competitors**, and **Where to open**.
+
+2. Please note that for the working of the app, raw_data/clean_dataframe.csv file is needed with following format
 
 | priceLevel | rating | userRatingsTotal | lat | lng | fullAddress | district | foodType | foodType2 |
 |-------------|--------|--------------------|-----|-----|--------------|----------|-----------|-------------|
 | $$ | 4.3 | 980 | 52.1 | 13.1 | Address 1, Mitte, Berlin | Mitte | Indian | North Indian |
 | $ | 4.2 | 1100 | 52.2 | 13.15 | Address 2, Mitte, Berlin | Mitte | Chinese | Chinese |
 
-2. Once the streamlit web app is ruinning, we will see the following
+3. Once the streamlit web app is ruinning, we will see the following
 
 ![My Image](/images/image_1.png)
 
 On the left, different selections related to the neighbourhood and cuisines are provided. The data will be filtered based on user defined preferences like the neighbourhood, cuisine and rating threshold.
 
-3. In the bottom, another plot is provided which displays best areas to open a resturant based on user selection preferences. For reference, please see image below
+4. In the bottom, another plot is provided which displays best areas to open a resturant based on user selection preferences. For reference, please see image below
 
 ![My Image](/images/image_3.png)
 

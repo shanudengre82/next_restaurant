@@ -122,7 +122,7 @@ for _col, (_title, _text, _preset) in zip(st.columns(len(USE_CASES)), USE_CASES)
             args=_preset,
         )
 st.caption(
-    "Use the filters on the left, then explore the tabs below: "
+    "Use the filters on the left, then scroll down to explore "
     "**Search**, **Explore Berlin**, **Your competitors** and **Where to open**."
 )
 
@@ -216,6 +216,31 @@ with st.sidebar.expander("3. Map display", expanded=True):
         help="How many restaurants around your address are used for the suggestions.",
     )
 
+with st.sidebar.expander("About", expanded=False):
+    st.markdown(
+        """
+**How it works**
+
+**Data.** Ratings, review counts, price levels and locations of restaurants in
+Berlin, grouped by district and cuisine.
+
+**What is a good restaurant?** One with a rating at or above your minimum rating
+and at least your minimum number of reviews (set in the sidebar).
+
+**Where to open.** Around your address we take the nearest restaurants, locate the
+centre of the high and low rated ones, and search a grid of points for the places
+furthest from any existing restaurant. Those are the green markers.
+
+**Good to know.** The data is a snapshot and ratings are only a proxy for demand.
+Use the results as a starting point, not as a final decision.
+        """
+    )
+    st.markdown(
+        "Built with Python, pandas, Streamlit and Folium. "
+        "Source code: [github.com/shanudengre82/next_restaurant]"
+        "(https://github.com/shanudengre82/next_restaurant)"
+    )
+
 blue_ratings = map_filter == "Only good restaurants"
 red_ratings = map_filter == "Only low rated restaurants"
 
@@ -261,12 +286,14 @@ df_cusine_district = df_cusine_district[
 ]
 
 
-(tab_search, tab_explore, tab_competitors, tab_where, tab_about) = st.tabs(
-    ["Search", "Explore Berlin", "Your competitors", "Where to open", "About"]
-)
+tab_search = st.container()
+tab_explore = st.container()
+tab_competitors = st.container()
+tab_where = st.container()
 
-# SEARCH TAB
+# SEARCH SECTION
 with tab_search:
+    st.divider()
     st.markdown("### Find restaurants by natural language query")
     st.markdown(
         "Enter what you're looking for, e.g., *'Italian restaurants'*, "
@@ -367,6 +394,8 @@ with tab_search:
                     folium_static(search_map, width=WIDTH, height=HEIGHT)
 
 with tab_explore:
+    st.divider()
+    st.header("Explore Berlin")
     kpi_box = st.container()
 
 step(50, "Drawing the Berlin map...")
@@ -428,7 +457,7 @@ else:
 step(65, "Calculating market statistics...")
 with tab_explore:
     # Key points
-    st.header("Key points")
+    st.subheader("Key points")
     st.subheader("Consider this information when chosing a location for your restaurant:")
 
     # general stats about Berlin
@@ -573,6 +602,7 @@ df_local = df_local[df_local["userRatingsTotal"] > popularity_cutoff]
 
 
 with tab_competitors:
+    st.divider()
     # Closest Competitors
 
     # In case of address input
@@ -624,6 +654,8 @@ with tab_competitors:
 
 step(92, "Searching for the best spots...")
 with tab_where:
+    st.divider()
+    st.header("Where to open")
     # Sugggestions
     # Displaying suggestions
     display_suggestions_text()
@@ -731,30 +763,6 @@ else:
         df_local["foodType"].isin(cuisine_list_local[0:10])
     ]
 
-
-with tab_about:
-    st.header("How it works")
-    st.markdown(
-        """
-**Data.** Ratings, review counts, price levels and locations of restaurants in
-Berlin, grouped by district and cuisine.
-
-**What is a good restaurant?** One with a rating at or above your minimum rating
-and at least your minimum number of reviews (set in the sidebar).
-
-**Where to open.** Around your address we take the nearest restaurants, locate the
-centre of the high and low rated ones, and search a grid of points for the places
-furthest from any existing restaurant. Those are the green markers.
-
-**Good to know.** The data is a snapshot and ratings are only a proxy for demand.
-Use the results as a starting point, not as a final decision.
-        """
-    )
-    st.markdown(
-        "Built with Python, pandas, Streamlit and Folium. "
-        "Source code: [github.com/shanudengre82/next_restaurant]"
-        "(https://github.com/shanudengre82/next_restaurant)"
-    )
 
 step(100, "Done")
 progress_box.empty()
