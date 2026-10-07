@@ -26,20 +26,50 @@ poetry install
 streamlit run app.py
 ```
 
-## User Instructions
+## Two-Page Architecture
 
-### Search Section (Natural-Language Query)
+The app is now split into two focused pages accessible from the main navigation:
 
-The new **Search** section lets you find restaurants by natural language queries:
+### Page 1: Explore Berlin
+Explore the market by cuisine and district:
+- **Search results table** (appears when a query is active) showing matching restaurants ranked by semantic similarity and rating
+- **Interactive map** with restaurant locations color-coded by rating
+- **Market insights** showing total restaurants, average rating, and review counts
+- **Key points** highlighting the best-performing districts and cuisines
 
-- **Examples**: *"Italian restaurants"*, *"sushi in Mitte"*, *"vegan in Kreuzberg"*
-- **Guardrails**: Your query must include a cuisine or a Berlin district to be valid. The app will reject queries like *"what's good near me"* and suggest valid options.
-- **Ranking**: Results are ranked by semantic similarity (TF-IDF) blended with restaurant ratings.
-- **Filters**: You can also set minimum rating and review thresholds for search results.
+### Page 2: Find best locations
+Analyze a specific address for site suitability:
+- **Address search**: Enter any Berlin address or district name
+- **Nearby radius**: Adjust the search area (1-50 km)
+- **Competitors analysis**: See existing restaurants near your chosen location
+- **Site recommendations**: Visual suggestions showing the best-positioned gaps for a new restaurant
 
-### Sidebar Filters and Sections
+## Sidebar: Natural Language Search
 
-1. The sidebar contains three filter expanders (**Where & what**, **What is a good restaurant?**, **Map display**) and an **About** section at the bottom. The main content is a single scrollable page with four sections: **Search**, **Explore Berlin**, **Your competitors**, and **Where to open**.
+The left sidebar contains your primary interaction tools:
+
+1. **Search box**: Describe what you're looking for in natural language
+   - Examples: *"Italian restaurants"*, *"sushi in Mitte"*, *"vegan with 100+ reviews"*, *"Turkish above 4.5"*
+   - **Supported constraints**:
+     - Cuisines: Any cuisine from the dataset (Italian, Asian, Indian, etc.)
+     - Districts: All Berlin districts (Mitte, Kreuzberg, Friedrichshain, etc.)
+     - Ratings: "above 4.5", "top rated", "highly rated", etc.
+     - Reviews: "100+ reviews", "at least 50 reviews", etc.
+   - **Guardrails**: Your query must include a cuisine or a district. Invalid queries show helpful feedback.
+
+2. **Example buttons**: Pre-built queries you can click to instantly search
+   - Italian in Kreuzberg
+   - Top rated sushi in Mitte
+   - Pizza with 100+ reviews
+   - Vegan in Prenzlauer Berg
+   - Turkish above 4.5
+
+3. **Filter expanders**:
+   - **1. Where & what**: Manually select cuisine and district
+   - **2. What is a good restaurant?**: Set minimum rating and review thresholds
+   - **3. Map display**: Choose to show all, good, or low-rated restaurants
+
+4. **About**: Information on how the app works
 
 2. Please note that for the working of the app, raw_data/clean_dataframe.csv file is needed with following format
 
