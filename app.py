@@ -19,8 +19,12 @@ from next_restaurant.app_state import (
 from next_restaurant.cuisine_info import CUISINE_OPTIONS
 from next_restaurant.district import BERLIN_DISTRICTS
 from next_restaurant.nlp_search import validate_query, selections_from_query
+from next_restaurant.ui import inject_theme
 
 st.set_page_config(page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide")
+
+# Apply theme
+inject_theme()
 
 # Initialize session state
 for _key, _value in DEFAULTS.items():
@@ -109,7 +113,7 @@ st.sidebar.button("Reset filters", on_click=reset_filters, use_container_width=T
 # Sidebar filters
 with st.sidebar.expander("Where & what", expanded=True):
     st.selectbox(
-        "Type of cuisine",
+        "Cuisine",
         CUISINE_OPTIONS,
         key="cuisine",
         help="Pick a cuisine or 'All' to look at every type of restaurant.",
@@ -121,7 +125,7 @@ with st.sidebar.expander("Where & what", expanded=True):
         help="Pick a district or 'All' to look at the whole city.",
     )
 
-with st.sidebar.expander("What is a good restaurant?", expanded=True):
+with st.sidebar.expander("Quality thresholds", expanded=True):
     st.slider(
         "Minimum rating",
         min_value=2.0,
@@ -131,7 +135,7 @@ with st.sidebar.expander("What is a good restaurant?", expanded=True):
         help="Restaurants at or above this rating count as good.",
     )
     st.slider(
-        "Minimum number of reviews",
+        "Minimum reviews",
         min_value=0,
         max_value=2000,
         step=1,
@@ -139,7 +143,7 @@ with st.sidebar.expander("What is a good restaurant?", expanded=True):
         help="Ignore restaurants with fewer reviews than this.",
     )
 
-with st.sidebar.expander("Map display", expanded=True):
+with st.sidebar.expander("Map", expanded=True):
     st.radio(
         "Show on the map",
         ["All restaurants", "Only good restaurants", "Only low rated restaurants"],

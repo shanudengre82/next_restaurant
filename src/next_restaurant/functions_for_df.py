@@ -106,7 +106,7 @@ def generating_circles(map: folium.Map, df: pd.DataFrame, color: Optional[str] =
             circle_color = row[color]
         else:
             rating = row["rating"]
-            circle_color = "orange" if rating < 4.0 else "blue"
+            circle_color = "#D9480F" if rating < 4.0 else "#17375E"
 
         name = html.escape(str(row.get("namesClean", "Restaurant")))
         rating = row.get("rating", 0)
