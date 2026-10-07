@@ -24,46 +24,73 @@ def inject_theme():
             background-color: #17375E;
         }
 
-        [data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div > div {
-            color: white;
+        /* Sidebar text - ensure visibility */
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] span,
+        [data-testid="stSidebar"] div {
+            color: white !important;
         }
 
-        [data-testid="stSidebar"] label {
-            color: white;
+        [data-testid="stSidebar"] .stCaption {
+            color: #E4EAF1 !important;
         }
 
-        [data-testid="stSidebar"] .stTextInput > div > div > input {
-            background-color: #FAFAF8;
-            color: #1B1F24;
+        /* Sidebar text inputs */
+        [data-testid="stSidebar"] .stTextInput input {
+            background-color: #FAFAF8 !important;
+            color: #1B1F24 !important;
+            border: 1px solid #E4EAF1 !important;
         }
 
-        [data-testid="stSidebar"] .stSelectbox > div > div > div {
-            background-color: #FAFAF8;
-            color: #1B1F24;
+        [data-testid="stSidebar"] .stTextInput input::placeholder {
+            color: #999 !important;
         }
 
-        [data-testid="stSidebar"] .stSlider > div > div {
-            color: white;
+        /* Sidebar select boxes */
+        [data-testid="stSidebar"] .stSelectbox > div > div {
+            background-color: #FAFAF8 !important;
+            color: #1B1F24 !important;
+        }
+
+        /* Sidebar sliders */
+        [data-testid="stSidebar"] .stSlider > div > div > div {
+            color: white !important;
+        }
+
+        /* Sidebar radio buttons */
+        [data-testid="stSidebar"] .stRadio label {
+            color: white !important;
+        }
+
+        /* Sidebar buttons - white text, readable */
+        [data-testid="stSidebar"] button {
+            background-color: rgba(255, 255, 255, 0.15) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            font-family: 'Barlow', sans-serif;
+            border-radius: 6px;
+        }
+
+        [data-testid="stSidebar"] button:hover {
+            background-color: rgba(255, 255, 255, 0.25) !important;
         }
 
         /* Main content background */
-        body {
+        .main {
             background-color: #FAFAF8;
             color: #1B1F24;
         }
 
         /* Border and divider colors */
         hr {
-            border-color: #E4EAF1;
+            border-color: #E4EAF1 !important;
         }
 
+        /* Expander styling */
         .streamlit-expanderHeader {
-            background-color: #E4EAF1;
-        }
-
-        /* Map and container borders */
-        [data-testid="stContainer"] {
-            border-color: #E4EAF1;
+            background-color: #E4EAF1 !important;
+            color: #1B1F24 !important;
         }
 
         /* Table striping */
@@ -80,12 +107,15 @@ def inject_theme():
             border: 1px solid #E4EAF1;
             border-radius: 6px;
             padding: 1rem;
+            background-color: white;
         }
 
-        /* Buttons */
-        button {
+        /* Main buttons */
+        .main button {
             font-family: 'Barlow', sans-serif;
             border-radius: 6px;
+            background-color: #17375E !important;
+            color: white !important;
         }
         </style>
         """,

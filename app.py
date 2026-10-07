@@ -52,8 +52,13 @@ nl_query = st.sidebar.text_input(
 # Example buttons
 st.sidebar.caption("Try an example")
 for example in EXAMPLES:
-    if st.sidebar.button(example, key=f"example_{example}", use_container_width=True):
-        use_example(example)
+    st.sidebar.button(
+        example,
+        key=f"example_{example}",
+        on_click=use_example,
+        args=(example,),
+        use_container_width=True,
+    )
 
 # Query application logic
 query_feedback = ""
