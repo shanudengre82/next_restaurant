@@ -154,11 +154,14 @@ def render():
         )
     elif cuisine != "All" and district == "All":
         stats_hoods_cuisine = update_stats_per_hood_and_cuisine(
-            df_copy_for_stats, cuisine, rating_cutoff, popularity_cutoff
+            df_copy_for_stats, rating_cutoff, popularity_cutoff
+        )
+        stats_cuisine_hoods = update_stats_per_cuisine_and_hood(
+            df_copy_for_stats, rating_cutoff, popularity_cutoff
         )
         all_district_selected_cuisine(
             stats_hoods_cuisine=stats_hoods_cuisine,
-            stats_cuisine_hoods=stats_hoods_cuisine,
+            stats_cuisine_hoods=stats_cuisine_hoods,
             options_cuisine=cuisine,
             number_cuisine=len(df[df["foodType"] == cuisine]),
             percent_good_cuisine=100 * good_restaurants / total_restaurants if total_restaurants > 0 else 0,
@@ -182,11 +185,14 @@ def render():
             five_most_common_percent=[100 * len(df[df["foodType"] == c]) / len(df) for c in cuisine_list[:5]],
         )
     else:
+        stats_hoods_cuisine = update_stats_per_hood_and_cuisine(
+            df_copy_for_stats, rating_cutoff, popularity_cutoff
+        )
         stats_cuisine_hoods = update_stats_per_cuisine_and_hood(
-            df_copy_for_stats, cuisine, district, rating_cutoff, popularity_cutoff
+            df_copy_for_stats, rating_cutoff, popularity_cutoff
         )
         selected_district_selected_cuisine(
-            stats_hoods_cuisine=stats_cuisine_hoods,
+            stats_hoods_cuisine=stats_hoods_cuisine,
             stats_cuisine_hoods=stats_cuisine_hoods,
             options_district=district,
             options_cuisine=cuisine,
