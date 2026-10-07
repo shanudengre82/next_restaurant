@@ -24,19 +24,26 @@ def inject_theme():
             background-color: #17375E;
         }
 
-        /* Sidebar text - ensure visibility */
-        [data-testid="stSidebar"] label,
-        [data-testid="stSidebar"] p,
-        [data-testid="stSidebar"] span,
-        [data-testid="stSidebar"] div {
+        /* Sidebar text - only direct elements on enamel background */
+        [data-testid="stSidebar"] > div > div > div label,
+        [data-testid="stSidebar"] [data-testid="stWidgetLabel"] *,
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] *,
+        [data-testid="stSidebar"] [data-testid="stCaptionContainer"] *,
+        [data-testid="stSidebar"] h1,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] h3,
+        [data-testid="stSidebar"] h4,
+        [data-testid="stSidebar"] h5,
+        [data-testid="stSidebar"] h6 {
             color: white !important;
         }
 
-        [data-testid="stSidebar"] .stCaption {
+        /* Sidebar captions - slightly muted white */
+        [data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
             color: #E4EAF1 !important;
         }
 
-        /* Sidebar text inputs */
+        /* Sidebar text inputs - dark text on white */
         [data-testid="stSidebar"] .stTextInput input {
             background-color: #FAFAF8 !important;
             color: #1B1F24 !important;
@@ -44,36 +51,49 @@ def inject_theme():
         }
 
         [data-testid="stSidebar"] .stTextInput input::placeholder {
-            color: #999 !important;
+            color: #5B6672 !important;
         }
 
-        /* Sidebar select boxes */
+        /* Sidebar select boxes - dark text on white */
+        [data-testid="stSidebar"] [data-baseweb="select"] * {
+            color: #1B1F24 !important;
+        }
+
         [data-testid="stSidebar"] .stSelectbox > div > div {
             background-color: #FAFAF8 !important;
+        }
+
+        /* Sidebar alerts/warnings - dark text on their own background */
+        [data-testid="stSidebar"] [data-testid="stAlert"] * {
             color: #1B1F24 !important;
         }
 
         /* Sidebar sliders */
-        [data-testid="stSidebar"] .stSlider > div > div > div {
+        [data-testid="stSidebar"] .stSlider label {
             color: white !important;
         }
 
-        /* Sidebar radio buttons */
+        /* Sidebar radio buttons - white text for labels */
         [data-testid="stSidebar"] .stRadio label {
             color: white !important;
         }
 
-        /* Sidebar buttons - white text, readable */
+        /* Sidebar buttons - translucent white with focus ring */
         [data-testid="stSidebar"] button {
-            background-color: rgba(255, 255, 255, 0.15) !important;
+            background-color: rgba(255, 255, 255, 0.2) !important;
             color: white !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.4) !important;
             font-family: 'Barlow', sans-serif;
             border-radius: 6px;
         }
 
         [data-testid="stSidebar"] button:hover {
-            background-color: rgba(255, 255, 255, 0.25) !important;
+            background-color: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        [data-testid="stSidebar"] button:focus {
+            outline: 2px solid #FAFAF8 !important;
+            outline-offset: 2px !important;
         }
 
         /* Main content background */

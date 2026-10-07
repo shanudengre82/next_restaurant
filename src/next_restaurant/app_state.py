@@ -16,7 +16,8 @@ EXAMPLES = [
     "Top rated sushi in Mitte",
     "Pizza with 100+ reviews",
     "Vegan in Prenzlauer Berg",
-    "Turkish above 4.5"
+    "Turkish above 4.5",
+    "Indian in Neukölln",
 ]
 
 DEFAULTS = {

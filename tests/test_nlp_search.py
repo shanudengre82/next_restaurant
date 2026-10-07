@@ -232,3 +232,22 @@ class TestSearch:
         required_cols = ["namesClean", "foodType", "district", "rating", "userRatingsTotal", "lat", "lng"]
         for col in required_cols:
             assert col in matches.columns
+
+
+class TestExamples:
+    """Test that all examples in EXAMPLES are valid and parseable."""
+
+    def test_all_examples_validate(self, vocab):
+        """Every example should pass validation."""
+        from src.next_restaurant.app_state import EXAMPLES
+        for example in EXAMPLES:
+            result = validate_query(example, vocab)
+            assert result.ok, f"Example '{example}' failed validation: {result.message}"
+
+    def test_indian_neukölln_example(self, vocab):
+        """Indian in Neukölln should parse to Indian cuisine and Neukölln district."""
+        result = validate_query("Indian in Neukölln", vocab)
+        assert result.ok, f"Example 'Indian in Neukölln' failed: {result.message}"
+        parsed = result.parsed
+        assert "Indian" in parsed.cuisines, f"Expected Indian in cuisines, got {parsed.cuisines}"
+        assert "Neukölln" in parsed.districts, f"Expected Neukölln in districts, got {parsed.districts}"
