@@ -4,33 +4,33 @@ import sys
 from pathlib import Path
 
 import streamlit as st
-from geopy.geocoders import Nominatim
 
-# Make src package importable
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 from next_restaurant.app_state import (
-    DEFAULTS, EXAMPLES, use_example, apply_preset, reset_filters,
-    load_data, load_search_stack
+    DEFAULTS,
+    EXAMPLES,
+    use_example,
+    apply_preset,
+    reset_filters,
+    load_data,
+    load_search_stack,
 )
 from next_restaurant.cuisine_info import CUISINE_OPTIONS
 from next_restaurant.district import BERLIN_DISTRICTS
 from next_restaurant.nlp_search import validate_query, selections_from_query
-from next_restaurant.parameters import BERLIN_CENTER
 
-# Page config
 st.set_page_config(page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide")
 
-# Session state initialization
+# Initialize session state
 for _key, _value in DEFAULTS.items():
     st.session_state.setdefault(_key, _value)
 
-# Workaround: keep page-2-only widgets in state when on page 1
-# This prevents them from resetting when the user switches pages
+# Keep-alive: preserve page-2-only widgets when navigating to page 1
 st.session_state.setdefault("address", DEFAULTS["address"])
 st.session_state.setdefault("nearby", DEFAULTS["nearby"])
 
-# Load data once
+# Load data
 df = load_data()
 vocab, search_index = load_search_stack(df)
 
@@ -103,11 +103,11 @@ elif nl_query:
 if query_feedback:
     st.sidebar.caption(f"**Applied:** {query_feedback}")
 
-# Reset and filter buttons
+# Reset button
 st.sidebar.button("Reset filters", on_click=reset_filters, use_container_width=True)
 
 # Sidebar filters
-with st.sidebar.expander("1. Where & what", expanded=True):
+with st.sidebar.expander("Where & what", expanded=True):
     st.selectbox(
         "Type of cuisine",
         CUISINE_OPTIONS,
@@ -121,7 +121,7 @@ with st.sidebar.expander("1. Where & what", expanded=True):
         help="Pick a district or 'All' to look at the whole city.",
     )
 
-with st.sidebar.expander("2. What is a good restaurant?", expanded=True):
+with st.sidebar.expander("What is a good restaurant?", expanded=True):
     st.slider(
         "Minimum rating",
         min_value=2.0,
@@ -139,7 +139,7 @@ with st.sidebar.expander("2. What is a good restaurant?", expanded=True):
         help="Ignore restaurants with fewer reviews than this.",
     )
 
-with st.sidebar.expander("3. Map display", expanded=True):
+with st.sidebar.expander("Map display", expanded=True):
     st.radio(
         "Show on the map",
         ["All restaurants", "Only good restaurants", "Only low rated restaurants"],
@@ -171,23 +171,7 @@ Use the results as a starting point, not as a final decision.
         "(https://github.com/shanudengre82/next_restaurant)"
     )
 
-# Navigation
-def explore_page():
-    """Explore Berlin page."""
-    from views import explore
-    explore.render()
-
-def best_locations_page():
-    """Find best locations page."""
-    from views import best_locations
-    best_locations.render()
-
-pages = {
-    "Explore Berlin": explore_page,
-    "Find best locations": best_locations_page,
-}
-
-# Main title
+# Main title and intro
 st.title("Next Restaurant")
 st.markdown(
     "##### Find the best place to open your next restaurant in Berlin, "
@@ -196,10 +180,26 @@ st.markdown(
 
 # Use-case cards
 USE_CASES = [
-    ("Pick a district & cuisine", "Is a cuisine under-served or already crowded in the district you like?", ("Italian", "Mitte", "Mitte, Berlin")),
-    ("Scout an address", "See the closest competitors, their price level and average rating.", ("All", "All", "Kreuzberg, Berlin")),
-    ("Find the gap", "Get map markers for spots furthest from nearby restaurants.", ("Asian", "Friedrichshain", "Friedrichshain, Berlin")),
-    ("Understand the market", "Compare districts and cuisines by how many restaurants are rated good.", ("All", "All", "Mitte, Berlin")),
+    (
+        "Pick a district & cuisine",
+        "Is a cuisine under-served or already crowded in the district you like?",
+        ("Italian", "Mitte", "Mitte, Berlin"),
+    ),
+    (
+        "Scout an address",
+        "See the closest competitors, their price level and average rating.",
+        ("All", "All", "Kreuzberg, Berlin"),
+    ),
+    (
+        "Find the gap",
+        "Get map markers for spots furthest from nearby restaurants.",
+        ("Asian", "Friedrichshain", "Friedrichshain, Berlin"),
+    ),
+    (
+        "Understand the market",
+        "Compare districts and cuisines by how many restaurants are rated good.",
+        ("All", "All", "Mitte, Berlin"),
+    ),
 ]
 
 _cols = st.columns(len(USE_CASES))
@@ -207,17 +207,34 @@ for _col, (_title, _text, _preset) in zip(_cols, USE_CASES):
     with _col.container(border=True):
         st.markdown(f"**{_title}**")
         st.caption(_text)
-        st.button(_title, key=f"preset_{_title}", on_click=apply_preset, args=_preset, use_container_width=True)
+        st.button(
+            _title,
+            key=f"preset_{_title}",
+            on_click=apply_preset,
+            args=_preset,
+            use_container_width=True,
+        )
 
 st.caption(
     "Use the search box or filters on the left, then scroll down to see results and explore further."
 )
 
 # Page navigation
-page_name = st.radio(
-    "Navigate:",
-    list(pages.keys()),
-    horizontal=True,
-    label_visibility="collapsed"
-)
-pages[page_name]()
+def explore_page():
+    """Load and render Explore Berlin page."""
+    from views import explore
+    explore.render()
+
+def best_locations_page():
+    """Load and render Find best locations page."""
+    from views import best_locations
+    best_locations.render()
+
+# Use st.navigation for page routing
+pages = [
+    st.Page(explore_page, title="Explore Berlin"),
+    st.Page(best_locations_page, title="Find best locations"),
+]
+
+pg = st.navigation(pages)
+pg.run()
