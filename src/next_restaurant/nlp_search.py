@@ -9,7 +9,7 @@ import difflib
 import re
 import string
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 
 import numpy as np
@@ -165,16 +165,18 @@ def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
     if any(kw in lower_query for kw in ["top rated", "best rated", "highly rated"]):
         min_rating = 4.5
 
-    # Rating patterns: "rated 4.5", "rating above 4", "4 stars", etc.
+    # Rating patterns: "rated 4.5", "above 4", "at least 4.5", "4 stars", etc.
+    # Also handle commas: "4,5" means 4.5
     rating_patterns = [
-        r"(?:rated|rating)\s+(?:at\s+)?(?:least\s+)?(?:above\s+)?(?:over\s+)?([\d.]+)",
-        r"([\d.]+)\s*(?:\+\s*)?(?:stars?|rating)",
+        r"(?:rated|rating|above|over|at\s+least|min(?:imum)?|>=?)\s*([\d,]+(?:[\d,]*)?)",
+        r"([\d,]+)\s*(?:\+\s*)?(?:stars?|rating)",
     ]
     for pattern in rating_patterns:
         match = re.search(pattern, lower_query, re.IGNORECASE)
         if match:
             try:
-                val = float(match.group(1))
+                val_str = match.group(1).replace(",", ".")  # Handle European format
+                val = float(val_str)
                 val = max(2.0, min(5.0, val))  # Clamp to slider range
                 min_rating = val
                 break
@@ -318,11 +320,7 @@ class Selections:
     district: Optional[str] = None
     rating: Optional[float] = None
     reviews: Optional[int] = None
-    notes: List[str] = None
-
-    def __post_init__(self):
-        if self.notes is None:
-            self.notes = []
+    notes: List[str] = field(default_factory=list)
 
 
 def selections_from_query(
