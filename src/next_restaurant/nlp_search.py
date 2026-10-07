@@ -105,8 +105,8 @@ def normalize_text(text: str) -> str:
 class ParsedQuery:
     """Result of query parsing."""
 
-    cuisines: Set[str]
-    districts: Set[str]
+    cuisines: List[str]
+    districts: List[str]
     leftover_terms: List[str]
     query_text: str
     min_rating: Optional[float] = None
@@ -154,7 +154,7 @@ def build_vocabulary(df: pd.DataFrame) -> Vocabulary:
 def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
     """Parse query to extract cuisines, districts, and rating/review constraints."""
     if not query or not query.strip():
-        return ParsedQuery(cuisines=set(), districts=set(), leftover_terms=[], query_text="")
+        return ParsedQuery(cuisines=[], districts=[], leftover_terms=[], query_text="")
 
     # Extract numeric constraints before normalization (which removes numbers)
     lower_query = query.lower()
@@ -201,8 +201,8 @@ def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
     normalized = normalize_text(query)
     tokens = normalized.split()
 
-    found_cuisines: Set[str] = set()
-    found_districts: Set[str] = set()
+    found_cuisines: List[str] = []
+    found_districts: List[str] = []
     matched_indices: Set[int] = set()
 
     # Try to match multi-word terms first (districts like "prenzlauer berg")
@@ -214,7 +214,8 @@ def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
             for district in vocab.districts:
                 normalized_district = normalize_text(district)
                 if phrase == normalized_district:
-                    found_districts.add(district)
+                    if district not in found_districts:
+                        found_districts.append(district)
                     for j in range(i, i + length):
                         matched_indices.add(j)
                     break
@@ -223,7 +224,8 @@ def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
             for cuisine in vocab.cuisines:
                 normalized_cuisine = normalize_text(cuisine)
                 if phrase == normalized_cuisine:
-                    found_cuisines.add(cuisine)
+                    if cuisine not in found_cuisines:
+                        found_cuisines.append(cuisine)
                     for j in range(i, i + length):
                         matched_indices.add(j)
                     break
@@ -235,7 +237,9 @@ def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
 
         # Check synonyms
         if token in CUISINE_SYNONYMS:
-            found_cuisines.add(CUISINE_SYNONYMS[token])
+            cuisine = CUISINE_SYNONYMS[token]
+            if cuisine not in found_cuisines:
+                found_cuisines.append(cuisine)
             matched_indices.add(i)
             continue
 
@@ -248,7 +252,8 @@ def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
                 # Find original cuisine name
                 for cuisine in vocab.cuisines:
                     if normalize_text(cuisine) == close_cuisines[0]:
-                        found_cuisines.add(cuisine)
+                        if cuisine not in found_cuisines:
+                            found_cuisines.append(cuisine)
                         matched_indices.add(i)
                         break
 
@@ -259,7 +264,8 @@ def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
                 # Find original district name
                 for district in vocab.districts:
                     if normalize_text(district) == close_districts[0]:
-                        found_districts.add(district)
+                        if district not in found_districts:
+                            found_districts.append(district)
                         matched_indices.add(i)
                         break
 
@@ -328,17 +334,17 @@ def selections_from_query(
     cuisine_options: List[str],
     district_options: List[str],
 ) -> Selections:
-    """Map parsed query to sidebar selections using first-match logic."""
+    """Map parsed query to sidebar selections using first-in-query-order logic."""
     selections = Selections()
 
     # Normalize option lists for matching
     cuisine_map = {normalize_text(c): c for c in cuisine_options}
     district_map = {normalize_text(d): d for d in district_options if d != "All"}
 
-    # Match cuisines (first one found in normalized order, alphabetically as tiebreaker)
+    # Match cuisines (preserve order from parse_query)
     if parsed.cuisines:
         matched_cuisines = []
-        for cuisine in sorted(parsed.cuisines):
+        for cuisine in parsed.cuisines:
             normalized = normalize_text(cuisine)
             if normalized in cuisine_map:
                 matched_cuisines.append(cuisine)
@@ -353,10 +359,10 @@ def selections_from_query(
                 f"'{', '.join(parsed.cuisines)}' is not a sidebar cuisine, so cuisine was left unchanged"
             )
 
-    # Match districts (first one found, alphabetically as tiebreaker)
+    # Match districts (preserve order from parse_query)
     if parsed.districts:
         matched_districts = []
-        for district in sorted(parsed.districts):
+        for district in parsed.districts:
             normalized = normalize_text(district)
             if normalized in district_map:
                 matched_districts.append(district)
