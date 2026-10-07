@@ -43,6 +43,19 @@ STOP_WORDS = {
     "who",
     "when",
     "berlin",  # Whole dataset is Berlin; it's not a location filter
+    "rated",
+    "top",
+    "best",
+    "highly",
+    "reviews",
+    "review",
+    "stars",
+    "star",
+    "rating",
+    "above",
+    "over",
+    "least",
+    "minimum",
 }
 
 # Cuisine synonyms and variants
@@ -96,6 +109,8 @@ class ParsedQuery:
     districts: Set[str]
     leftover_terms: List[str]
     query_text: str
+    min_rating: Optional[float] = None
+    min_reviews: Optional[int] = None
 
 
 @dataclass
@@ -137,9 +152,49 @@ def build_vocabulary(df: pd.DataFrame) -> Vocabulary:
 
 
 def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
-    """Parse query to extract cuisines and districts."""
+    """Parse query to extract cuisines, districts, and rating/review constraints."""
     if not query or not query.strip():
         return ParsedQuery(cuisines=set(), districts=set(), leftover_terms=[], query_text="")
+
+    # Extract numeric constraints before normalization (which removes numbers)
+    lower_query = query.lower()
+    min_rating = None
+    min_reviews = None
+
+    # Keywords that map to 4.5 rating
+    if any(kw in lower_query for kw in ["top rated", "best rated", "highly rated"]):
+        min_rating = 4.5
+
+    # Rating patterns: "rated 4.5", "rating above 4", "4 stars", etc.
+    rating_patterns = [
+        r"(?:rated|rating)\s+(?:at\s+)?(?:least\s+)?(?:above\s+)?(?:over\s+)?([\d.]+)",
+        r"([\d.]+)\s*(?:\+\s*)?(?:stars?|rating)",
+    ]
+    for pattern in rating_patterns:
+        match = re.search(pattern, lower_query, re.IGNORECASE)
+        if match:
+            try:
+                val = float(match.group(1))
+                val = max(2.0, min(5.0, val))  # Clamp to slider range
+                min_rating = val
+                break
+            except (ValueError, IndexError):
+                pass
+
+    # Review patterns: "100 reviews", "100+ reviews", "at least 50 reviews"
+    review_patterns = [
+        r"(?:at\s+least\s+|[\d,]+\s*\+?\s*)?(\d+)\s*(?:\+\s*)?(?:reviews?)",
+    ]
+    for pattern in review_patterns:
+        match = re.search(pattern, lower_query, re.IGNORECASE)
+        if match:
+            try:
+                val = int(match.group(1).replace(",", ""))
+                val = max(0, min(2000, val))  # Clamp to slider range
+                min_reviews = val
+                break
+            except (ValueError, IndexError):
+                pass
 
     normalized = normalize_text(query)
     tokens = normalized.split()
@@ -214,6 +269,8 @@ def parse_query(query: str, vocab: Vocabulary) -> ParsedQuery:
         districts=found_districts,
         leftover_terms=leftover,
         query_text=query.strip(),
+        min_rating=min_rating,
+        min_reviews=min_reviews,
     )
 
 
@@ -224,7 +281,7 @@ def validate_query(query: str, vocab: Vocabulary) -> GuardrailResult:
             ok=False,
             message=(
                 "Please enter a search query. Examples: 'italian restaurants', "
-                "'restaurants in kreuzberg', 'sushi in mitte'"
+                "'top rated sushi in mitte', 'asian with 100+ reviews', 'kreuzberg above 4.5'"
             ),
         )
 
@@ -246,11 +303,83 @@ def validate_query(query: str, vocab: Vocabulary) -> GuardrailResult:
                 f"Please include a cuisine or a district in your query.\n\n"
                 f"**Example cuisines:** {sample_cuisines}, ...\n"
                 f"**Example districts:** {sample_districts}, ...\n\n"
-                f"Try: 'italian restaurants', 'sushi in mitte', or 'kreuzberg'"
+                f"Try: 'italian restaurants', 'top rated sushi in mitte', 'asian with 100+ reviews'"
             ),
         )
 
     return GuardrailResult(ok=True, message="", parsed=parsed)
+
+
+@dataclass
+class Selections:
+    """Sidebar selections derived from a parsed query."""
+
+    cuisine: Optional[str] = None
+    district: Optional[str] = None
+    rating: Optional[float] = None
+    reviews: Optional[int] = None
+    notes: List[str] = None
+
+    def __post_init__(self):
+        if self.notes is None:
+            self.notes = []
+
+
+def selections_from_query(
+    parsed: ParsedQuery,
+    cuisine_options: List[str],
+    district_options: List[str],
+) -> Selections:
+    """Map parsed query to sidebar selections using first-match logic."""
+    selections = Selections()
+
+    # Normalize option lists for matching
+    cuisine_map = {normalize_text(c): c for c in cuisine_options}
+    district_map = {normalize_text(d): d for d in district_options if d != "All"}
+
+    # Match cuisines (first one found in normalized order, alphabetically as tiebreaker)
+    if parsed.cuisines:
+        matched_cuisines = []
+        for cuisine in sorted(parsed.cuisines):
+            normalized = normalize_text(cuisine)
+            if normalized in cuisine_map:
+                matched_cuisines.append(cuisine)
+
+        if matched_cuisines:
+            selections.cuisine = cuisine_map[normalize_text(matched_cuisines[0])]
+            if len(matched_cuisines) > 1:
+                also_matched = ", ".join(matched_cuisines[1:])
+                selections.notes.append(f"Applied {selections.cuisine}; also matched {also_matched}")
+        else:
+            selections.notes.append(
+                f"'{', '.join(parsed.cuisines)}' is not a sidebar cuisine, so cuisine was left unchanged"
+            )
+
+    # Match districts (first one found, alphabetically as tiebreaker)
+    if parsed.districts:
+        matched_districts = []
+        for district in sorted(parsed.districts):
+            normalized = normalize_text(district)
+            if normalized in district_map:
+                matched_districts.append(district)
+
+        if matched_districts:
+            selections.district = district_map[normalize_text(matched_districts[0])]
+            if len(matched_districts) > 1:
+                also_matched = ", ".join(matched_districts[1:])
+                selections.notes.append(f"Applied {selections.district}; also matched {also_matched}")
+        else:
+            selections.notes.append(
+                f"'{', '.join(parsed.districts)}' is not a sidebar district, so district was left unchanged"
+            )
+
+    # Add rating/reviews if found
+    if parsed.min_rating is not None:
+        selections.rating = parsed.min_rating
+    if parsed.min_reviews is not None:
+        selections.reviews = parsed.min_reviews
+
+    return selections
 
 
 class RestaurantIndex:

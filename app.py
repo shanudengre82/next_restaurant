@@ -33,6 +33,8 @@ from next_restaurant.nlp_search import (
     build_vocabulary,
     validate_query,
     search,
+    parse_query,
+    selections_from_query,
 )
 from next_restaurant.functions_for_df import (
     generating_circles,
@@ -70,13 +72,15 @@ DEFAULTS = {
     "reviews": 40,
     "map_filter": "All restaurants",
     "nearby": 20,
+    "nl_query": "",
+    "applied_query": "",
 }
 for _key, _value in DEFAULTS.items():
     st.session_state.setdefault(_key, _value)
 
 
 def apply_preset(cuisine: str, district: str, address: str) -> None:
-    st.session_state.update(cuisine=cuisine, district=district, address=address)
+    st.session_state.update(cuisine=cuisine, district=district, address=address, nl_query="", applied_query="")
 
 
 def reset_filters() -> None:
@@ -122,8 +126,7 @@ for _col, (_title, _text, _preset) in zip(st.columns(len(USE_CASES)), USE_CASES)
             args=_preset,
         )
 st.caption(
-    "Use the filters on the left, then scroll down to explore "
-    "**Search**, **Explore Berlin**, **Your competitors** and **Where to open**."
+    "Use the search box or filters on the left, then scroll down to see results and explore further."
 )
 
 # LOADING PROGRESS: a progress bar that is removed once the page is ready
@@ -162,6 +165,68 @@ vocab, search_index = build_search_index(df)
 
 # SIDEBAR FILTERS
 st.sidebar.title("Your filters")
+
+# Natural language search box (top of sidebar)
+nl_query = st.sidebar.text_input(
+    "Describe what you're looking for",
+    value=st.session_state.get("nl_query", ""),
+    placeholder="e.g., top rated italian in mitte",
+    key="nl_query",
+    help="Examples: 'italian', 'sushi in kreuzberg', 'top rated', '100+ reviews', 'above 4.5'",
+)
+
+# Apply query logic: update sidebar selections if query changed
+query_feedback = ""
+if nl_query and nl_query != st.session_state.applied_query:
+    validation = validate_query(nl_query, vocab)
+    if validation.ok:
+        parsed = validation.parsed
+        selections = selections_from_query(parsed, CUISINE_OPTIONS, BERLIN_DISTRICTS)
+        # Only update the fields that were found
+        if selections.cuisine:
+            st.session_state.cuisine = selections.cuisine
+        if selections.district:
+            st.session_state.district = selections.district
+        if selections.rating is not None:
+            st.session_state.rating = selections.rating
+        if selections.reviews is not None:
+            st.session_state.reviews = selections.reviews
+        # Show feedback
+        feedback_parts = []
+        if selections.cuisine:
+            feedback_parts.append(f"Cuisine: {selections.cuisine}")
+        if selections.district:
+            feedback_parts.append(f"District: {selections.district}")
+        if selections.rating is not None:
+            feedback_parts.append(f"Rating ≥ {selections.rating}")
+        if selections.reviews is not None:
+            feedback_parts.append(f"Reviews ≥ {selections.reviews}")
+        query_feedback = " · ".join(feedback_parts)
+        if selections.notes:
+            query_feedback += "\n" + "\n".join(selections.notes)
+        st.session_state.applied_query = nl_query
+    else:
+        st.sidebar.warning(validation.message)
+elif nl_query:
+    # Query hasn't changed, show the feedback from before
+    validation = validate_query(nl_query, vocab)
+    if validation.ok:
+        parsed = validation.parsed
+        selections = selections_from_query(parsed, CUISINE_OPTIONS, BERLIN_DISTRICTS)
+        feedback_parts = []
+        if selections.cuisine:
+            feedback_parts.append(f"Cuisine: {selections.cuisine}")
+        if selections.district:
+            feedback_parts.append(f"District: {selections.district}")
+        if selections.rating is not None:
+            feedback_parts.append(f"Rating ≥ {selections.rating}")
+        if selections.reviews is not None:
+            feedback_parts.append(f"Reviews ≥ {selections.reviews}")
+        query_feedback = " · ".join(feedback_parts)
+
+if query_feedback:
+    st.sidebar.caption(f"**Applied:** {query_feedback}")
+
 st.sidebar.button("Reset filters", on_click=reset_filters)
 
 with st.sidebar.expander("1. Where & what", expanded=True):
