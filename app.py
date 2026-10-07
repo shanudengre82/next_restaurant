@@ -151,13 +151,13 @@ df_copy_for_stats = df.copy()
 
 # Build vocabulary and search index for NLP search (cached)
 @st.cache_resource
-def build_search_index(dataframe):
+def build_search_index(_dataframe):
     """Build and cache the restaurant search index."""
-    step(8, "Building search vocabulary and index...")
-    vocab = build_vocabulary(dataframe)
-    index = RestaurantIndex.build(dataframe)
+    vocab = build_vocabulary(_dataframe)
+    index = RestaurantIndex.build(_dataframe)
     return vocab, index
 
+step(8, "Building search vocabulary and index...")
 vocab, search_index = build_search_index(df)
 
 # SIDEBAR FILTERS
