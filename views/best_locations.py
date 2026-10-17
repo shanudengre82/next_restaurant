@@ -29,6 +29,7 @@ from next_restaurant.cuisine_stats_display import (
 )
 from next_restaurant.app_state import load_data
 from next_restaurant.parameters import HEIGHT
+from next_restaurant.ui import current_theme
 
 
 def render():
@@ -190,9 +191,9 @@ def render():
                     location=[loc_lat, loc_lng],
                     radius=8,
                     popup=f"Suggestion #{idx + 1}",
-                    color="green",
+                    color=current_theme().marker_suggest,
                     fill=True,
-                    fill_color="green",
+                    fill_color=current_theme().marker_suggest,
                     fill_opacity=0.8,
                     weight=2,
                 ).add_to(m)

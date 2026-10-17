@@ -6,13 +6,16 @@ from typing import Callable, List, Optional, Tuple
 import folium
 import pandas as pd
 import streamlit as st
+from branca.element import MacroElement
 from folium.plugins import Fullscreen, HeatMap
+from jinja2 import Template
 from streamlit_folium import st_folium
 
 from next_restaurant.cuisine_info import CUISINE_OPTIONS, change_main_foodTypes
 from next_restaurant.district import BERLIN_DISTRICTS
 from next_restaurant.german_to_english import german_to_english
 from next_restaurant.parameters import BERLIN_CENTER, INITIAL_RADIUS, WIDTH
+from next_restaurant.ui import current_theme
 
 """
 In this module we make functions which can be used to transform DataFrames
@@ -80,11 +83,35 @@ def get_lat_lng(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+class TileFilter(MacroElement):
+    """Tint the basemap tiles with a CSS filter (e.g. dark or greyscale themes).
+
+    Injected as map script, because st_folium drops <style> tags from the header.
+    """
+
+    _template = Template(
+        """
+        {% macro script(this, kwargs) %}
+        (function() {
+            var style = document.createElement("style");
+            style.textContent = ".leaflet-tile-pane { filter: " + {{ this.css_filter|tojson }} + "; }";
+            document.head.appendChild(style);
+        })();
+        {% endmacro %}
+        """
+    )
+
+    def __init__(self, css_filter: str):
+        super().__init__()
+        self._name = "TileFilter"
+        self.css_filter = css_filter
+
+
 @st.cache_data  # type: ignore
-def get_map_instance(
-    zoom: int = INITIAL_RADIUS,
-    initial_location: Tuple[float, float] = BERLIN_CENTER,
-    height: int = 600,
+def _base_map(
+    zoom: int,
+    initial_location: Tuple[float, float],
+    height: int,
 ) -> folium.Map:
     """Create a map with OpenStreetMap basemap (open-source)."""
     map_instance = folium.Map(
@@ -97,16 +124,33 @@ def get_map_instance(
     return map_instance
 
 
+def get_map_instance(
+    zoom: int = INITIAL_RADIUS,
+    initial_location: Tuple[float, float] = BERLIN_CENTER,
+    height: int = 600,
+) -> folium.Map:
+    """Create a map whose basemap is tinted for the current theme."""
+    # Themed outside the cache so switching themes never reuses a stale tint
+    map_instance = _base_map(zoom, initial_location, height)
+    tile_filter = current_theme().tile_filter
+    if tile_filter != "none":
+        TileFilter(tile_filter).add_to(map_instance)
+    return map_instance
+
+
 # @st.cache_data  # type: ignore
 def generating_circles(map: folium.Map, df: pd.DataFrame, color: Optional[str] = None) -> folium.Map:
+    theme = current_theme()
+    # ratings_color holds "blue" (high rated) / "orange" (low rated); draw them in theme colours
+    theme_colors = {"blue": theme.marker_high, "orange": theme.marker_low}
     for _, row in df.iterrows():
         lat, lng = row["lat"], row["lng"]
 
         if color and color in row.index:
-            circle_color = row[color]
+            circle_color = theme_colors.get(row[color], row[color])
         else:
             rating = row["rating"]
-            circle_color = "#D9480F" if rating < 4.0 else "#17375E"
+            circle_color = theme.marker_low if rating < 4.0 else theme.marker_high
 
         name = html.escape(str(row.get("namesClean", "Restaurant")))
         rating = row.get("rating", 0)

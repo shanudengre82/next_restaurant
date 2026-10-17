@@ -19,12 +19,12 @@ from next_restaurant.app_state import (
 from next_restaurant.cuisine_info import CUISINE_OPTIONS
 from next_restaurant.district import BERLIN_DISTRICTS
 from next_restaurant.nlp_search import validate_query, selections_from_query
-from next_restaurant.ui import inject_theme
+from next_restaurant.ui import THEMES, init_theme, inject_theme, sync_theme_query_param
 
 st.set_page_config(page_title="NEXT RESTAURANT", initial_sidebar_state="expanded", layout="wide")
 
-# Apply theme
-inject_theme()
+# Apply theme (from ?theme= in the URL, else the session, else the default)
+inject_theme(init_theme())
 
 # Initialize session state
 for _key, _value in DEFAULTS.items():
@@ -153,6 +153,16 @@ with st.sidebar.expander("Map", expanded=True):
         "Show on the map",
         ["All restaurants", "Only good restaurants", "Only low rated restaurants"],
         key="map_filter",
+    )
+
+with st.sidebar.expander("Appearance", expanded=False):
+    st.selectbox(
+        "Theme",
+        list(THEMES),
+        key="theme",
+        format_func=lambda slug: THEMES[slug].label,
+        on_change=sync_theme_query_param,
+        help="Changes the colours, fonts and map style. Saved in the page URL.",
     )
 
 with st.sidebar.expander("About", expanded=False):

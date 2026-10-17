@@ -3,6 +3,8 @@ from typing import List
 import pandas as pd
 import streamlit as st
 
+from next_restaurant.ui import current_theme, legend_item
+
 
 def display_additional_stats(
     most_frq_priceLevel: str,
@@ -22,16 +24,27 @@ def display_additional_stats(
 
 
 def display_map_legend() -> None:
-    st.caption("🔵 **Blue circles**: high rated restaurants · 🟠 **Orange circles**: low rated restaurants")
+    theme = current_theme()
+    st.markdown(
+        '<div class="nr-legend">'
+        + legend_item(theme.marker_high, "High rated restaurants")
+        + legend_item(theme.marker_low, "Low rated restaurants")
+        + "</div>",
+        unsafe_allow_html=True,
+    )
 
 
 def display_suggestions_text() -> None:
     # Making heading for the suggestion part
     st.header("Our suggestions in the area")
-    st.caption(
-        "🟠 **Orange marker**: center of low rated restaurants of the area · "
-        "🔵 **Blue marker**: center of high rated restaurants of the area · "
-        "🟢 **Light green marker**: furthest locations from all restaurants in the area"
+    theme = current_theme()
+    st.markdown(
+        '<div class="nr-legend">'
+        + legend_item(theme.marker_high, "High rated restaurants")
+        + legend_item(theme.marker_low, "Low rated restaurants")
+        + legend_item(theme.marker_suggest, "Suggested spots, furthest from all restaurants in the area")
+        + "</div>",
+        unsafe_allow_html=True,
     )
 
 
