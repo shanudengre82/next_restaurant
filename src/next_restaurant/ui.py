@@ -160,6 +160,70 @@ def inject_theme():
             background-color: white;
         }
 
+        /* Map loading spinner */
+        @keyframes map-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .map-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background-color: #FAFAF8;
+            border: 1px solid #E4EAF1;
+            border-radius: 6px;
+            color: #17375E;
+            font-weight: 500;
+        }
+
+        .map-loader-ring {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #E4EAF1;
+            border-top-color: #17375E;
+            border-radius: 50%;
+            animation: map-spin 0.9s linear infinite;
+        }
+
+        /* Spinner behind the map iframe, visible until Leaflet paints over it */
+        [class*="st-key-map_wrap_"] {
+            position: relative;
+        }
+
+        [class*="st-key-map_wrap_"]::before {
+            content: "";
+            position: absolute;
+            top: calc(50% - 40px);
+            left: calc(50% - 24px);
+            width: 48px;
+            height: 48px;
+            box-sizing: border-box;
+            border: 5px solid #E4EAF1;
+            border-top-color: #17375E;
+            border-radius: 50%;
+            animation: map-spin 0.9s linear infinite;
+            z-index: 0;
+        }
+
+        [class*="st-key-map_wrap_"]::after {
+            content: "Loading map…";
+            position: absolute;
+            top: calc(50% + 20px);
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #17375E;
+            font-weight: 500;
+            z-index: 0;
+        }
+
+        [class*="st-key-map_wrap_"] iframe {
+            position: relative;
+            z-index: 1;
+        }
+
         /* Main buttons */
         .main button {
             font-family: 'Barlow', sans-serif;
@@ -170,6 +234,16 @@ def inject_theme():
         </style>
         """,
         unsafe_allow_html=True,
+    )
+
+
+def map_loader_html(height: int) -> str:
+    """Return a map-sized placeholder with a circular spinner and loading text."""
+    return (
+        f'<div class="map-loader" style="height: {height}px;">'
+        '<div class="map-loader-ring"></div>'
+        "<div>Loading map…</div>"
+        "</div>"
     )
 
 

@@ -151,13 +151,14 @@ def show_map(
     """Render a centered map with optional legend below."""
     col1, col2, col3 = st.columns([1, 8, 1])
     with col2:
-        st_folium(
-            m,
-            use_container_width=True,
-            height=height,
-            key=key,
-            returned_objects=[],
-        )
+        with st.container(key=f"map_wrap_{key}"):
+            st_folium(
+                m,
+                use_container_width=True,
+                height=height,
+                key=key,
+                returned_objects=[],
+            )
         if legend:
             legend()
 

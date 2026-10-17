@@ -14,6 +14,7 @@ from next_restaurant.functions_for_df import (
     show_map,
 )
 from next_restaurant.nlp_search import validate_query, search
+from next_restaurant.ui import map_loader_html
 from next_restaurant.cuisine_stats_display import (
     all_district_all_cuisines,
     all_district_selected_cuisine,
@@ -89,6 +90,10 @@ def render():
     else:
         df_map = df_filtered
 
+    # Show a spinner in the map's slot while the map is built
+    map_slot = st.empty()
+    map_slot.markdown(map_loader_html(HEIGHT), unsafe_allow_html=True)
+
     # Build map
     if district == "All":
         m = get_map_instance(zoom=INITIAL_ZOOM, initial_location=BERLIN_CENTER, height=HEIGHT)
@@ -112,7 +117,8 @@ def render():
         lambda x: "orange" if x < rating_cutoff else "blue"
     )
     m = generating_circles(m, df_map_copy, color="ratings_color")
-    show_map(m, key="explore_map", height=HEIGHT, legend=display_map_legend)
+    with map_slot.container():
+        show_map(m, key="explore_map", height=HEIGHT, legend=display_map_legend)
 
     # KPI metrics
     kpi_cols = st.columns(4)
